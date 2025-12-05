@@ -15,6 +15,11 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @role('admin_ti|gerente')
+                        <x-nav-link :href="route('dashboard.ti')" :active="request()->routeIs('dashboard.ti')">
+                            {{ __('Dashboard TI') }}
+                        </x-nav-link>
+                    @endrole
 
                     <x-nav-link :href="route('plan-trabajo.index')" :active="request()->routeIs('plan-trabajo.*')">
                         {{ __('Plan de Trabajo TI') }}
@@ -103,6 +108,14 @@
                     {{ __('Gestión de Usuarios') }}
                 </x-responsive-nav-link>
             @endrole
+
+            @role('admin_ti|gerente')
+                <x-nav-link :href="route('dashboard.ti')" :active="request()->routeIs('dashboard.ti')">
+                    {{ __('Dashboard TI') }}
+                </x-nav-link>
+            @endrole
+
+
 
 
         </div>

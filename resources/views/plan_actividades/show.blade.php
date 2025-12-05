@@ -50,31 +50,57 @@
             <p class="text-gray-700 mt-1">{{ $actividad->progreso }}% completado</p>
         </div>
 
+        {{-- FORMULARIO DE AVANCE --}}
         <div class="bg-white shadow rounded p-6 mt-6">
-            <h2 class="text-lg font-bold mb-3">Registrar Avance</h2>
 
-            <form action="{{ route('actividad.ejecucion.store', $actividad->id) }}" method="POST"
-                enctype="multipart/form-data">
-                @csrf
+            {{-- Mostrar estado final si ya está completado --}}
+            @if ($actividad->progreso == 100)
+                <h2 class="text-lg font-bold mb-3 text-green-700">Actividad Completada</h2>
+                <p class="text-gray-700">
+                    Esta actividad alcanzó el 100% de progreso y ya no admite más registros de avance.
+                </p>
+            @else
+                {{-- Solo admin_ti puede ver este formulario --}}
+                @role('admin_ti')
+                    <h2 class="text-lg font-bold mb-3">Registrar Avance</h2>
 
-                <label class="block mb-2">Porcentaje de Avance (%)</label>
-                <input type="number" name="avance" min="0" max="100" class="border rounded px-3 py-2 w-32"
-                    required>
+                    <form action="{{ route('actividad.ejecucion.store', $actividad->id) }}" method="POST"
+                        enctype="multipart/form-data">
+                        @csrf
 
-                <label class="block mt-4 mb-2">Comentario</label>
-                <textarea name="comentario" class="border rounded w-full px-3 py-2" rows="3"></textarea>
+                        {{-- Porcentaje de avance --}}
+                        <label class="block mb-2 font-semibold">Incremento de Avance (%)</label>
+                        <input type="number" name="avance" min="1" max="{{ 100 - $actividad->progreso }}"
+                            class="border rounded px-3 py-2 w-32" required>
 
-                <label class="block mt-4 mb-2">Fecha de Ejecución</label>
-                <input type="date" name="fecha" class="border rounded px-3 py-2">
+                        <small class="text-gray-500">
+                            Progreso actual: {{ $actividad->progreso }}%.
+                            Avance restante disponible: {{ 100 - $actividad->progreso }}%.
+                        </small>
 
-                <label class="block mt-4 mb-2">Evidencia (opcional)</label>
-                <input type="file" name="evidencia" class="border rounded px-3 py-2">
 
-                <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Guardar Avance
-                </button>
-            </form>
+                        {{-- Comentario --}}
+                        <label class="block mt-4 mb-2 font-semibold">Comentario</label>
+                        <textarea name="comentario" class="border rounded w-full px-3 py-2" rows="3"></textarea>
+
+                        {{-- Fecha --}}
+                        <label class="block mt-4 mb-2 font-semibold">Fecha de Ejecución</label>
+                        <input type="date" name="fecha" class="border rounded px-3 py-2" required>
+
+                        {{-- Evidencia --}}
+                        <label class="block mt-4 mb-2 font-semibold">Evidencia (opcional)</label>
+                        <input type="file" name="evidencia" accept="image/*" class="border rounded px-3 py-2">
+
+                        {{-- Botón --}}
+                        <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            Guardar Avance
+                        </button>
+                    </form>
+                @endrole
+            @endif
+
         </div>
+
         @if ($actividad->ejecuciones->count() > 0)
             <div class="bg-white shadow rounded p-6 mt-6">
                 <h2 class="text-lg font-bold mb-4">Historial de Ejecución</h2>

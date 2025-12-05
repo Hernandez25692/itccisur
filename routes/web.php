@@ -58,6 +58,10 @@
         Route::put('/bitacora/{id}', [App\Http\Controllers\BitacoraActividadController::class, 'update'])
             ->name('bitacora.update');
     });
+    Route::middleware(['auth', 'role:admin_ti|gerente'])->group(function () {
+        Route::get('/gerente/dashboard-ti', [App\Http\Controllers\DashboardTIController::class, 'index'])
+            ->name('dashboard.ti');
+    });
 
     Route::middleware(['auth'])->group(function () {
 

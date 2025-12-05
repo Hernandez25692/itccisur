@@ -7,40 +7,81 @@
         <form method="POST" action="{{ route('bitacora.store') }}" enctype="multipart/form-data">
             @csrf
 
-            <div class="mb-3">
+            {{-- Título --}}
+            <div class="mb-4">
                 <label class="font-semibold">Título *</label>
                 <input type="text" name="titulo" class="form-input w-full" required>
             </div>
 
-            <div class="mb-3">
+            {{-- Descripción --}}
+            <div class="mb-4">
                 <label class="font-semibold">Descripción</label>
                 <textarea name="descripcion" class="form-input w-full"></textarea>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-3">
+            {{-- Catálogos estandarizados --}}
+            <div class="grid grid-cols-2 gap-4 mb-4">
+
+                {{-- Tipo de falla --}}
                 <div>
-                    <label>Equipo afectado</label>
-                    <input type="text" name="equipo_afectado" class="form-input w-full">
+                    <label class="font-semibold">Tipo de Falla *</label>
+                    <select name="tipo_falla" class="form-input w-full" required>
+                        <option value="Hardware">Hardware</option>
+                        <option value="Software">Software</option>
+                        <option value="Red">Red</option>
+                        <option value="Impresora">Impresora</option>
+                        <option value="Energía">Energía</option>
+                        <option value="Correo">Correo</option>
+                        <option value="Usuario / Permisos">Usuario / Permisos</option>
+                        <option value="Servidor">Servidor</option>
+                        <option value="Internet">Internet</option>
+                        <option value="Aplicación Interna">Aplicación Interna</option>
+                    </select>
                 </div>
 
+                {{-- Equipo afectado --}}
                 <div>
-                    <label>Tipo de falla</label>
-                    <input type="text" name="tipo_falla" class="form-input w-full">
+                    <label class="font-semibold">Equipo Afectado *</label>
+                    <select name="equipo_afectado" class="form-input w-full" required>
+                        <option value="PC Escritorio">PC Escritorio</option>
+                        <option value="Laptop">Laptop</option>
+                        <option value="Switch">Switch</option>
+                        <option value="Router">Router</option>
+                        <option value="Access Point">Access Point</option>
+                        <option value="Servidor">Servidor</option>
+                        <option value="Impresora">Impresora</option>
+                        <option value="UPS">UPS</option>
+                        <option value="Sistema Interno">Sistema Interno</option>
+                        <option value="Otro">Otro</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label>Ubicación</label>
-                <input type="text" name="ubicacion" class="form-input w-full">
+            {{-- Ubicación --}}
+            <div class="mb-4">
+                <label class="font-semibold">Ubicación *</label>
+                <select name="ubicacion" class="form-input w-full" required>
+                    <option value="Gerencia">Gerencia</option>
+                    <option value="Recepción">Recepción</option>
+                    <option value="Contabilidad">Contabilidad</option>
+                    <option value="Caja">Caja</option>
+                    <option value="Sala de Reuniones">Sala de Reuniones</option>
+                    <option value="Oficinas Generales">Oficinas Generales</option>
+                    <option value="TI">TI</option>
+                    <option value="Almacén">Almacén</option>
+                    <option value="Otro">Otro</option>
+                </select>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-3">
+            {{-- Fecha y prioridad --}}
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label>Fecha *</label>
+                    <label class="font-semibold">Fecha *</label>
                     <input type="date" name="fecha" class="form-input w-full" required>
                 </div>
+
                 <div>
-                    <label>Prioridad *</label>
+                    <label class="font-semibold">Prioridad *</label>
                     <select name="prioridad" class="form-input w-full">
                         <option value="baja">Baja</option>
                         <option value="media" selected>Media</option>
@@ -50,7 +91,8 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-3">
+            {{-- Horas --}}
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <label>Hora inicio</label>
                     <input type="time" name="hora_inicio" class="form-input w-full">
@@ -61,14 +103,16 @@
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label>Solución aplicada</label>
+            {{-- Solución --}}
+            <div class="mb-4">
+                <label class="font-semibold">Solución aplicada</label>
                 <textarea name="solucion_aplicada" class="form-input w-full"></textarea>
             </div>
 
-            <div class="mb-3">
-                <label>Evidencia (opcional)</label>
-                <input type="file" name="evidencia" accept="image/*">
+            {{-- Evidencia --}}
+            <div class="mb-4">
+                <label class="font-semibold">Evidencia (opcional)</label>
+                <input type="file" name="evidencia" accept="image/*" class="block mt-1">
             </div>
 
             <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">

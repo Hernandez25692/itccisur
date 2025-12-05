@@ -89,7 +89,14 @@
                                 <td class="border p-2">{{ $act->mes_previsto }}</td>
                                 <td class="border p-2">{{ $act->fecha_ejecucion }}</td>
                                 <td class="border p-2">{{ $act->metrica_exito }}</td>
-                                <td class="border p-2 capitalize">{{ $act->estado }}</td>
+                                <td class="border p-2 capitalize">
+                                    @if ($act->progreso == 100)
+                                        <span class="text-green-600 font-semibold">Completado</span>
+                                    @else
+                                        {{ ucfirst($act->estado) }}
+                                    @endif
+                                </td>
+
                                 <td class="border p-2">
 
                                     <div class="w-full bg-gray-200 rounded h-4 overflow-hidden">
