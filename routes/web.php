@@ -40,6 +40,24 @@
         )->name('actividad.ejecucion.store');
     });
 
+    // Bitácora de Actividades TI
+    Route::middleware(['auth'])->group(function () {
+
+        Route::get('/bitacora', [App\Http\Controllers\BitacoraActividadController::class, 'index'])
+            ->name('bitacora.index');
+
+        Route::get('/bitacora/crear', [App\Http\Controllers\BitacoraActividadController::class, 'create'])
+            ->name('bitacora.create');
+
+        Route::post('/bitacora', [App\Http\Controllers\BitacoraActividadController::class, 'store'])
+            ->name('bitacora.store');
+
+        Route::get('/bitacora/{id}/editar', [App\Http\Controllers\BitacoraActividadController::class, 'edit'])
+            ->name('bitacora.edit');
+
+        Route::put('/bitacora/{id}', [App\Http\Controllers\BitacoraActividadController::class, 'update'])
+            ->name('bitacora.update');
+    });
 
     Route::middleware(['auth'])->group(function () {
 

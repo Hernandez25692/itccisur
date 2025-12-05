@@ -19,6 +19,10 @@
                     <x-nav-link :href="route('plan-trabajo.index')" :active="request()->routeIs('plan-trabajo.*')">
                         {{ __('Plan de Trabajo TI') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('bitacora.index')" :active="request()->routeIs('bitacora.*')">
+                        {{ __('Bitácora TI') }}
+                    </x-nav-link>
+
                     @role('admin_ti')
                         <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
                             {{ __('Gestión de Usuarios') }}
@@ -90,11 +94,16 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
+            <x-responsive-nav-link :href="route('bitacora.index')" :active="request()->routeIs('bitacora.*')">
+                {{ __('Bitácora TI') }}
+            </x-responsive-nav-link>
+
             @role('admin_ti')
                 <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
                     {{ __('Gestión de Usuarios') }}
                 </x-responsive-nav-link>
             @endrole
+
 
         </div>
 
