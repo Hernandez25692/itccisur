@@ -1,18 +1,17 @@
 <x-app-layout>
-
-    <div class="flex justify-end mb-4">
-        <a href="{{ route('bitacora.create') }}"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-            + Registrar Actividad
-        </a>
-    </div>
-
+    @role('admin_ti')
+        <div class="flex justify-end mb-4">
+            <a href="{{ route('bitacora.create') }}"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+                + Registrar Actividad
+            </a>
+        </div>
+    @endrole
     <h2 class="text-2xl font-bold mb-6">Bitácora de Actividades</h2>
 
     <div class="mb-6 bg-white p-4 shadow rounded-lg">
         <form method="GET" class="grid grid-cols-5 gap-4">
 
-            
 
             <div>
                 <label>Prioridad</label>
@@ -49,10 +48,10 @@
         @foreach ($actividades as $a)
             <div
                 class="bg-white p-4 shadow rounded-lg border-l-8 
-        @if ($a->prioridad == 'alta') border-red-500 
-        @elseif($a->prioridad == 'critica') border-red-700
-        @elseif($a->prioridad == 'media') border-yellow-500
-        @else border-green-500 @endif">
+    @if ($a->prioridad == 'alta') border-red-500 
+    @elseif($a->prioridad == 'critica') border-red-700
+    @elseif($a->prioridad == 'media') border-yellow-500
+    @else border-green-500 @endif">
 
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-bold">{{ $a->titulo }}</h3>
@@ -80,10 +79,24 @@
                     </div>
                 @endif
 
+                {{-- BOTONES --}}
+                <div class="mt-3 flex items-center gap-3">
+                    <a href="{{ route('bitacora.show', $a->id) }}"
+                        class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition">
+                        Ver
+                    </a>
+
+                    @role('admin_ti')
+                        <a href="{{ route('bitacora.edit', $a->id) }}"
+                            class="px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600 transition">
+                            Editar
+                        </a>
+                    @endrole
+                </div>
+
                 <p class="text-sm text-gray-500 mt-2">
                     Registrado por: {{ $a->user->name }}
                 </p>
-
             </div>
         @endforeach
 

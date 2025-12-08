@@ -15,7 +15,7 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @role('admin_ti|gerente')
+                    @role('admin_ti|gerencia')
                         <x-nav-link :href="route('dashboard.ti')" :active="request()->routeIs('dashboard.ti')">
                             {{ __('Dashboard TI') }}
                         </x-nav-link>

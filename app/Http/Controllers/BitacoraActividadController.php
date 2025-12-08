@@ -62,14 +62,18 @@ class BitacoraActividadController extends Controller
             'hora_fin' => 'nullable',
             'solucion_aplicada' => 'nullable|string',
             'observaciones' => 'nullable|string',
-            'prioridad' => 'required|string',
-            'evidencia' => 'nullable|image|max:4096', // 4 MB
+            'prioridad' => 'required|string|in:baja,media,alta,critica',
+
+            // 🔥 ESTADOS CORRECTOS
+            'estado' => 'required|string|in:pendiente,en_proceso,resuelto',
+
+            'evidencia' => 'nullable|image|max:8192',
         ]);
 
         $data = $request->all();
         $data['user_id'] = Auth::id();
 
-        // Foto evidencia
+        // Evidencia
         if ($request->hasFile('evidencia')) {
             $data['evidencia'] = $request->file('evidencia')->store('bitacora_evidencias', 'public');
         }
@@ -82,12 +86,15 @@ class BitacoraActividadController extends Controller
                 $data['tiempo_empleado_minutos'] =
                     (strtotime($request->hora_fin) - strtotime($request->hora_inicio)) / 60;
             }
+        } else {
+            $data['solucionado'] = false;
         }
 
         BitacoraActividad::create($data);
 
         return redirect()->route('bitacora.index')->with('success', 'Actividad registrada correctamente.');
     }
+
 
     /**
      * Editar registro.
@@ -106,12 +113,13 @@ class BitacoraActividadController extends Controller
         $actividad = BitacoraActividad::findOrFail($id);
 
         $request->validate([
-            'titulo' => 'required',
-            'descripcion' => 'nullable',
-            'estado' => 'required',
-            'prioridad' => 'required',
-            'evidencia' => 'nullable|image|max:4096'
+            'titulo' => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'estado' => 'required|string|in:pendiente,en_proceso,resuelto',
+            'prioridad' => 'required|string|in:baja,media,alta,critica',
+            'evidencia' => 'nullable|image|max:4096',
         ]);
+
 
         $data = $request->all();
 
@@ -127,10 +135,18 @@ class BitacoraActividadController extends Controller
         // Si se marcó como resuelto
         if ($request->estado === 'resuelto') {
             $data['solucionado'] = true;
+        } else {
+            $data['solucionado'] = false;
         }
 
         $actividad->update($data);
 
         return redirect()->route('bitacora.index')->with('success', 'Actividad actualizada correctamente.');
+    }
+
+    public function show($id)
+    {
+        $actividad = BitacoraActividad::with('user')->findOrFail($id);
+        return view('bitacora.show', compact('actividad'));
     }
 }

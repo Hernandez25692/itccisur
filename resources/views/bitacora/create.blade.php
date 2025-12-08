@@ -61,17 +61,24 @@
             <div class="mb-4">
                 <label class="font-semibold">Ubicación *</label>
                 <select name="ubicacion" class="form-input w-full" required>
-                    <option value="Gerencia">Gerencia</option>
-                    <option value="Recepción">Recepción</option>
-                    <option value="Contabilidad">Contabilidad</option>
-                    <option value="Caja">Caja</option>
-                    <option value="Sala de Reuniones">Sala de Reuniones</option>
-                    <option value="Oficinas Generales">Oficinas Generales</option>
-                    <option value="TI">TI</option>
-                    <option value="Almacén">Almacén</option>
-                    <option value="Otro">Otro</option>
+                    <option value="DE">Dirección Ejecutiva</option>
+                    <option value="GOR">Gerencia de Operaciones Registrales</option>
+                    <option value="GAF">Gerencia Administrativa y Financiera</option>
+                    <option value="GSEA">Gerencia de Servicios Empresariales y Afiliaciones</option>
                 </select>
             </div>
+
+            {{-- Estado --}}
+            <div class="mb-4">
+                <label class="font-semibold">Estado *</label>
+                <select name="estado" class="form-input w-full" required>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_proceso">En Proceso</option>
+                    <option value="resuelto">Resuelto</option>
+                </select>
+            </div>
+
+
 
             {{-- Fecha y prioridad --}}
             <div class="grid grid-cols-2 gap-4 mb-4">

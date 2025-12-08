@@ -45,6 +45,8 @@
 
         Route::get('/bitacora', [App\Http\Controllers\BitacoraActividadController::class, 'index'])
             ->name('bitacora.index');
+        Route::get('/bitacora/{id}', [App\Http\Controllers\BitacoraActividadController::class, 'show'])
+            ->name('bitacora.show');
 
         Route::get('/bitacora/crear', [App\Http\Controllers\BitacoraActividadController::class, 'create'])
             ->name('bitacora.create');
@@ -58,7 +60,7 @@
         Route::put('/bitacora/{id}', [App\Http\Controllers\BitacoraActividadController::class, 'update'])
             ->name('bitacora.update');
     });
-    Route::middleware(['auth', 'role:admin_ti|gerente'])->group(function () {
+    Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
         Route::get('/gerente/dashboard-ti', [App\Http\Controllers\DashboardTIController::class, 'index'])
             ->name('dashboard.ti');
     });
