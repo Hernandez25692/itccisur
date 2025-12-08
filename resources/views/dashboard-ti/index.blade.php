@@ -1,7 +1,50 @@
 <x-app-layout>
 
     <h2 class="text-3xl font-bold mb-6 text-gray-800">Dashboard TI – Resumen Gerencial</h2>
+    {{-- 🔔 Alertas de vencimiento de licencias / dominios / servicios --}}
+    @if ($alertas->count() > 0)
+        <div class="bg-red-100 text-red-700 px-4 py-3 rounded mb-6 border border-red-300">
+            <h2 class="font-bold text-lg mb-2">⚠️ Alertas de vencimiento (próximos 15 días)</h2>
 
+            <ul class="space-y-1">
+                @foreach ($alertas as $alerta)
+                    <li>
+                        <strong>{{ $alerta->actividad }}</strong>
+                        @if ($alerta->tipo)
+                            <span class="text-xs text-gray-700">({{ $alerta->tipo }})</span>
+                        @endif
+                        — vence el
+                        <span class="font-semibold">
+                            {{ \Carbon\Carbon::parse($alerta->fecha_vencimiento)->format('d/m/Y') }}
+                        </span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- Tarjetas resumen --}}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white shadow rounded-xl p-6 border-l-8 border-blue-500">
+            <h3 class="text-gray-600">Actividades Hoy</h3>
+            <p class="text-3xl font-bold text-gray-800">{{ $actividadesHoy }}</p>
+        </div>
+
+        <div class="bg-white shadow rounded-xl p-6 border-l-8 border-yellow-500">
+            <h3 class="text-gray-600">Pendientes</h3>
+            <p class="text-3xl font-bold text-gray-800">{{ $pendientes }}</p>
+        </div>
+
+        <div class="bg-white shadow rounded-xl p-6 border-l-8 border-green-500">
+            <h3 class="text-gray-600">Resueltas este mes</h3>
+            <p class="text-3xl font-bold text-gray-800">{{ $resueltasMes }}</p>
+        </div>
+
+        <div class="bg-white shadow rounded-xl p-6 border-l-8 border-purple-500">
+            <h3 class="text-gray-600">Tiempo Promedio (min)</h3>
+            <p class="text-3xl font-bold text-gray-800">{{ $tiempoPromedio }}</p>
+        </div>
+    </div>
     {{-- Tarjetas resumen --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
 

@@ -34,6 +34,12 @@
                         </x-nav-link>
                     @endrole
 
+                    <!-- Control TI -->
+                    <a href="{{ route('control.index') }}"
+                       class="flex items-center px-4 py-2 text-sm font-semibold text-gray-700 hover:text-white hover:bg-[#0c1c3c] rounded transition">
+                        <span class="mr-2">🛡️</span> Control TI
+                    </a>
+
                 </div>
 
             </div>

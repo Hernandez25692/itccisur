@@ -40,6 +40,18 @@
         )->name('actividad.ejecucion.store');
     });
 
+    Route::middleware(['auth'])->group(function () {
+
+        Route::prefix('control')->group(function () {
+            Route::get('/', [\App\Http\Controllers\ControlRecordatorioController::class, 'index'])->name('control.index');
+            Route::get('/crear', [\App\Http\Controllers\ControlRecordatorioController::class, 'create'])->name('control.create');
+            Route::post('/', [\App\Http\Controllers\ControlRecordatorioController::class, 'store'])->name('control.store');
+            Route::get('/{id}/editar', [\App\Http\Controllers\ControlRecordatorioController::class, 'edit'])->name('control.edit');
+            Route::put('/{id}', [\App\Http\Controllers\ControlRecordatorioController::class, 'update'])->name('control.update');
+            Route::delete('/{id}', [\App\Http\Controllers\ControlRecordatorioController::class, 'destroy'])->name('control.destroy');
+        });
+    });
+
     // Bitácora de Actividades TI
     Route::middleware(['auth'])->group(function () {
 
