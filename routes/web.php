@@ -57,12 +57,10 @@
 
         Route::get('/bitacora', [App\Http\Controllers\BitacoraActividadController::class, 'index'])
             ->name('bitacora.index');
+        Route::get('/bitacora/create', [App\Http\Controllers\BitacoraActividadController::class, 'create'])
+            ->name('bitacora.create');
         Route::get('/bitacora/{id}', [App\Http\Controllers\BitacoraActividadController::class, 'show'])
             ->name('bitacora.show');
-
-        Route::get('/bitacora/crear', [App\Http\Controllers\BitacoraActividadController::class, 'create'])
-            ->name('bitacora.create');
-
         Route::post('/bitacora', [App\Http\Controllers\BitacoraActividadController::class, 'store'])
             ->name('bitacora.store');
 
