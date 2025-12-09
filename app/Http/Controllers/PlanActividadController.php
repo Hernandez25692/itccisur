@@ -22,7 +22,6 @@ class PlanActividadController extends Controller
     public function store(Request $request, PlanTrabajo $plan)
     {
         $request->validate([
-            'codigo' => 'required|string|max:10',
             'seccion' => 'required|string|max:255',
             'actividad' => 'required|string',
             'objetivo' => 'required|string',
@@ -34,9 +33,17 @@ class PlanActividadController extends Controller
             'observaciones' => 'nullable|string',
         ]);
 
-        // Crear la actividad asociada al plan
+        // 1️⃣ Obtener el último código dentro del plan
+        $ultimo = PlanActividad::where('plan_trabajo_id', $plan->id)
+            ->orderBy('codigo', 'DESC')
+            ->first();
+
+        // 2️⃣ Si no existe ninguno, empezamos en 1
+        $nuevoCodigo = $ultimo ? intval($ultimo->codigo) + 1 : 1;
+
+        // 3️⃣ Crear la actividad
         $plan->actividades()->create([
-            'codigo' => $request->codigo,
+            'codigo' => $nuevoCodigo,
             'seccion' => $request->seccion,
             'actividad' => $request->actividad,
             'objetivo' => $request->objetivo,
@@ -51,6 +58,7 @@ class PlanActividadController extends Controller
         return redirect()->route('plan-trabajo.show', $plan->id)
             ->with('success', 'Actividad agregada correctamente.');
     }
+
 
     public function show(PlanActividad $actividad)
     {

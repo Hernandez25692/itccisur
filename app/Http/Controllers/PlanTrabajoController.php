@@ -41,7 +41,12 @@ class PlanTrabajoController extends Controller
 
     public function show(PlanTrabajo $plan)
     {
-        $plan->load('actividades');
+        $plan->load(['actividades' => function ($q) {
+            $q->orderBy('seccion', 'ASC')
+                ->orderBy('codigo', 'ASC');
+        }]);
+
+
 
         return view('plan_trabajo.show', compact('plan'));
     }
