@@ -153,8 +153,8 @@
                         class="text-gray-600 hover:text-gray-900 transition-colors">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <div class="text-sm text-gray-500">
-                        {{ date('d/m/Y H:i') }}
+                    <div class="text-sm text-gray-500" x-data="{ time: '' }" x-init="time = new Date().toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); setInterval(() => { time = new Date().toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) }, 1000)">
+                        <span x-text="time"></span>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

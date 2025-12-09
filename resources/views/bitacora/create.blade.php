@@ -119,7 +119,9 @@
             {{-- Evidencia --}}
             <div class="mb-4">
                 <label class="font-semibold">Evidencia (opcional)</label>
-                <input type="file" name="evidencia" accept="image/*" class="block mt-1">
+                <input type="file" name="evidencia" id="evidenciaInput" accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
+                    class="block mt-1">
+
             </div>
 
             <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
@@ -129,4 +131,48 @@
         </form>
 
     </div>
+    <!-- MODAL DE ERROR -->
+    <div id="modalError" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md text-center">
+            <h2 class="text-xl font-bold text-red-600 mb-3">Archivo no permitido</h2>
+            <p class="text-gray-700 mb-6">
+                Solo se aceptan archivos PNG, JPG, JPEG, PDF, DOC y DOCX.
+            </p>
+            <button onclick="cerrarModal()" class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const evidenciaInput = document.getElementById('evidenciaInput');
+
+        evidenciaInput.addEventListener('change', function() {
+            const archivo = this.files[0];
+            if (!archivo) return;
+
+            const extensionesPermitidas = [
+                'image/png',
+                'image/jpg',
+                'image/jpeg',
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ];
+
+            if (!extensionesPermitidas.includes(archivo.type)) {
+                this.value = ""; // Limpia el input
+                abrirModal();
+            }
+        });
+
+        function abrirModal() {
+            document.getElementById('modalError').classList.remove('hidden');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalError').classList.add('hidden');
+        }
+    </script>
+
 </x-app-layout>

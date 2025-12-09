@@ -118,31 +118,39 @@ class BitacoraActividadController extends Controller
             'estado' => 'required|string|in:pendiente,en_proceso,resuelto',
             'prioridad' => 'required|string|in:baja,media,alta,critica',
             'evidencia' => 'nullable|image|max:4096',
+            'hora_inicio' => 'nullable',
+            'hora_fin' => 'nullable',
         ]);
-
 
         $data = $request->all();
 
-        // Manejo de nueva foto
+        // Nueva evidencia
         if ($request->hasFile('evidencia')) {
-            // Borrar la evidencia anterior si existe
             if ($actividad->evidencia) {
                 Storage::disk('public')->delete($actividad->evidencia);
             }
             $data['evidencia'] = $request->file('evidencia')->store('bitacora_evidencias', 'public');
         }
 
-        // Si se marcó como resuelto
-        if ($request->estado === 'resuelto') {
-            $data['solucionado'] = true;
-        } else {
-            $data['solucionado'] = false;
+        // Estado solucionado
+        $data['solucionado'] = $request->estado === 'resuelto' ? true : false;
+
+        // 🔥🔥 OBLIGATORIO: Recalcular tiempo empleado SI existen ambas horas
+        if ($request->hora_inicio && $request->hora_fin) {
+            $inicio = strtotime($request->hora_inicio);
+            $fin = strtotime($request->hora_fin);
+
+            if ($fin >= $inicio) {
+                $data['tiempo_empleado_minutos'] = ($fin - $inicio) / 60;
+            }
         }
 
         $actividad->update($data);
 
-        return redirect()->route('bitacora.index')->with('success', 'Actividad actualizada correctamente.');
+        return redirect()->route('bitacora.show', $actividad->id)
+            ->with('success', 'Actividad actualizada correctamente.');
     }
+
 
     public function show($id)
     {
