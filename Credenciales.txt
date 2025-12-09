@@ -1,0 +1,6 @@
+nombre: useradmin
+Nombre del servidor: ccisurti
+
+Usuario: useradmin
+
+Contraseña: C

@@ -479,18 +479,7 @@
                 </div>
             </div>
 
-            <div class="metric-card" style="--accent-color: #8B5CF6;">
-                <h3 class="metric-label">Tiempo Promedio</h3>
-                <p class="metric-value">{{ $tiempoPromedio }}<span class="text-lg">min</span></p>
-                <div class="metric-trend" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    Eficiencia
-                </div>
-            </div>
+            
         </div>
 
         {{-- Gráficas --}}
@@ -679,62 +668,110 @@
             }
         });
 
-        // Por día - Línea con estilo institucional
+        // Por día - Línea con estilo Excel avanzado
         new Chart(document.getElementById('porDiaChart'), {
             type: 'line',
             data: {
-                labels: {!! json_encode($porDia->keys()) !!},
-                datasets: [{
-                    label: 'Actividades',
-                    data: {!! json_encode($porDia->values()) !!},
-                    backgroundColor: 'rgba(30, 64, 175, 0.1)',
-                    borderColor: 'rgba(26, 42, 79, 1)',
-                    borderWidth: 2,
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: 'rgba(197, 160, 73, 1)',
-                    pointBorderColor: 'white',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }]
+            labels: {!! json_encode($porDia->keys()) !!},
+            datasets: [{
+                label: 'Actividades',
+                data: {!! json_encode($porDia->values()) !!},
+                backgroundColor: 'rgba(197, 160, 73, 0.15)',
+                borderColor: '#C5A049',
+                borderWidth: 3,
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#C5A049',
+                pointBorderColor: 'white',
+                pointBorderWidth: 3,
+                pointRadius: 6,
+                pointHoverRadius: 9,
+                pointStyle: 'circle',
+                segment: {
+                borderDash: [0]
+                }
+            }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: false
+            responsive: true,
+            maintainAspectRatio: true,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    color: '#1F2937',
+                    font: {
+                    weight: 600,
+                    size: 12
                     },
-                    tooltip: {
-                        backgroundColor: 'rgba(26, 42, 79, 0.9)',
-                        titleColor: 'white',
-                        bodyColor: 'white',
-                        borderColor: '#C5A049',
-                        borderWidth: 1,
-                        padding: 12,
-                        cornerRadius: 6
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        },
-                        ticks: {
-                            color: '#6B7280'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        },
-                        ticks: {
-                            color: '#6B7280'
-                        }
-                    }
+                    padding: 15,
+                    usePointStyle: true
                 }
+                },
+                tooltip: {
+                backgroundColor: 'rgba(26, 42, 79, 0.95)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                borderColor: '#C5A049',
+                borderWidth: 2,
+                padding: 14,
+                cornerRadius: 8,
+                titleFont: {
+                    weight: 600,
+                    size: 13
+                },
+                bodyFont: {
+                    size: 12
+                },
+                displayColors: true,
+                boxPadding: 6
+                }
+            },
+            scales: {
+                y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.08)',
+                    lineWidth: 1,
+                    drawBorder: true
+                },
+                ticks: {
+                    color: '#4B5563',
+                    font: {
+                    size: 11,
+                    weight: 500
+                    },
+                    padding: 8
+                },
+                border: {
+                    color: 'rgba(0, 0, 0, 0.1)',
+                    lineWidth: 1
+                }
+                },
+                x: {
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)',
+                    lineWidth: 1
+                },
+                ticks: {
+                    color: '#4B5563',
+                    font: {
+                    size: 11,
+                    weight: 500
+                    },
+                    padding: 8
+                },
+                border: {
+                    color: 'rgba(0, 0, 0, 0.1)',
+                    lineWidth: 1
+                }
+                }
+            }
             }
         });
     </script>
