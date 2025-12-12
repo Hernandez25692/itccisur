@@ -7,7 +7,7 @@
                 📅 Calendario Editorial – Redes Sociales
             </h1>
 
-            @role('calendario')
+            @role('admin_ti|calendario')
                 <a href="{{ route('calendario-editorial.create') }}"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
                     + Nueva Publicación
