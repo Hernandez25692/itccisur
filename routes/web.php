@@ -5,6 +5,8 @@
     use App\Http\Controllers\PlanTrabajoController;
     use App\Http\Controllers\Admin\UserController;
     use App\Http\Controllers\PlanActividadController;
+    use App\Http\Controllers\CalendarioEditorialController;
+
 
     Route::get('/', function () {
         return view('welcome');
@@ -40,6 +42,8 @@
         )->name('actividad.ejecucion.store');
     });
 
+
+
     Route::middleware(['auth'])->group(function () {
 
         Route::prefix('control')->group(function () {
@@ -51,6 +55,38 @@
             Route::delete('/{id}', [\App\Http\Controllers\ControlRecordatorioController::class, 'destroy'])->name('control.destroy');
         });
     });
+
+
+    Route::middleware(['auth', 'role:admin_ti|calendario'])
+        ->prefix('calendario-editorial')
+        ->name('calendario-editorial.')
+        ->group(function () {
+
+            Route::get('/', [CalendarioEditorialController::class, 'index'])
+                ->name('index');
+
+            Route::get('/crear', [CalendarioEditorialController::class, 'create'])
+                ->name('create');
+
+            Route::post('/', [CalendarioEditorialController::class, 'store'])
+                ->name('store');
+
+            Route::get('/{calendarioEditorial}/editar', [CalendarioEditorialController::class, 'edit'])
+                ->name('edit');
+
+            Route::put('/{calendarioEditorial}', [CalendarioEditorialController::class, 'update'])
+                ->name('update');
+
+            // Acción exclusiva admin_ti
+            Route::post('/{calendarioEditorial}/publicar', [CalendarioEditorialController::class, 'marcarPublicado'])
+                ->middleware('role:admin_ti')
+                ->name('publicar');
+
+            Route::get(
+                '/{calendarioEditorial}',
+                [CalendarioEditorialController::class, 'show']
+            )->name('show');
+        });
 
     // Bitácora de Actividades TI
     Route::middleware(['auth'])->group(function () {

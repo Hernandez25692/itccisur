@@ -83,6 +83,22 @@
                             <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
                         @endif
                     </a>
+                    @role('admin_ti|calendario')
+                        <a href="{{ route('calendario-editorial.index') }}"
+                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
+   {{ request()->routeIs('calendario-editorial.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+
+                            <i class="fas fa-calendar-alt w-5 text-lg"></i>
+
+                            <span class="ml-3 font-medium">
+                                Calendario Editorial
+                            </span>
+
+                            @if (request()->routeIs('calendario-editorial.*'))
+                                <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
+                            @endif
+                        </a>
+                    @endrole
 
                     <a href="{{ route('bitacora.index') }}"
                         class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('bitacora.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
@@ -153,7 +169,8 @@
                         class="text-gray-600 hover:text-gray-900 transition-colors">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <div class="text-sm text-gray-500" x-data="{ time: '' }" x-init="time = new Date().toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); setInterval(() => { time = new Date().toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) }, 1000)">
+                    <div class="text-sm text-gray-500" x-data="{ time: '' }" x-init="time = new Date().toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    setInterval(() => { time = new Date().toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) }, 1000)">
                         <span x-text="time"></span>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
