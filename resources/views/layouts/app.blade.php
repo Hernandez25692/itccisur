@@ -58,6 +58,24 @@
                             <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
                         @endif
                     </a>
+                    @role('admin_ti|gerencia|usuario|calendario')
+                        @if (Route::has('calendario-editorial.dashboard'))
+                            <a href="{{ route('calendario-editorial.dashboard') }}"
+                                class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
+   {{ request()->routeIs('calendario-editorial.dashboard') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+
+                                <i class="fas fa-chart-line w-5 text-lg"></i>
+
+                                <span class="ml-3 font-medium">
+                                    Calendario Editorial
+                                </span>
+
+                                @if (request()->routeIs('calendario-editorial.dashboard'))
+                                    <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
+                                @endif
+                            </a>
+                        @endif
+                    @endrole
 
                     @role('admin_ti|gerencia')
                         <a href="{{ route('dashboard.ti') }}"
@@ -213,6 +231,8 @@
             </footer>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </body>
 
 </html>

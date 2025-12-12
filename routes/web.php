@@ -6,7 +6,7 @@
     use App\Http\Controllers\Admin\UserController;
     use App\Http\Controllers\PlanActividadController;
     use App\Http\Controllers\CalendarioEditorialController;
-
+    use App\Http\Controllers\CalendarioEditorialDashboardController;
 
     Route::get('/', function () {
         return view('welcome');
@@ -56,7 +56,16 @@
         });
     });
 
+    Route::middleware(['auth', 'role:admin_ti|gerencia|usuario|calendario'])
+        ->prefix('calendario-editorial')
+        ->name('calendario-editorial.')
+        ->group(function () {
 
+            Route::get('/dashboard', [CalendarioEditorialDashboardController::class, 'index'])
+                ->name('dashboard');
+        });
+
+        
     Route::middleware(['auth', 'role:admin_ti|calendario'])
         ->prefix('calendario-editorial')
         ->name('calendario-editorial.')

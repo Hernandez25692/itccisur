@@ -24,6 +24,7 @@
                         <th class="px-4 py-3">Fecha</th>
                         <th class="px-4 py-3">Tema</th>
                         <th class="px-4 py-3">Área</th>
+                        <th class="px-4 py-3">Tipo de contenido</th>
                         <th class="px-4 py-3">Publicar en</th>
                         <th class="px-4 py-3">Estado</th>
                         <th class="px-4 py-3 text-center">Acciones</th>
@@ -65,7 +66,15 @@
                             <td class="px-4 py-3">
                                 {{ $item->area ?? '—' }}
                             </td>
-
+                            <td class="px-4 py-3">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mt-1">
+                                        @foreach ($item->contenido ?? [] as $c)
+                                            <span class="px-2 py-1 bg-gray-200 rounded text-xs">{{ $c }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </td>
                             <td class="px-4 py-3">
                                 @if ($item->publicar_en)
                                     <div class="flex flex-wrap gap-1">
