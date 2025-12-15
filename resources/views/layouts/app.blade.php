@@ -67,7 +67,7 @@
                                 <i class="fas fa-chart-line w-5 text-lg"></i>
 
                                 <span class="ml-3 font-medium">
-                                    Calendario Editorial
+                                    Resumen Calendario 
                                 </span>
 
                                 @if (request()->routeIs('calendario-editorial.dashboard'))
@@ -109,7 +109,7 @@
                             <i class="fas fa-calendar-alt w-5 text-lg"></i>
 
                             <span class="ml-3 font-medium">
-                                Calendario Editorial
+                                Calendario
                             </span>
 
                             @if (request()->routeIs('calendario-editorial.*'))
