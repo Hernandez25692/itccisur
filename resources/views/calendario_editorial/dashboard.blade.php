@@ -1,160 +1,277 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 space-y-10">
 
-        <!-- ENCABEZADO -->
-        <div class="flex flex-col lg:flex-row lg:justify-between gap-4 items-center">
+        <div
+            class="flex flex-col lg:flex-row lg:justify-between gap-6 items-center bg-gradient-to-r from-gray-900 to-blue-900 p-6 rounded-2xl shadow-2xl">
             <div>
-                <h1 class="text-4xl font-bold text-gray-900">
-                    📊 Dashboard – Calendario Editorial
+                <h1 class="text-4xl font-extrabold text-white mb-2 tracking-tight">
+                    📊 Dashboard Editorial Pro
                 </h1>
-                <p class="text-gray-500 mt-1">Análisis detallado de publicaciones</p>
+                <p class="text-blue-300 font-medium text-lg">
+                    Análisis de Publicaciones: {{ \Carbon\Carbon::createFromDate($anio, $mes, 1)->translatedFormat('F Y') }}
+                </p>
             </div>
 
-            <div class="flex gap-3 items-end flex-wrap">
-                <a href="{{ route('calendario-editorial.index') }}"
-                    class="px-5 py-2.5 bg-gradient-to-r from-[#0C1C3C] to-[#1a2e5c] text-white rounded-lg text-sm font-semibold hover:shadow-lg transition">
-                    📅 Ir al Calendario
-                </a>
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-500 p-2 rounded-lg flex-shrink-0">
+                            <span class="text-white text-xl">📅</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-blue-200">Periodo seleccionado</p>
+                            <p class="text-lg font-bold text-white">{{ $mes }}/{{ $anio }}</p>
+                        </div>
+                    </div>
+                </div>
 
-                <form method="GET" class="flex gap-3">
-                    <select name="mes" class="border-2 border-gray-300 rounded-lg p-2.5 text-sm font-medium focus:border-blue-500 focus:outline-none">
-                        @foreach (range(1, 12) as $m)
-                            <option value="{{ $m }}" @selected($mes == $m)>
-                                {{ \Carbon\Carbon::createFromDate(now()->year, $m, 1)->format('F') }}
-                            </option>
-                        @endforeach
-                    </select>
+                <form method="GET"
+                    class="flex gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/20 items-end">
+                    
+                    <div class="flex flex-col">
+                        <label class="text-xs text-blue-200 mb-1 font-semibold">Mes</label>
+                        <select name="mes"
+                            class="bg-white/90 border-0 rounded-lg p-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-cyan-400 focus:outline-none shadow-md">
+                            @foreach (range(1, 12) as $m)
+                                <option value="{{ $m }}" @selected($mes == $m)>
+                                    {{ \Carbon\Carbon::createFromDate(now()->year, $m, 1)->translatedFormat('F') }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                    <select name="anio" class="border-2 border-gray-300 rounded-lg p-2.5 text-sm font-medium focus:border-blue-500 focus:outline-none">
-                        @foreach (range(now()->year - 2, now()->year + 1) as $y)
-                            <option value="{{ $y }}" @selected($anio == $y)>{{ $y }}</option>
-                        @endforeach
-                    </select>
+                    <div class="flex flex-col">
+                        <label class="text-xs text-blue-200 mb-1 font-semibold">Año</label>
+                        <select name="anio"
+                            class="bg-white/90 border-0 rounded-lg p-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-cyan-400 focus:outline-none shadow-md">
+                            @foreach (range(now()->year - 2, now()->year + 1) as $y)
+                                <option value="{{ $y }}" @selected($anio == $y)>{{ $y }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                    <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm font-semibold hover:shadow-lg transition">
-                        🔍 Filtrar
+                    <button type="submit"
+                        class="px-5 py-2.5 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] shadow-blue-500/50">
+                        🔍 Aplicar
                     </button>
                 </form>
             </div>
         </div>
 
-        <!-- KPIs - Cards Mejoradas -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            <div class="bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-600 p-6 rounded-xl shadow-md hover:shadow-lg transition">
+            <div
+                class="bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-b-4 border-blue-400">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Total Publicaciones</p>
-                        <p class="text-4xl font-bold text-blue-700 mt-2">{{ $totalMes }}</p>
+                        <p class="text-sm font-light text-blue-200 uppercase tracking-widest">Total Publicaciones</p>
+                        <p class="text-6xl font-extrabold mt-2">{{ $totalMes }}</p>
+                        <p class="text-sm mt-1 text-blue-200">En el periodo</p>
                     </div>
-                    <span class="text-3xl">📈</span>
+                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                        <span class="text-3xl">📊</span>
+                    </div>
+                </div>
+                <div class="mt-4 w-full h-2 bg-blue-500/30 rounded-full">
+                    <div class="bg-white h-full rounded-full w-full"></div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-600 p-6 rounded-xl shadow-md hover:shadow-lg transition">
+            <div
+                class="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-b-4 border-emerald-400">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Publicadas</p>
-                        <p class="text-4xl font-bold text-green-700 mt-2">{{ $porEstado['publicado'] ?? 0 }}</p>
+                        <p class="text-sm font-light text-emerald-200 uppercase tracking-widest">Publicadas</p>
+                        <p class="text-6xl font-extrabold mt-2">{{ $porEstado['publicado'] ?? 0 }}</p>
+                        <p class="text-sm mt-1 text-emerald-200">Éxito total</p>
                     </div>
-                    <span class="text-3xl">✅</span>
+                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                        <span class="text-3xl">✅</span>
+                    </div>
+                </div>
+                <div class="mt-4 w-full h-2 bg-emerald-500/30 rounded-full">
+                    <div class="bg-white h-full rounded-full"
+                        style="width: {{ $totalMes > 0 ? (($porEstado['publicado'] ?? 0) / $totalMes) * 100 : 0 }}%">
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-orange-50 to-orange-100 border-l-4 border-orange-600 p-6 rounded-xl shadow-md hover:shadow-lg transition">
+            <div
+                class="bg-gradient-to-br from-amber-600 to-amber-800 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-b-4 border-amber-400">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Pendientes</p>
-                        <p class="text-4xl font-bold text-orange-700 mt-2">{{ $porEstado['pendiente'] ?? 0 }}</p>
+                        <p class="text-sm font-light text-amber-200 uppercase tracking-widest">Pendientes</p>
+                        <p class="text-6xl font-extrabold mt-2">{{ $porEstado['pendiente'] ?? 0 }}</p>
+                        <p class="text-sm mt-1 text-amber-200">En proceso</p>
                     </div>
-                    <span class="text-3xl">⏳</span>
+                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                        <span class="text-3xl">⏳</span>
+                    </div>
+                </div>
+                <div class="mt-4 w-full h-2 bg-amber-500/30 rounded-full">
+                    <div class="bg-white h-full rounded-full"
+                        style="width: {{ $totalMes > 0 ? (($porEstado['pendiente'] ?? 0) / $totalMes) * 100 : 0 }}%">
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-purple-50 to-purple-100 border-l-4 border-purple-600 p-6 rounded-xl shadow-md hover:shadow-lg transition">
+            <div
+                class="bg-gradient-to-br from-violet-600 to-violet-800 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-b-4 border-violet-400">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Cumplimiento</p>
-                        <p class="text-4xl font-bold text-purple-700 mt-2">{{ $cumplimiento }}%</p>
+                        <p class="text-sm font-light text-violet-200 uppercase tracking-widest">Cumplimiento</p>
+                        <p class="text-6xl font-extrabold mt-2">{{ $cumplimiento }}%</p>
+                        <p class="text-sm mt-1 text-violet-200">Meta lograda</p>
                     </div>
-                    <span class="text-3xl">🎯</span>
+                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                        <span class="text-3xl">🎯</span>
+                    </div>
+                </div>
+                <div class="mt-4 w-full h-2 bg-violet-500/30 rounded-full">
+                    <div class="bg-white h-full rounded-full" style="width: {{ $cumplimiento }}%"></div>
                 </div>
             </div>
 
         </div>
 
-        <!-- GRÁFICAS - Con colores fuertes -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-600">
-                <h3 class="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
-                    📊 Publicaciones por Semana
-                </h3>
-                <div class="relative h-80">
-                    <canvas id="chartSemana"></canvas>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-shadow duration-300 hover:shadow-2xl">
+                <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                            <div class="bg-blue-600 p-2 rounded-lg">
+                                <span class="text-white">📈</span>
+                            </div>
+                            Publicaciones por Semana
+                        </h3>
+                        <div class="text-sm font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full border border-blue-200">
+                            Total: {{ $porSemana->sum('total') }}
+                        </div>
+                    </div>
                 </div>
-                <div class="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-gray-700">
-                    <span class="font-semibold">Total semanas: </span> <span id="totalSemanas" class="text-blue-700 font-bold">0</span>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-600">
-                <h3 class="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
-                    📅 Publicaciones por Día
-                </h3>
-                <div class="relative h-80">
-                    <canvas id="chartDia"></canvas>
-                </div>
-                <div class="mt-4 p-3 bg-green-50 rounded-lg text-sm text-gray-700">
-                    <span class="font-semibold">Promedio diario: </span> <span id="promedioDiario" class="text-green-700 font-bold">0</span>
+                <div class="p-6">
+                    <div class="relative h-80">
+                        <canvas id="chartSemana"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-purple-600 lg:col-span-2">
-                <h3 class="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
-                    🌐 Publicaciones por Medio
-                </h3>
-                <div class="relative h-80">
-                    <canvas id="chartRed"></canvas>
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-shadow duration-300 hover:shadow-2xl">
+                <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-white">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                            <div class="bg-emerald-600 p-2 rounded-lg">
+                                <span class="text-white">📅</span>
+                            </div>
+                            Publicaciones por Día
+                        </h3>
+                        <div class="text-sm font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200">
+                            Promedio: {{ number_format($porDia->avg('total') ?? 0, 1) }}
+                        </div>
+                    </div>
                 </div>
-                <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div id="indicesRed"></div>
+                <div class="p-6">
+                    <div class="relative h-80">
+                        <canvas id="chartDia"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-shadow duration-300 hover:shadow-2xl">
+                <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-violet-50 to-white">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                            <div class="bg-violet-600 p-2 rounded-lg">
+                                <span class="text-white">🌐</span>
+                            </div>
+                            Distribución por Redes Sociales
+                        </h3>
+                        <div class="text-sm font-bold text-violet-700 bg-violet-100 px-3 py-1 rounded-full border border-violet-200">
+                            Total redes: {{ $porRed->count() }}
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                        <div class="lg:col-span-2">
+                            <div class="relative h-96 lg:h-80">
+                                <canvas id="chartRed"></canvas>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="font-extrabold text-gray-800 text-lg border-b pb-2">Desglose por Red</h4>
+                            @foreach ($porRed as $red => $cantidad)
+                                @php
+                                    $icon_map = ['FACEBOOK' => '📘', 'INSTAGRAM' => '📸', 'LINKEDIN' => '💼', 'WHATSAPP' => '💬', 'TIKTOK' => '🎵', 'TWITTER' => '🐦', 'PINTEREST' => '📌'];
+                                    $gradient_map = ['FACEBOOK' => 'from-blue-500 to-indigo-600', 'INSTAGRAM' => 'from-pink-500 to-rose-600', 'LINKEDIN' => 'from-blue-700 to-cyan-700', 'WHATSAPP' => 'from-green-500 to-emerald-600', 'TIKTOK' => 'from-gray-800 to-black', 'TWITTER' => 'from-cyan-400 to-blue-400', 'PINTEREST' => 'from-red-600 to-red-700'];
+                                    $icon = $icon_map[$red] ?? '🔗';
+                                    $gradient = $gradient_map[$red] ?? 'from-gray-500 to-gray-600';
+                                @endphp
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-violet-50 transition border border-gray-100">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-gradient-to-r {{ $gradient }} flex items-center justify-center shadow-md flex-shrink-0">
+                                            <span class="text-white text-sm">{{ $icon }}</span>
+                                        </div>
+                                        <span class="font-semibold text-gray-700">{{ $red }}</span>
+                                    </div>
+                                    <span class="text-2xl font-extrabold text-violet-800">{{ $cantidad }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- TABLA: POR DÍA - Estilo Excel Dinámico -->
-        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-orange-600">
-            <h3 class="font-bold text-lg text-gray-800 mb-6 flex items-center gap-2">
-                📆 Publicaciones por Día de la Semana
-            </h3>
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+            <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-white">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                    <div class="bg-amber-600 p-2 rounded-lg">
+                        <span class="text-white">📆</span>
+                    </div>
+                    Distribución Semanal
+                </h3>
+            </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm border-collapse">
+                <table class="min-w-full">
                     <thead>
-                        <tr class="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold">
-                            <th class="px-4 py-3 text-left border border-orange-700">Semana</th>
-                            <th class="px-4 py-3 text-center border border-orange-700">Lunes</th>
-                            <th class="px-4 py-3 text-center border border-orange-700">Martes</th>
-                            <th class="px-4 py-3 text-center border border-orange-700">Miércoles</th>
-                            <th class="px-4 py-3 text-center border border-orange-700">Jueves</th>
-                            <th class="px-4 py-3 text-center border border-orange-700">Viernes</th>
-                            <th class="px-4 py-3 text-center border border-orange-700">Sábado</th>
-                            <th class="px-4 py-3 text-center border border-orange-700">Domingo</th>
-                            <th class="px-4 py-3 text-center border border-orange-700">Total</th>
+                        <tr class="bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg">
+                            <th class="px-6 py-4 text-left font-extrabold text-sm uppercase tracking-wider rounded-tl-2xl">
+                                Semana</th>
+                            @foreach (['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as $dia)
+                                <th class="px-6 py-4 text-center font-extrabold text-sm uppercase tracking-wider">
+                                    {{ substr($dia, 0, 3) }}</th>
+                            @endforeach
+                            <th
+                                class="px-6 py-4 text-center font-extrabold text-sm uppercase tracking-wider rounded-tr-2xl bg-amber-700/80">
+                                Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($tablaPorDiaSemana as $index => $fila)
-                            <tr class="{{ $index % 2 == 0 ? 'bg-white hover:bg-orange-50' : 'bg-gray-50 hover:bg-orange-50' }} transition border-b border-gray-200">
-                                <td class="px-4 py-3 font-semibold text-gray-800 border border-gray-300">{{ $fila['semana'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['Lunes'] > 0 ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-500' }}">{{ $fila['Lunes'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['Martes'] > 0 ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-500' }}">{{ $fila['Martes'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['Miércoles'] > 0 ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-500' }}">{{ $fila['Miércoles'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['Jueves'] > 0 ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-500' }}">{{ $fila['Jueves'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['Viernes'] > 0 ? 'bg-green-100 text-green-900 font-semibold' : 'text-gray-500' }}">{{ $fila['Viernes'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['Sábado'] > 0 ? 'bg-yellow-100 text-yellow-900 font-semibold' : 'text-gray-500' }}">{{ $fila['Sábado'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['Domingo'] > 0 ? 'bg-red-100 text-red-900 font-semibold' : 'text-gray-500' }}">{{ $fila['Domingo'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 bg-purple-200 text-purple-900 font-bold">
-                                    {{ $fila['Lunes'] + $fila['Martes'] + $fila['Miércoles'] + $fila['Jueves'] + $fila['Viernes'] + $fila['Sábado'] + $fila['Domingo'] }}
+                            <tr
+                                class="hover:bg-amber-50/50 transition border-b border-gray-100 {{ $index % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
+                                <td class="px-6 py-4 font-bold text-gray-900">
+                                    {{ $fila['semana'] }}
+                                </td>
+                                @foreach (['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as $dia)
+                                    <td class="px-6 py-4 text-center">
+                                        @if ($fila[$dia] > 0)
+                                            <span
+                                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-md text-base">
+                                                {{ $fila[$dia] }}
+                                            </span>
+                                        @else
+                                            <span class="text-gray-400 font-semibold">-</span>
+                                        @endif
+                                    </td>
+                                @endforeach
+                                <td class="px-6 py-4 text-center bg-amber-100/70">
+                                    <span
+                                        class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-extrabold text-lg shadow-xl shadow-amber-500/30">
+                                        {{ $fila['Lunes'] + ($fila['Martes'] ?? 0) + ($fila['Miércoles'] ?? 0) + ($fila['Jueves'] ?? 0) + ($fila['Viernes'] ?? 0) + ($fila['Sábado'] ?? 0) + ($fila['Domingo'] ?? 0) }}
+                                    </span>
                                 </td>
                             </tr>
                         @endforeach
@@ -163,45 +280,63 @@
             </div>
         </div>
 
-        <!-- TABLA: CONTENIDO - Estilo Excel Dinámico -->
-        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-indigo-600">
-            <h3 class="font-bold text-lg text-gray-800 mb-6 flex items-center gap-2">
-                📝 Contenido por Semana
-            </h3>
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+            <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-white">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                    <div class="bg-indigo-600 p-2 rounded-lg">
+                        <span class="text-white">🎬</span>
+                    </div>
+                    Contenido por Semana (Tipo)
+                </h3>
+            </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm border-collapse">
+                <table class="min-w-full">
                     <thead>
-                        <tr class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold">
-                            <th class="px-4 py-3 text-left border border-indigo-700">Semana</th>
-                            <th class="px-4 py-3 text-center border border-indigo-700">
-                                <span title="Vivencias">🎬 VIV</span>
-                            </th>
-                            <th class="px-4 py-3 text-center border border-indigo-700">
-                                <span title="Imágenes">🖼️ IMG</span>
-                            </th>
-                            <th class="px-4 py-3 text-center border border-indigo-700">
-                                <span title="Carousel">🎠 CAR</span>
-                            </th>
-                            <th class="px-4 py-3 text-center border border-indigo-700">
-                                <span title="Historia">📖 HIST</span>
-                            </th>
-                            <th class="px-4 py-3 text-center border border-indigo-700">
-                                <span title="Videos">🎥 VID</span>
-                            </th>
-                            <th class="px-4 py-3 text-center border border-indigo-700">Total</th>
+                        <tr class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg">
+                            <th class="px-6 py-4 text-left font-extrabold text-sm uppercase tracking-wider rounded-tl-2xl">
+                                Semana</th>
+                            @foreach (['VIV' => '🎬 VIV', 'IMG' => '🖼️ IMG', 'CAR' => '🎠 CAR', 'HIST' => '📖 HIST', 'VID' => '🎥 VID'] as $key => $label)
+                                <th class="px-6 py-4 text-center font-extrabold text-sm uppercase tracking-wider">
+                                    {{ $label }}</th>
+                            @endforeach
+                            <th
+                                class="px-6 py-4 text-center font-extrabold text-sm uppercase tracking-wider rounded-tr-2xl bg-indigo-700/80">
+                                Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($tablaContenidoPorSemana as $index => $fila)
-                            <tr class="{{ $index % 2 == 0 ? 'bg-white hover:bg-indigo-50' : 'bg-gray-50 hover:bg-indigo-50' }} transition border-b border-gray-200">
-                                <td class="px-4 py-3 font-semibold text-gray-800 border border-gray-300">{{ $fila['semana'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['VIV'] > 0 ? 'bg-red-100 text-red-900 font-semibold' : 'text-gray-500' }}">{{ $fila['VIV'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['IMG'] > 0 ? 'bg-purple-100 text-purple-900 font-semibold' : 'text-gray-500' }}">{{ $fila['IMG'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['CAR'] > 0 ? 'bg-cyan-100 text-cyan-900 font-semibold' : 'text-gray-500' }}">{{ $fila['CAR'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['HIST'] > 0 ? 'bg-yellow-100 text-yellow-900 font-semibold' : 'text-gray-500' }}">{{ $fila['HIST'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 {{ $fila['VID'] > 0 ? 'bg-pink-100 text-pink-900 font-semibold' : 'text-gray-500' }}">{{ $fila['VID'] }}</td>
-                                <td class="px-4 py-3 text-center border border-gray-300 bg-indigo-200 text-indigo-900 font-bold">
-                                    {{ $fila['VIV'] + $fila['IMG'] + $fila['CAR'] + $fila['HIST'] + $fila['VID'] }}
+                            <tr
+                                class="hover:bg-indigo-50/50 transition border-b border-gray-100 {{ $index % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
+                                <td class="px-6 py-4 font-bold text-gray-900">
+                                    {{ $fila['semana'] }}
+                                </td>
+                                @foreach (['VIV', 'IMG', 'CAR', 'HIST', 'VID'] as $tipo)
+                                    <td class="px-6 py-4 text-center">
+                                        @if ($fila[$tipo] > 0)
+                                            @php
+                                                $colors = [
+                                                    'VIV' => 'from-red-500 to-pink-600',
+                                                    'IMG' => 'from-purple-500 to-violet-600',
+                                                    'CAR' => 'from-cyan-500 to-blue-600',
+                                                    'HIST' => 'from-yellow-500 to-amber-600',
+                                                    'VID' => 'from-pink-500 to-rose-600',
+                                                ];
+                                            @endphp
+                                            <span
+                                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r {{ $colors[$tipo] }} text-white font-bold shadow-md text-base">
+                                                {{ $fila[$tipo] }}
+                                            </span>
+                                        @else
+                                            <span class="text-gray-400 font-semibold">-</span>
+                                        @endif
+                                    </td>
+                                @endforeach
+                                <td class="px-6 py-4 text-center bg-indigo-100/70">
+                                    <span
+                                        class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-extrabold text-lg shadow-xl shadow-indigo-500/30">
+                                        {{ $fila['VIV'] + ($fila['IMG'] ?? 0) + ($fila['CAR'] ?? 0) + ($fila['HIST'] ?? 0) + ($fila['VID'] ?? 0) }}
+                                    </span>
                                 </td>
                             </tr>
                         @endforeach
@@ -212,111 +347,259 @@
 
     </div>
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script>
-        // Colores fuertes y vibrantes
-        const colores = {
-            primary: '#1e40af',
-            success: '#16a34a',
-            warning: '#ea580c',
-            danger: '#dc2626',
-            purple: '#7c3aed',
-            cyan: '#0891b2',
-            pink: '#ec4899',
-            indigo: '#4f46e5'
+        // Registrar plugin de etiquetas
+        Chart.register(ChartDataLabels);
+
+        // Colores mejorados y diferenciados
+        const colors = {
+            blue: {
+                bg: 'rgba(59, 130, 246, 0.1)',
+                border: 'rgb(59, 130, 246)',
+                gradient: ['rgba(59, 130, 246, 0.95)', 'rgba(29, 78, 216, 0.95)'],
+                light: 'rgba(59, 130, 246, 0.7)'
+            },
+            green: {
+                bg: 'rgba(16, 185, 129, 0.1)',
+                border: 'rgb(16, 185, 129)',
+                gradient: ['rgba(16, 185, 129, 0.95)', 'rgba(5, 150, 105, 0.95)'],
+                light: 'rgba(16, 185, 129, 0.7)'
+            },
+            purple: {
+                bg: 'rgba(168, 85, 247, 0.1)',
+                border: 'rgb(168, 85, 247)',
+                gradient: ['rgba(168, 85, 247, 0.95)', 'rgba(147, 51, 234, 0.95)'],
+                light: 'rgba(168, 85, 247, 0.7)'
+            }
         };
 
-        // Gráfica Semana
+        // ========== GRÁFICA SEMANA ==========
         const dataSemana = @json($porSemana->pluck('total'));
-        new Chart(document.getElementById('chartSemana'), {
+        const ctxSemana = document.getElementById('chartSemana').getContext('2d');
+        const gradientSemana = ctxSemana.createLinearGradient(0, 0, 0, 400);
+        gradientSemana.addColorStop(0, colors.blue.gradient[0]);
+        gradientSemana.addColorStop(1, colors.blue.gradient[1]);
+
+        new Chart(ctxSemana, {
             type: 'bar',
             data: {
-                labels: @json($porSemana->pluck('semana')->map(fn($s) => 'Semana ' . $s)),
+                labels: @json(
+                    $porSemana->pluck('semana')->map(function ($s) {
+                        return 'Semana ' . $s;
+                    })),
                 datasets: [{
                     label: 'Publicaciones',
                     data: dataSemana,
-                    backgroundColor: 'rgba(30, 64, 175, 0.8)',
-                    borderColor: '#1e40af',
+                    backgroundColor: gradientSemana,
+                    borderColor: colors.blue.border,
                     borderWidth: 2,
                     borderRadius: 8,
-                    hoverBackgroundColor: 'rgba(30, 64, 175, 1)'
+                    hoverBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    hoverBorderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: true, position: 'top' }
+                    legend: {
+                        display: true,
+                        labels: {
+                            font: { weight: 'bold', size: 12 },
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        font: {
+                            weight: 'bold',
+                            size: 13
+                        },
+                        color: '#1f2937',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        borderRadius: 6,
+                        padding: 6
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: colors.blue.border,
+                        borderWidth: 2,
+                        padding: 10,
+                        titleFont: { weight: 'bold', size: 12 },
+                        bodyFont: { size: 12 }
+                    }
                 },
                 scales: {
-                    y: { beginAtZero: true, ticks: { font: { weight: 'bold' } } }
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: { weight: 'bold' }
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
                 }
             }
         });
-        document.getElementById('totalSemanas').textContent = dataSemana.reduce((a,b) => a+b, 0);
 
-        // Gráfica Día
+        // ========== GRÁFICA DÍA ==========
         const dataDia = @json($porDia->pluck('total'));
-        new Chart(document.getElementById('chartDia'), {
+        const ctxDia = document.getElementById('chartDia').getContext('2d');
+        const gradientDia = ctxDia.createLinearGradient(0, 0, 0, 400);
+        gradientDia.addColorStop(0, colors.green.gradient[0]);
+        gradientDia.addColorStop(1, colors.green.gradient[1]);
+
+        new Chart(ctxDia, {
             type: 'bar',
             data: {
                 labels: @json($porDia->pluck('dia')),
                 datasets: [{
                     label: 'Publicaciones',
                     data: dataDia,
-                    backgroundColor: 'rgba(22, 163, 74, 0.8)',
-                    borderColor: '#16a34a',
+                    backgroundColor: gradientDia,
+                    borderColor: colors.green.border,
                     borderWidth: 2,
                     borderRadius: 8,
-                    hoverBackgroundColor: 'rgba(22, 163, 74, 1)'
+                    hoverBackgroundColor: 'rgba(16, 185, 129, 1)',
+                    hoverBorderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: true, position: 'top' }
+                    legend: {
+                        display: true,
+                        labels: {
+                            font: { weight: 'bold', size: 12 },
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        font: {
+                            weight: 'bold',
+                            size: 13
+                        },
+                        color: '#1f2937',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        borderRadius: 6,
+                        padding: 6
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: colors.green.border,
+                        borderWidth: 2,
+                        padding: 10,
+                        titleFont: { weight: 'bold', size: 12 },
+                        bodyFont: { size: 12 }
+                    }
                 },
                 scales: {
-                    y: { beginAtZero: true, ticks: { font: { weight: 'bold' } } }
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: { weight: 'bold' }
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
                 }
             }
         });
-        const promedio = Math.round(dataDia.reduce((a,b) => a+b, 0) / dataDia.length);
-        document.getElementById('promedioDiario').textContent = promedio;
 
-        // Gráfica Red
+        // ========== GRÁFICA RED (DOUGHNUT) ==========
         const dataRed = @json($porRed);
-        const coloresRed = ['#ec4899', '#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#ef4444', '#10b981'];
-        new Chart(document.getElementById('chartRed'), {
+        const ctxRed = document.getElementById('chartRed').getContext('2d');
+
+        const redColors = [
+            'rgba(236, 72, 153, 0.9)',     // Pink (Instagram)
+            'rgba(59, 130, 246, 0.9)',     // Blue (Facebook)
+            'rgba(139, 92, 246, 0.9)',     // Purple (Otra)
+            'rgba(6, 182, 212, 0.9)',      // Cyan (Twitter/Linkedin)
+            'rgba(245, 158, 11, 0.9)',     // Amber (Otra)
+            'rgba(239, 68, 68, 0.9)',      // Red (Otra)
+            'rgba(16, 185, 129, 0.9)'      // Green (Whatsapp)
+        ];
+
+        new Chart(ctxRed, {
             type: 'doughnut',
             data: {
                 labels: Object.keys(dataRed),
                 datasets: [{
                     data: Object.values(dataRed),
-                    backgroundColor: coloresRed.slice(0, Object.keys(dataRed).length),
+                    backgroundColor: redColors.slice(0, Object.keys(dataRed).length),
                     borderColor: '#fff',
-                    borderWidth: 3,
-                    hoverBorderWidth: 5
+                    borderWidth: 4, // Aumentado
+                    hoverBorderWidth: 6, // Aumentado
+                    hoverOffset: 15
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                cutout: '70%',
                 plugins: {
-                    legend: { position: 'bottom', labels: { font: { weight: 'bold', size: 12 }, padding: 15 } }
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                weight: 'bold',
+                                size: 13
+                            },
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    datalabels: {
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        color: '#fff',
+                        formatter: function(value, context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return value > 0 ? value + '\n(' + percentage + '%)' : '';
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        padding: 12,
+                        titleFont: { weight: 'bold', size: 12 },
+                        bodyFont: { size: 12 },
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
                 }
             }
         });
-
-        // Índices por Red
-        const indicesHTML = Object.entries(dataRed).map((item, i) => `
-            <div class="p-3 rounded-lg" style="background-color: ${coloresRed[i]}20; border-left: 4px solid ${coloresRed[i]}">
-                <p class="text-xs font-semibold text-gray-600">${item[0]}</p>
-                <p class="text-xl font-bold" style="color: ${coloresRed[i]}">${item[1]}</p>
-            </div>
-        `).join('');
-        document.getElementById('indicesRed').innerHTML = indicesHTML;
     </script>
 </x-app-layout>
