@@ -65,7 +65,7 @@
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                                         placeholder="Ej: 15">
                                 </div>
-                                <p class="text-xs text-gray-500">Número de semana del año (1-52)</p>
+                               
                             </div>
 
                             <!-- Día -->
@@ -133,7 +133,7 @@
                                     <input type="time" name="hora"
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                 </div>
-                                <p class="text-xs text-gray-500">Formato 24h (opcional)</p>
+                                
                             </div>
                         </div>
                     </div>
