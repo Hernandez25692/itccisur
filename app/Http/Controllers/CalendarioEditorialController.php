@@ -31,7 +31,11 @@ class CalendarioEditorialController extends Controller
 
 
 
-        $registros = $query->get();
+        $registros = $query
+            ->orderBy('fecha_publicacion')
+            ->paginate(10)
+            ->withQueryString();
+
 
         return view('calendario_editorial.index', compact('registros'));
     }

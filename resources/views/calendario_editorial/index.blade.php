@@ -67,29 +67,70 @@
                         <div>
                             <h3 class="text-sm font-semibold text-gray-900 mb-3">Estado de Publicaciones</h3>
                             <div class="flex flex-wrap gap-3">
-                                @foreach([
-                                    ['color' => 'green', 'label' => 'Publicado', 'count' => $registros->where('estado', 'publicado')->count()],
-                                    ['color' => 'orange', 'label' => 'Pendiente', 'count' => $registros->where('estado', 'pendiente')->count()],
-                                    ['color' => 'yellow', 'label' => 'Reprogramado', 'count' => $registros->where('estado', 'reprogramado')->count()],
-                                    ['color' => 'red', 'label' => 'Cancelado', 'count' => $registros->where('estado', 'cancelado')->count()]
-                                ] as $status)
-                                <div class="flex items-center gap-2">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="w-3 h-3 rounded-full bg-{{ $status['color'] }}-500"></span>
-                                        <span class="text-sm font-medium text-gray-700">{{ $status['label'] }}</span>
+                                @foreach ([['color' => 'green', 'label' => 'Publicado', 'count' => $registros->where('estado', 'publicado')->count()], ['color' => 'orange', 'label' => 'Pendiente', 'count' => $registros->where('estado', 'pendiente')->count()], ['color' => 'yellow', 'label' => 'Reprogramado', 'count' => $registros->where('estado', 'reprogramado')->count()], ['color' => 'red', 'label' => 'Cancelado', 'count' => $registros->where('estado', 'cancelado')->count()]] as $status)
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="w-3 h-3 rounded-full bg-{{ $status['color'] }}-500"></span>
+                                            <span
+                                                class="text-sm font-medium text-gray-700">{{ $status['label'] }}</span>
+                                        </div>
+                                        <span
+                                            class="text-xs font-semibold bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">
+                                            {{ $status['count'] }}
+                                        </span>
                                     </div>
-                                    <span class="text-xs font-semibold bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">
-                                        {{ $status['count'] }}
-                                    </span>
-                                </div>
                                 @endforeach
                             </div>
                         </div>
-                        
-                        
+
+
                     </div>
                 </div>
             </div>
+            <!-- Filtros de Búsqueda Mejorados -->
+            <form method="GET" class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+
+
+
+                    <!-- Estado -->
+                    <select name="estado" class="border rounded-lg p-2 text-sm">
+                        <option value="">Todos los estados</option>
+                        @foreach (['publicado', 'pendiente', 'reprogramado', 'cancelado'] as $e)
+                            <option value="{{ $e }}" @selected(request('estado') == $e)>
+                                {{ ucfirst($e) }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <!-- Semana -->
+                    <input type="number" name="semana" value="{{ request('semana') }}" placeholder="Semana"
+                        class="border rounded-lg p-2 text-sm">
+
+                    <!-- Mes -->
+                    <!-- Mes -->
+                    <select name="mes" class="border rounded-lg p-2 text-sm">
+                        <option value="">Todos los meses</option>
+                        @foreach (range(1, 12) as $m)
+                            <option value="{{ $m }}" @selected(request('mes') == $m)>
+                                {{ \Carbon\Carbon::createFromDate(now()->year, $m, 1)->translatedFormat('F') }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <!-- Botones -->
+                    <div class="flex gap-2">
+                        <button class="flex-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700">
+                            🔍 Filtrar
+                        </button>
+
+                        <a href="{{ route('calendario-editorial.index') }}"
+                            class="flex-1 text-center bg-gray-200 text-gray-700 rounded-lg px-4 py-2 text-sm hover:bg-gray-300">
+                            Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
 
             <!-- Desktop Table View - Mejorado -->
             <div class="hidden lg:block">
@@ -129,35 +170,40 @@
                                             'publicado' => [
                                                 'bg' => 'bg-gradient-to-r from-green-50 to-emerald-50',
                                                 'text' => 'text-green-800',
-                                                'badge' => 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200',
+                                                'badge' =>
+                                                    'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200',
                                                 'dot' => 'bg-green-500',
                                                 'border' => 'border-green-200',
                                             ],
                                             'pendiente' => [
                                                 'bg' => 'bg-gradient-to-r from-orange-50 to-amber-50',
                                                 'text' => 'text-orange-800',
-                                                'badge' => 'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border border-orange-200',
+                                                'badge' =>
+                                                    'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border border-orange-200',
                                                 'dot' => 'bg-orange-500',
                                                 'border' => 'border-orange-200',
                                             ],
                                             'reprogramado' => [
                                                 'bg' => 'bg-gradient-to-r from-yellow-50 to-amber-50',
                                                 'text' => 'text-yellow-800',
-                                                'badge' => 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200',
+                                                'badge' =>
+                                                    'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200',
                                                 'dot' => 'bg-yellow-500',
                                                 'border' => 'border-yellow-200',
                                             ],
                                             'cancelado' => [
                                                 'bg' => 'bg-gradient-to-r from-red-50 to-rose-50',
                                                 'text' => 'text-red-800',
-                                                'badge' => 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200',
+                                                'badge' =>
+                                                    'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200',
                                                 'dot' => 'bg-red-500',
                                                 'border' => 'border-red-200',
                                             ],
                                             default => [
                                                 'bg' => 'bg-gradient-to-r from-gray-50 to-gray-100',
                                                 'text' => 'text-gray-800',
-                                                'badge' => 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-200',
+                                                'badge' =>
+                                                    'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-200',
                                                 'dot' => 'bg-gray-500',
                                                 'border' => 'border-gray-200',
                                             ],
@@ -170,7 +216,8 @@
                                         <!-- Semana -->
                                         <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
                                             <div class="flex flex-col items-center justify-center">
-                                                <span class="text-2xl font-bold text-gray-900">{{ $item->semana }}</span>
+                                                <span
+                                                    class="text-2xl font-bold text-gray-900">{{ $item->semana }}</span>
                                                 <span class="text-xs text-gray-500 mt-1">SEMANA</span>
                                             </div>
                                         </td>
@@ -179,8 +226,8 @@
                                         <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
                                             <div class="space-y-2">
                                                 <div class="flex items-center gap-2">
-                                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
+                                                    <svg class="w-4 h-4 text-gray-400" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2"
                                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
@@ -190,12 +237,13 @@
                                                         {{ $item->fecha_publicacion->format('d/m/Y') }}
                                                     </span>
                                                 </div>
-                                                <div class="text-xs text-gray-500 bg-white/50 rounded-lg px-2 py-1 inline-block">
+                                                <div
+                                                    class="text-xs text-gray-500 bg-white/50 rounded-lg px-2 py-1 inline-block">
                                                     {{ $item->dia }}
                                                 </div>
                                                 <div class="flex items-center gap-2 mt-3">
-                                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
+                                                    <svg class="w-4 h-4 text-gray-400" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2"
                                                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -212,7 +260,8 @@
                                             <div class="space-y-4">
                                                 <!-- Tema -->
                                                 <div>
-                                                    <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">
+                                                    <h3
+                                                        class="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">
                                                         {{ $item->tema }}
                                                     </h3>
                                                     <p class="text-sm text-gray-600 leading-relaxed line-clamp-2">
@@ -225,8 +274,10 @@
                                                     <!-- Área -->
                                                     @if ($item->area)
                                                         <div class="flex items-center gap-2">
-                                                            <span class="text-xs font-medium text-gray-500">Área:</span>
-                                                            <span class="px-3 py-1 bg-white/70 text-gray-700 rounded-full text-xs font-medium border border-gray-200">
+                                                            <span
+                                                                class="text-xs font-medium text-gray-500">Área:</span>
+                                                            <span
+                                                                class="px-3 py-1 bg-white/70 text-gray-700 rounded-full text-xs font-medium border border-gray-200">
                                                                 {{ $item->area }}
                                                             </span>
                                                         </div>
@@ -235,12 +286,16 @@
                                                     <!-- Redes Sociales -->
                                                     @if (!empty($item->publicar_en))
                                                         <div class="flex items-center gap-2">
-                                                            <span class="text-xs font-medium text-gray-500">Redes:</span>
+                                                            <span
+                                                                class="text-xs font-medium text-gray-500">Redes:</span>
                                                             <div class="flex flex-wrap gap-1">
                                                                 @foreach ($item->publicar_en as $red)
-                                                                    <span class="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg text-xs font-medium border border-blue-100 flex items-center gap-1">
-                                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                                                                    <span
+                                                                        class="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg text-xs font-medium border border-blue-100 flex items-center gap-1">
+                                                                        <svg class="w-3 h-3" fill="currentColor"
+                                                                            viewBox="0 0 24 24">
+                                                                            <path
+                                                                                d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
                                                                         </svg>
                                                                         {{ $red }}
                                                                     </span>
@@ -256,9 +311,10 @@
                                                                 class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors group/link">
                                                                 <span>Ver publicación</span>
                                                                 <svg class="w-4 h-4 transform group-hover/link:translate-x-1 transition-transform"
-                                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
+                                                                    fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
                                                                         d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                                                                 </svg>
                                                             </a>
@@ -271,12 +327,13 @@
                                         <!-- Estado -->
                                         <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
                                             <div class="flex flex-col items-center gap-3">
-                                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold {{ $estadoConfig['badge'] }} capitalize shadow-sm">
-                                                    <span class="w-2 h-2 rounded-full {{ $estadoConfig['dot'] }} mr-2 animate-pulse"></span>
+                                                <span
+                                                    class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold {{ $estadoConfig['badge'] }} capitalize shadow-sm">
+                                                    <span
+                                                        class="w-2 h-2 rounded-full {{ $estadoConfig['dot'] }} mr-2 animate-pulse"></span>
                                                     {{ $item->estado }}
                                                 </span>
-                                                @if($item->estado === 'pendiente')
-                                                    
+                                                @if ($item->estado === 'pendiente')
                                                 @endif
                                             </div>
                                         </td>
@@ -290,8 +347,8 @@
                                                     <svg class="w-4 h-4 text-gray-600 group-hover/btn:text-blue-600 transition-colors"
                                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                            stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                                                        </path>
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2"
                                                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
@@ -342,25 +399,29 @@
                                     <tr>
                                         <td colspan="5" class="px-8 py-16 text-center">
                                             <div class="flex flex-col items-center justify-center">
-                                                <div class="w-24 h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6">
-                                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
+                                                <div
+                                                    class="w-24 h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6">
+                                                    <svg class="w-12 h-12 text-gray-400" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="1.5"
                                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                                                         </path>
                                                     </svg>
                                                 </div>
-                                                <h3 class="text-xl font-bold text-gray-700 mb-2">No hay publicaciones programadas</h3>
+                                                <h3 class="text-xl font-bold text-gray-700 mb-2">No hay publicaciones
+                                                    programadas</h3>
                                                 <p class="text-gray-500 mb-6 max-w-md">
-                                                    Comienza a planificar tu contenido para redes sociales creando una nueva publicación
+                                                    Comienza a planificar tu contenido para redes sociales creando una
+                                                    nueva publicación
                                                 </p>
                                                 @role('admin_ti|calendario')
                                                     <a href="{{ route('calendario-editorial.create') }}"
                                                         class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                d="M12 4v16m8-8H4"></path>
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M12 4v16m8-8H4"></path>
                                                         </svg>
                                                         Crear primera publicación
                                                     </a>
@@ -383,42 +444,48 @@
                             'publicado' => [
                                 'bg' => 'bg-gradient-to-r from-green-50 to-emerald-50',
                                 'border' => 'border-l-green-500',
-                                'badge' => 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200',
+                                'badge' =>
+                                    'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200',
                                 'dot' => 'bg-green-500',
                                 'header' => 'from-green-500 to-emerald-600',
                             ],
                             'pendiente' => [
                                 'bg' => 'bg-gradient-to-r from-orange-50 to-amber-50',
                                 'border' => 'border-l-orange-500',
-                                'badge' => 'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border border-orange-200',
+                                'badge' =>
+                                    'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border border-orange-200',
                                 'dot' => 'bg-orange-500',
                                 'header' => 'from-orange-500 to-amber-600',
                             ],
                             'reprogramado' => [
                                 'bg' => 'bg-gradient-to-r from-yellow-50 to-amber-50',
                                 'border' => 'border-l-yellow-500',
-                                'badge' => 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200',
+                                'badge' =>
+                                    'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200',
                                 'dot' => 'bg-yellow-500',
                                 'header' => 'from-yellow-500 to-amber-600',
                             ],
                             'cancelado' => [
                                 'bg' => 'bg-gradient-to-r from-red-50 to-rose-50',
                                 'border' => 'border-l-red-500',
-                                'badge' => 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200',
+                                'badge' =>
+                                    'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200',
                                 'dot' => 'bg-red-500',
                                 'header' => 'from-red-500 to-rose-600',
                             ],
                             default => [
                                 'bg' => 'bg-gradient-to-r from-gray-50 to-gray-100',
                                 'border' => 'border-l-gray-500',
-                                'badge' => 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-200',
+                                'badge' =>
+                                    'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-200',
                                 'dot' => 'bg-gray-500',
                                 'header' => 'from-gray-500 to-gray-600',
                             ],
                         };
                     @endphp
 
-                    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden {{ $estadoConfig['border'] }} border-l-4">
+                    <div
+                        class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden {{ $estadoConfig['border'] }} border-l-4">
                         <!-- Card Header -->
                         <div class="p-5 {{ $estadoConfig['bg'] }}">
                             <div class="flex justify-between items-start mb-4">
@@ -427,14 +494,17 @@
                                         <span class="text-lg font-bold text-gray-900">
                                             Semana {{ $item->semana }}
                                         </span>
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {{ $estadoConfig['badge'] }} capitalize">
-                                            <span class="w-2 h-2 rounded-full {{ $estadoConfig['dot'] }} mr-1.5 animate-pulse"></span>
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {{ $estadoConfig['badge'] }} capitalize">
+                                            <span
+                                                class="w-2 h-2 rounded-full {{ $estadoConfig['dot'] }} mr-1.5 animate-pulse"></span>
                                             {{ $item->estado }}
                                         </span>
                                     </div>
                                     <div class="flex items-center gap-3 text-sm text-gray-600">
                                         <span class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                                                 </path>
@@ -442,7 +512,8 @@
                                             {{ $item->fecha_publicacion->format('d/m/Y') }}
                                         </span>
                                         <span class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
@@ -470,7 +541,8 @@
                                 @if ($item->area)
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs font-medium text-gray-500">Área:</span>
-                                        <span class="px-3 py-1 bg-white/70 text-gray-700 rounded-full text-xs font-medium border border-gray-200">
+                                        <span
+                                            class="px-3 py-1 bg-white/70 text-gray-700 rounded-full text-xs font-medium border border-gray-200">
                                             {{ $item->area }}
                                         </span>
                                     </div>
@@ -480,7 +552,8 @@
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="text-xs font-medium text-gray-500">Contenido:</span>
                                         @foreach ($item->contenido as $c)
-                                            <span class="px-2.5 py-1 bg-white/70 text-gray-700 rounded-lg text-xs border border-gray-200">
+                                            <span
+                                                class="px-2.5 py-1 bg-white/70 text-gray-700 rounded-lg text-xs border border-gray-200">
                                                 {{ $c }}
                                             </span>
                                         @endforeach
@@ -491,9 +564,11 @@
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="text-xs font-medium text-gray-500">Redes:</span>
                                         @foreach ($item->publicar_en as $red)
-                                            <span class="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg text-xs font-medium border border-blue-100 flex items-center gap-1">
+                                            <span
+                                                class="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg text-xs font-medium border border-blue-100 flex items-center gap-1">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                                                    <path
+                                                        d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
                                                 </svg>
                                                 {{ $red }}
                                             </span>
@@ -535,7 +610,8 @@
                                     <div class="col-span-2 mt-2">
                                         <a href="{{ $item->enlace }}" target="_blank"
                                             class="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-blue-600 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
                                                 </path>
@@ -550,12 +626,16 @@
                                     @if ($item->estado !== 'publicado')
                                         <div class="col-span-2 mt-2">
                                             <form id="publicar-form-mobile-{{ $item->id }}"
-                                                action="{{ route('calendario-editorial.publicar', $item) }}" method="POST">
+                                                action="{{ route('calendario-editorial.publicar', $item) }}"
+                                                method="POST">
                                                 @csrf
-                                                <button type="button" onclick="confirmarPublicacion({{ $item->id }})"
+                                                <button type="button"
+                                                    onclick="confirmarPublicacion({{ $item->id }})"
                                                     class="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all shadow-sm hover:shadow">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
                                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                     </svg>
                                                     Publicar esta actividad
@@ -570,8 +650,10 @@
                 @empty
                     <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center">
                         <div class="flex flex-col items-center justify-center">
-                            <div class="w-20 h-20 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-4">
-                                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div
+                                class="w-20 h-20 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                                     </path>
@@ -619,7 +701,7 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             const form = document.getElementById('publicar-form-' + id) ||
-                                        document.getElementById('publicar-form-mobile-' + id);
+                                document.getElementById('publicar-form-mobile-' + id);
                             if (form) {
                                 form.submit();
                             }
