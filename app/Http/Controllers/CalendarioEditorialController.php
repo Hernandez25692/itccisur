@@ -106,13 +106,7 @@ class CalendarioEditorialController extends Controller
      ========================= */
     public function update(Request $request, CalendarioEditorial $calendarioEditorial)
     {
-        if (
-            Auth::user()->hasRole('calendario') &&
-            $calendarioEditorial->creado_por !== Auth::id()
-        ) {
-            abort(403);
-        }
-
+        // Validación (estado ABIERTO, sin roles)
         $data = $request->validate([
             'semana' => 'required|integer',
             'dia' => 'required|string',
@@ -126,9 +120,11 @@ class CalendarioEditorialController extends Controller
             'etiquetas' => 'nullable|string',
             'comentario' => 'nullable|string',
             'enlace' => 'nullable|string',
+            'estado' => 'required|in:pendiente,publicado,reprogramado,cancelado',
             'adjunto' => 'nullable|file|max:20480',
         ]);
 
+        // Manejo de adjunto
         if ($request->hasFile('adjunto')) {
             if ($calendarioEditorial->adjunto_path) {
                 Storage::disk('public')->delete($calendarioEditorial->adjunto_path);
@@ -139,12 +135,23 @@ class CalendarioEditorialController extends Controller
             $data['adjunto_nombre'] = $request->file('adjunto')->getClientOriginalName();
         }
 
+        // Si cambia a PUBLICADO, registrar metadata (una sola vez)
+        if (
+            $data['estado'] === 'publicado' &&
+            $calendarioEditorial->estado !== 'publicado'
+        ) {
+            $data['fecha_publicado'] = now();
+            $data['publicado_por'] = Auth::id();
+        }
+
+        // Actualizar
         $calendarioEditorial->update($data);
 
         return redirect()
             ->route('calendario-editorial.index')
-            ->with('success', 'Actividad actualizada');
+            ->with('success', 'Actividad actualizada correctamente');
     }
+
 
     /* =========================
      |  MARCAR COMO PUBLICADO (ADMIN TI)

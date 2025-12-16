@@ -141,21 +141,63 @@
                                 <tr>
                                     <th scope="col"
                                         class="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex items-center justify-between gap-2 cursor-pointer group"
+                                            onclick="toggleSort('semana')">
                                             <span>Semana</span>
+                                            <div class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 14l5-5 5 5z"></path>
+                                                </svg>
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 10l5 5 5-5z"></path>
+                                                </svg>
+                                            </div>
                                         </div>
                                     </th>
                                     <th scope="col"
                                         class="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                        Fecha y Hora
+                                        <div class="flex items-center justify-between gap-2 cursor-pointer group"
+                                            onclick="toggleSort('fecha')">
+                                            <span>Fecha y Hora</span>
+                                            <div class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 14l5-5 5 5z"></path>
+                                                </svg>
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 10l5 5 5-5z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
                                     </th>
                                     <th scope="col"
                                         class="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                        Contenido
+                                        <div class="flex items-center justify-between gap-2 cursor-pointer group"
+                                            onclick="toggleSort('contenido')">
+                                            <span>Contenido</span>
+                                            <div class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 14l5-5 5 5z"></path>
+                                                </svg>
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 10l5 5 5-5z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
                                     </th>
                                     <th scope="col"
                                         class="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                        Estado
+                                        <div class="flex items-center justify-between gap-2 cursor-pointer group"
+                                            onclick="toggleSort('estado')">
+                                            <span>Estado</span>
+                                            <div class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 14l5-5 5 5z"></path>
+                                                </svg>
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M7 10l5 5 5-5z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
                                     </th>
                                     <th scope="col"
                                         class="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -163,7 +205,7 @@
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-100">
+                            <tbody class="bg-white divide-y divide-gray-100" id="tableBody">
                                 @forelse ($registros as $item)
                                     @php
                                         $estadoConfig = match ($item->estado) {
@@ -211,7 +253,11 @@
                                     @endphp
 
                                     <tr class="hover:bg-gray-50/50 transition-all duration-200 group {{ $estadoConfig['bg'] }}"
-                                        style="border-left: 4px solid {{ $estadoConfig['dot'] == 'bg-green-500' ? '#10B981' : ($estadoConfig['dot'] == 'bg-orange-500' ? '#F97316' : ($estadoConfig['dot'] == 'bg-yellow-500' ? '#EAB308' : '#EF4444')) }};">
+                                        style="border-left: 4px solid {{ $estadoConfig['dot'] == 'bg-green-500' ? '#10B981' : ($estadoConfig['dot'] == 'bg-orange-500' ? '#F97316' : ($estadoConfig['dot'] == 'bg-yellow-500' ? '#EAB308' : '#EF4444')) }};"
+                                        data-semana="{{ $item->semana }}"
+                                        data-fecha="{{ $item->fecha_publicacion->format('Y-m-d') }}"
+                                        data-contenido="{{ strtolower($item->tema) }}"
+                                        data-estado="{{ strtolower($item->estado) }}">
 
                                         <!-- Semana -->
                                         <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
@@ -333,8 +379,6 @@
                                                         class="w-2 h-2 rounded-full {{ $estadoConfig['dot'] }} mr-2 animate-pulse"></span>
                                                     {{ $item->estado }}
                                                 </span>
-                                                @if ($item->estado === 'pendiente')
-                                                @endif
                                             </div>
                                         </td>
 
@@ -432,6 +476,74 @@
                                 @endforelse
                             </tbody>
                         </table>
+
+                        <script>
+                            let sortState = {
+                                semana: null,
+                                fecha: null,
+                                contenido: null,
+                                estado: null
+                            };
+
+                            function toggleSort(column) {
+                                // Reset other columns
+                                Object.keys(sortState).forEach(key => {
+                                    if (key !== column) sortState[key] = null;
+                                });
+
+                                // Cycle through sort states: null -> asc -> desc -> null
+                                if (sortState[column] === null) {
+                                    sortState[column] = 'asc';
+                                } else if (sortState[column] === 'asc') {
+                                    sortState[column] = 'desc';
+                                } else {
+                                    sortState[column] = null;
+                                }
+
+                                sortTable(column, sortState[column]);
+                            }
+
+                            function sortTable(column, direction) {
+                                const tbody = document.getElementById('tableBody');
+                                const rows = Array.from(tbody.querySelectorAll('tr'));
+
+                                if (!direction) {
+                                    location.reload();
+                                    return;
+                                }
+
+                                rows.sort((a, b) => {
+                                    let aVal, bVal;
+
+                                    switch(column) {
+                                        case 'semana':
+                                            aVal = parseInt(a.dataset.semana);
+                                            bVal = parseInt(b.dataset.semana);
+                                            break;
+                                        case 'fecha':
+                                            aVal = new Date(a.dataset.fecha);
+                                            bVal = new Date(b.dataset.fecha);
+                                            break;
+                                        case 'contenido':
+                                            aVal = a.dataset.contenido;
+                                            bVal = b.dataset.contenido;
+                                            break;
+                                        case 'estado':
+                                            aVal = a.dataset.estado;
+                                            bVal = b.dataset.estado;
+                                            break;
+                                    }
+
+                                    if (direction === 'asc') {
+                                        return aVal > bVal ? 1 : -1;
+                                    } else {
+                                        return aVal < bVal ? 1 : -1;
+                                    }
+                                });
+
+                                rows.forEach(row => tbody.appendChild(row));
+                            }
+                        </script>
                     </div>
                 </div>
             </div>
