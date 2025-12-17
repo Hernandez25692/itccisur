@@ -67,7 +67,7 @@
                                 <i class="fas fa-chart-line w-5 text-lg"></i>
 
                                 <span class="ml-3 font-medium">
-                                    Resumen Calendario 
+                                    Resumen Calendario
                                 </span>
 
                                 @if (request()->routeIs('calendario-editorial.dashboard'))
@@ -92,40 +92,42 @@
                 {{-- Sección Gestión --}}
                 <div class="mb-6">
                     <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide">Gestión</p>
-
-                    <a href="{{ route('plan-trabajo.index') }}"
-                        class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('plan-trabajo.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
-                        <i class="fas fa-list-check w-5 text-lg"></i>
-                        <span class="ml-3 font-medium">Plan de Trabajo TI</span>
-                        @if (request()->routeIs('plan-trabajo.*'))
-                            <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
-                        @endif
-                    </a>
-                    @role('admin_ti|calendario')
-                        <a href="{{ route('calendario-editorial.index') }}"
-                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
-   {{ request()->routeIs('calendario-editorial.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
-
-                            <i class="fas fa-calendar-alt w-5 text-lg"></i>
-
-                            <span class="ml-3 font-medium">
-                                Calendario
-                            </span>
-
-                            @if (request()->routeIs('calendario-editorial.*'))
+                    @role('admin_ti|gerencia')
+                        <a href="{{ route('plan-trabajo.index') }}"
+                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('plan-trabajo.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+                            <i class="fas fa-list-check w-5 text-lg"></i>
+                            <span class="ml-3 font-medium">Plan de Trabajo TI</span>
+                            @if (request()->routeIs('plan-trabajo.*'))
                                 <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
                             @endif
                         </a>
                     @endrole
 
-                    <a href="{{ route('bitacora.index') }}"
-                        class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('bitacora.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
-                        <i class="fas fa-book w-5 text-lg"></i>
-                        <span class="ml-3 font-medium">Bitácora TI</span>
-                        @if (request()->routeIs('bitacora.*'))
+                    <a href="{{ route('calendario-editorial.index') }}"
+                        class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
+   {{ request()->routeIs('calendario-editorial.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+
+                        <i class="fas fa-calendar-alt w-5 text-lg"></i>
+
+                        <span class="ml-3 font-medium">
+                            Calendario
+                        </span>
+
+                        @if (request()->routeIs('calendario-editorial.*'))
                             <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
                         @endif
                     </a>
+
+                    @role('admin_ti|gerencia')
+                        <a href="{{ route('bitacora.index') }}"
+                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('bitacora.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+                            <i class="fas fa-book w-5 text-lg"></i>
+                            <span class="ml-3 font-medium">Bitácora TI</span>
+                            @if (request()->routeIs('bitacora.*'))
+                                <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
+                            @endif
+                        </a>
+                    @endrole
 
                     @role('admin_ti')
                         <a href="{{ route('admin.users.index') }}"
@@ -142,16 +144,17 @@
                 {{-- Sección Control --}}
                 <div class="mb-6">
                     <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide">Control</p>
-
-                    <a href="{{ route('control.index') }}"
-                        class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('control.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
-                        <i class="fas fa-shield w-5 text-lg"></i>
-                        <span class="ml-3 font-medium">Control TI</span>
-                        @if (request()->routeIs('control.*'))
-                            <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
-                        @endif
-                    </a>
-                </div>
+                    @role('admin_ti|gerencia')
+                        <a href="{{ route('control.index') }}"
+                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('control.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+                            <i class="fas fa-shield w-5 text-lg"></i>
+                            <span class="ml-3 font-medium">Control TI</span>
+                            @if (request()->routeIs('control.*'))
+                                <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
+                            @endif
+                        </a>
+                    </div>
+                @endrole
             </nav>
 
             {{-- Usuario en Pie de Sidebar --}}

@@ -691,8 +691,8 @@
                     <div class="contact-info">
                         <p><i class="fas fa-building"></i> Departamento de Sistemas</p>
                         <p><i class="fas fa-location-dot"></i> Cámara de Comercio e Industrias del Sur</p>
-                        <p><i class="fas fa-phone"></i> Soporte: +51 123 456 789</p>
-                        <p><i class="fas fa-envelope"></i> soporte@ccisur.org</p>
+                        <p><i class="fas fa-phone"></i> Soporte: +504 9944-3669</p>
+                        <p><i class="fas fa-envelope"></i> José Hernandez</p>
                     </div>
                 </div>
             </div>
@@ -701,9 +701,8 @@
                 <p>&copy; 2023 CCISUR TI - Departamento de Sistemas y Tecnologías de Información. Todos los derechos
                     reservados.</p>
                 <p style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
-                    Sistema v2.4.1 | Última actualización: Diciembre 2025 |
-                    <i class="fas fa-shield-check" style="color: var(--success); margin-left: 1rem;"></i> Sistema
-                    Seguro
+                    Sistema v2.4.1 | Última actualización: Diciembre 2025 
+                    <i class="fas fa-shield-check" style="color: var(--success); margin-left: 1rem;">
                 </p>
             </div>
         </div>
