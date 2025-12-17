@@ -361,14 +361,37 @@
 
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label">Hora inicio</label>
-                            <input type="time" name="hora_inicio" class="form-input">
+                            <label class="form-label form-label-required">Hora inicio</label>
+                            <input type="time" name="hora_inicio" class="form-input" id="horaInicio" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Hora fin</label>
-                            <input type="time" name="hora_fin" class="form-input">
+                            <label class="form-label form-label-required">Hora fin</label>
+                            <input type="time" name="hora_fin" class="form-input" id="horaFin" required>
                         </div>
                     </div>
+
+                    <script>
+                        const horaInicio = document.getElementById('horaInicio');
+                        const horaFin = document.getElementById('horaFin');
+
+                        horaFin.addEventListener('change', function() {
+                            if (horaInicio.value && horaFin.value) {
+                                if (horaFin.value <= horaInicio.value) {
+                                    alert('La hora de fin debe ser posterior a la hora de inicio');
+                                    horaFin.value = '';
+                                }
+                            }
+                        });
+
+                        horaInicio.addEventListener('change', function() {
+                            if (horaInicio.value && horaFin.value) {
+                                if (horaFin.value <= horaInicio.value) {
+                                    alert('La hora de fin debe ser posterior a la hora de inicio');
+                                    horaFin.value = '';
+                                }
+                            }
+                        });
+                    </script>
 
                     <div class="form-group">
                         <label class="form-label">Solución aplicada</label>
