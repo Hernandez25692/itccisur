@@ -186,8 +186,12 @@
                                 <div class="contact-value">José Hernandez</div>
                             </div>
                             <div class="contact-box">
-                                <div class="contact-label">📱 Teléfono</div>
-                                <div class="contact-value">9944-3669 (Ext. 1005)</div>
+                                <div class="contact-label">📱 Celular</div>
+                                <div class="contact-value">9944-3669</div>
+                            </div>
+                            <div class="contact-box">
+                                <div class="contact-label">☎️ PBX</div>
+                                <div class="contact-value">2782-2929 (Ext. 1005)</div>
                             </div>
                             <div class="contact-box">
                                 <div class="contact-label">📧 Email</div>
