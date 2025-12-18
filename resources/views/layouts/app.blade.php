@@ -53,7 +53,7 @@
                     <a href="{{ route('dashboard') }}"
                         class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
                         <i class="fas fa-home w-5 text-lg"></i>
-                        <span class="ml-3 font-medium">Dashboard</span>
+                        <span class="ml-3 font-medium">Inicio</span>
                         @if (request()->routeIs('dashboard'))
                             <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
                         @endif
