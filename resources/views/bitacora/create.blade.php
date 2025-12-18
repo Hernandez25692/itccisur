@@ -303,6 +303,7 @@
                                 <option value="Servidor">Servidor</option>
                                 <option value="Internet">Internet</option>
                                 <option value="Aplicación Interna">Aplicación Interna</option>
+                                <option value="Limpieza Física">Limpieza Física</option>
                             </select>
                         </div>
 
@@ -318,6 +319,7 @@
                                 <option value="Impresora">Impresora</option>
                                 <option value="UPS">UPS</option>
                                 <option value="Sistema Interno">Sistema Interno</option>
+                                <option value="Infraestructura">Infraestructura</option>
                                 <option value="Otro">Otro</option>
                             </select>
                         </div>
