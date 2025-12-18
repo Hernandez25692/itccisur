@@ -69,7 +69,9 @@
             color: #EF4444;
         }
 
-        .form-input, .form-select, .form-textarea {
+        .form-input,
+        .form-select,
+        .form-textarea {
             width: 100%;
             padding: 0.875rem 1rem;
             border: 2px solid #e2e8f0;
@@ -80,7 +82,9 @@
             transition: all 0.3s ease;
         }
 
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
             outline: none;
             border-color: var(--gold-primary);
             box-shadow: 0 0 0 3px rgba(197, 160, 73, 0.15);
@@ -253,15 +257,15 @@
             .activity-container {
                 padding: 1rem;
             }
-            
+
             .activity-body {
                 padding: 1.5rem;
             }
-            
+
             .form-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .form-actions {
                 flex-direction: column;
             }
@@ -276,12 +280,25 @@
             </div>
 
             <div class="activity-body">
+                @if ($errors->any())
+                    <div
+                        style="background:#fee2e2; border:1px solid #ef4444; padding:1rem; border-radius:8px; margin-bottom:1.5rem;">
+                        <strong>⚠️ Error al guardar la actividad:</strong>
+                        <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('bitacora.store') }}" enctype="multipart/form-data">
                     @csrf
 
                     <div class="form-group">
                         <label class="form-label form-label-required">Título</label>
-                        <input type="text" name="titulo" class="form-input" required placeholder="Breve descripción de la actividad">
+                        <input type="text" name="titulo" class="form-input" required
+                            placeholder="Breve descripción de la actividad">
                     </div>
 
                     <div class="form-group">
@@ -403,8 +420,8 @@
                     <div class="form-group">
                         <label class="form-label">Evidencia (opcional)</label>
                         <div class="file-upload">
-                            <input type="file" name="evidencia" id="evidenciaInput" class="file-input" 
-                                   accept=".png,.jpg,.jpeg,.pdf,.doc,.docx">
+                            <input type="file" name="evidencia" id="evidenciaInput" class="file-input"
+                                accept=".png,.jpg,.jpeg,.pdf,.doc,.docx">
                             <label for="evidenciaInput" class="file-label">
                                 <div class="file-icon">📎</div>
                                 <span>Subir archivo</span>

@@ -67,7 +67,8 @@ class BitacoraActividadController extends Controller
             // 🔥 ESTADOS CORRECTOS
             'estado' => 'required|string|in:pendiente,en_proceso,resuelto',
 
-            'evidencia' => 'nullable|image|max:8192',
+            'evidencia' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx',
+
         ]);
 
         $data = $request->all();
