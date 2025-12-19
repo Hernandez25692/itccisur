@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\GorAntecedenteRegistral;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class GorAntecedenteRegistralController extends Controller
 {
@@ -16,22 +18,18 @@ class GorAntecedenteRegistralController extends Controller
         $query = GorAntecedenteRegistral::with('creador')
             ->orderBy('created_at', 'desc');
 
-        // 🔎 Filtro: Circunscripción
         if ($request->filled('circunscripcion')) {
             $query->where('circunscripcion', $request->circunscripcion);
         }
 
-        // 📅 Filtro: Fecha inicio
         if ($request->filled('fecha_desde')) {
             $query->whereDate('fecha_recepcion', '>=', $request->fecha_desde);
         }
 
-        // 📅 Filtro: Fecha fin
         if ($request->filled('fecha_hasta')) {
             $query->whereDate('fecha_recepcion', '<=', $request->fecha_hasta);
         }
 
-        // 🔍 Filtro: Texto libre (nombre o exequátur)
         if ($request->filled('buscar')) {
             $query->where(function ($q) use ($request) {
                 $q->where('solicitante_nombre', 'like', '%' . $request->buscar . '%')
@@ -43,7 +41,6 @@ class GorAntecedenteRegistralController extends Controller
 
         return view('gor.antecedentes.index', compact('registros'));
     }
-
 
     /**
      * Formulario de creación
@@ -67,7 +64,24 @@ class GorAntecedenteRegistralController extends Controller
             'asiento_tomo_matricula' => 'nullable|string',
             'tipo_libro' => 'nullable|string',
             'motivo' => 'nullable|string',
+
+            // 📸 comprobante
+            'comprobante' => 'nullable|image|max:5120',
         ]);
+
+        $path = null;
+
+        if ($request->hasFile('comprobante')) {
+            $file = $request->file('comprobante');
+
+            $filename = 'gor_' . now()->format('Ymd_His') . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+
+            $path = $file->storeAs(
+                'gor/comprobantes',
+                $filename,
+                'public'
+            );
+        }
 
         GorAntecedenteRegistral::create([
             'centro' => 'CAS',
@@ -79,6 +93,7 @@ class GorAntecedenteRegistralController extends Controller
             'asiento_tomo_matricula' => $request->asiento_tomo_matricula,
             'tipo_libro' => $request->tipo_libro,
             'motivo' => $request->motivo,
+            'comprobante_path' => $path,
             'created_by' => Auth::id(),
         ]);
 
@@ -88,7 +103,7 @@ class GorAntecedenteRegistralController extends Controller
     }
 
     /**
-     * Vista detalle (SHOW)
+     * Vista detalle
      */
     public function show($id)
     {
@@ -122,9 +137,32 @@ class GorAntecedenteRegistralController extends Controller
             'asiento_tomo_matricula' => 'nullable|string',
             'tipo_libro' => 'nullable|string',
             'motivo' => 'nullable|string',
+
+            // 📸 comprobante
+            'comprobante' => 'nullable|image|max:5120',
         ]);
 
         $registro = GorAntecedenteRegistral::findOrFail($id);
+
+        $path = $registro->comprobante_path;
+
+        if ($request->hasFile('comprobante')) {
+
+            // eliminar anterior si existe
+            if ($registro->comprobante_path) {
+                Storage::disk('public')->delete($registro->comprobante_path);
+            }
+
+            $file = $request->file('comprobante');
+
+            $filename = 'gor_' . now()->format('Ymd_His') . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+
+            $path = $file->storeAs(
+                'gor/comprobantes',
+                $filename,
+                'public'
+            );
+        }
 
         $registro->update([
             'circunscripcion' => $request->circunscripcion,
@@ -135,6 +173,7 @@ class GorAntecedenteRegistralController extends Controller
             'asiento_tomo_matricula' => $request->asiento_tomo_matricula,
             'tipo_libro' => $request->tipo_libro,
             'motivo' => $request->motivo,
+            'comprobante_path' => $path,
             'updated_by' => Auth::id(),
         ]);
 

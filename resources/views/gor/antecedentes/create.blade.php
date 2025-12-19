@@ -24,7 +24,9 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('gor.antecedentes.store') }}" class="space-y-5">
+            <form method="POST" action="{{ route('gor.antecedentes.store') }}" enctype="multipart/form-data"
+                class="space-y-5">
+
                 @csrf
 
                 <!-- CIRCUNSCRIPCIÓN -->
@@ -93,6 +95,19 @@
                         Motivo
                     </label>
                     <textarea name="motivo" rows="4" class="mt-1 w-full rounded-lg border-gray-300" placeholder="Describa el motivo"></textarea>
+                </div>
+                <!-- COMPROBANTE -->
+                <div class="border-t pt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Comprobante (opcional)
+                    </label>
+
+                    <input type="file" name="comprobante" accept="image/*" capture="environment"
+                        class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white">
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Puede tomar una foto con la cámara del celular.
+                    </p>
                 </div>
 
                 <!-- BOTÓN -->
@@ -167,11 +182,11 @@
         function actualizarTipoLibro() {
             const select = document.getElementById('tipoLibro');
             const circunscripcion = document.querySelector('input[name="circunscripcion"]:checked')?.value;
-            
+
             select.innerHTML = '<option value="">[Seleccionar]</option>';
-            
+
             const libros = circunscripcion === 'Nacaome - Valle' ? librosNacaome : librosCholulteca;
-            
+
             Object.entries(libros).forEach(([valor, texto]) => {
                 const option = document.createElement('option');
                 option.value = valor;

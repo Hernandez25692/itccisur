@@ -24,7 +24,9 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('gor.antecedentes.update', $registro->id) }}" class="space-y-5">
+            <form method="POST" action="{{ route('gor.antecedentes.update', $registro->id) }}"
+                enctype="multipart/form-data" class="space-y-5">
+
                 @csrf
                 @method('PUT')
 
@@ -90,6 +92,28 @@
                         Motivo
                     </label>
                     <textarea name="motivo" rows="4" class="mt-1 w-full rounded-lg border-gray-300">{{ $registro->motivo }}</textarea>
+                </div>
+                <!-- COMPROBANTE -->
+                <div class="border-t pt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Comprobante
+                    </label>
+
+                    @if ($registro->comprobante_path)
+                        <div class="mb-2">
+                            <a href="{{ asset('storage/' . $registro->comprobante_path) }}" target="_blank"
+                                class="text-sm text-blue-700 underline">
+                                Ver comprobante actual
+                            </a>
+                        </div>
+                    @endif
+
+                    <input type="file" name="comprobante" accept="image/*" capture="environment"
+                        class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white">
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Si selecciona uno nuevo, reemplazará el anterior.
+                    </p>
                 </div>
 
                 <!-- BOTONES -->

@@ -22,6 +22,7 @@ class GorAntecedenteRegistral extends Model
         'asiento_tomo_matricula',
         'tipo_libro',
         'motivo',
+        'comprobante_path',
         'created_by',
         'updated_by',
     ];
