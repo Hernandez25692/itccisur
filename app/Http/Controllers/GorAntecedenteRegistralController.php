@@ -9,14 +9,41 @@ use Illuminate\Support\Facades\Auth;
 class GorAntecedenteRegistralController extends Controller
 {
     /**
-     * Listado (para uso futuro)
+     * Listado
      */
-    public function index()
+    public function index(Request $request)
     {
-        $registros = GorAntecedenteRegistral::orderBy('created_at', 'desc')->paginate(15);
+        $query = GorAntecedenteRegistral::with('creador')
+            ->orderBy('created_at', 'desc');
+
+        // 🔎 Filtro: Circunscripción
+        if ($request->filled('circunscripcion')) {
+            $query->where('circunscripcion', $request->circunscripcion);
+        }
+
+        // 📅 Filtro: Fecha inicio
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('fecha_recepcion', '>=', $request->fecha_desde);
+        }
+
+        // 📅 Filtro: Fecha fin
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('fecha_recepcion', '<=', $request->fecha_hasta);
+        }
+
+        // 🔍 Filtro: Texto libre (nombre o exequátur)
+        if ($request->filled('buscar')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('solicitante_nombre', 'like', '%' . $request->buscar . '%')
+                    ->orWhere('numero_exequatur', 'like', '%' . $request->buscar . '%');
+            });
+        }
+
+        $registros = $query->paginate(10)->withQueryString();
 
         return view('gor.antecedentes.index', compact('registros'));
     }
+
 
     /**
      * Formulario de creación
@@ -55,7 +82,20 @@ class GorAntecedenteRegistralController extends Controller
             'created_by' => Auth::id(),
         ]);
 
-        return redirect()->back()->with('success', 'Registro guardado correctamente.');
+        return redirect()
+            ->route('gor.antecedentes.index')
+            ->with('success', 'Registro guardado correctamente.');
+    }
+
+    /**
+     * Vista detalle (SHOW)
+     */
+    public function show($id)
+    {
+        $registro = GorAntecedenteRegistral::with(['creador', 'editor'])
+            ->findOrFail($id);
+
+        return view('gor.antecedentes.show', compact('registro'));
     }
 
     /**
@@ -98,6 +138,8 @@ class GorAntecedenteRegistralController extends Controller
             'updated_by' => Auth::id(),
         ]);
 
-        return redirect()->back()->with('success', 'Registro actualizado correctamente.');
+        return redirect()
+            ->route('gor.antecedentes.show', $registro->id)
+            ->with('success', 'Registro actualizado correctamente.');
     }
 }

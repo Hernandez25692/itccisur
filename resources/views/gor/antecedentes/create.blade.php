@@ -35,12 +35,14 @@
 
                     <div class="space-y-2">
                         <label class="flex items-center gap-3 p-3 border rounded-lg">
-                            <input type="radio" name="circunscripcion" value="Nacaome - Valle" required>
+                            <input type="radio" name="circunscripcion" value="Nacaome - Valle" required
+                                onchange="actualizarTipoLibro()">
                             <span>Nacaome / Valle</span>
                         </label>
 
                         <label class="flex items-center gap-3 p-3 border rounded-lg">
-                            <input type="radio" name="circunscripcion" value="Choluteca - Choluteca">
+                            <input type="radio" name="circunscripcion" value="Choluteca - Choluteca"
+                                onchange="actualizarTipoLibro()">
                             <span>Choluteca / Choluteca</span>
                         </label>
                     </div>
@@ -77,8 +79,12 @@
                     <input type="text" name="asiento_tomo_matricula" placeholder="Asiento / Tomo / Matrícula"
                         class="w-full rounded-lg border-gray-300">
 
-                    <input type="text" name="tipo_libro" placeholder="Tipo de libro"
-                        class="w-full rounded-lg border-gray-300">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de libro</label>
+                        <select id="tipoLibro" name="tipo_libro" class="w-full rounded-lg border-gray-300">
+                            <option value="">[Seleccionar]</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- MOTIVO -->
@@ -101,4 +107,77 @@
 
         </div>
     </div>
+
+    <script>
+        const librosCholulteca = {
+            "01 - REGISTRO DE LA PROPIEDAD": "01 - REGISTRO DE LA PROPIEDAD",
+            "02 - REGISTRO DE HIPOTECAS": "02 - REGISTRO DE HIPOTECAS",
+            "03 - REGISTRO DE LA PROPIEDAD, HIPOTECAS Y ANOTACIONES PREVENTIVAS": "03 - REGISTRO DE LA PROPIEDAD, HIPOTECAS Y ANOTACIONES PREVENTIVAS",
+            "04 - LIBROS INA": "04 - LIBROS INA",
+            "05 - LIBRO TOMO CONSERVADOR": "05 - LIBRO TOMO CONSERVADOR",
+            "06 - LIBRO DIGITAL PROPIEDAD INMUEBLE": "06 - LIBRO DIGITAL PROPIEDAD INMUEBLE",
+            "07 - LIBRO DE PRESENTACIONES (DIARIO)": "07 - LIBRO DE PRESENTACIONES (DIARIO)",
+            "10 - CERTIFICACIONES MUNICIPALES": "10 - CERTIFICACIONES MUNICIPALES",
+            "11 - ANOTACIONES PREVENTIVAS": "11 - ANOTACIONES PREVENTIVAS",
+            "12 - REINSCRIPCIONES": "12 - REINSCRIPCIONES",
+            "13 - LIBRO DE SENTENCIAS": "13 - LIBRO DE SENTENCIAS",
+            "14 - PROPIEDAD HORIZONTAL": "14 - PROPIEDAD HORIZONTAL",
+            "15 - AUXILIAR DE PRENDAS": "15 - AUXILIAR DE PRENDAS",
+            "16 - PRENDAS MERCANTILES": "16 - PRENDAS MERCANTILES",
+            "17 - REGISTRO DE CREDITOS DE AVIO Y REFACCIONARIOS": "17 - REGISTRO DE CREDITOS DE AVIO Y REFACCIONARIOS",
+            "18 - REGISTRO DE AERONAUTICA": "18 - REGISTRO DE AERONAUTICA",
+            "21 - REGISTRO COMERCIANTE SOCIAL": "21 - REGISTRO COMERCIANTE SOCIAL",
+            "22 - REGISTRO COMERCIANTE INDIVIDUAL": "22 - REGISTRO COMERCIANTE INDIVIDUAL",
+            "24 - ESTABLECIMIENTO MERCANTIL": "24 - ESTABLECIMIENTO MERCANTIL",
+            "30 - REGISTRO DE PODERES": "30 - REGISTRO DE PODERES",
+            "32 - COMERCIANTE INDIVIDUAL (ANTIGUO)": "32 - COMERCIANTE INDIVIDUAL (ANTIGUO)",
+            "33 - REGISTRO DE COMERCIO (ANTIGUO)": "33 - REGISTRO DE COMERCIO (ANTIGUO)",
+            "34 - REGISTRO MERCANTIL (ANTIGUO)": "34 - REGISTRO MERCANTIL (ANTIGUO)",
+            "19 - CIRCUNSCRIPCION": "19 - CIRCUNSCRIPCION"
+        };
+
+        const librosNacaome = {
+            "01 - REGISTRO DE LA PROPIEDAD": "01 - REGISTRO DE LA PROPIEDAD",
+            "02 - REGISTRO DE HIPOTECAS": "02 - REGISTRO DE HIPOTECAS",
+            "03 - REGISTRO DE LA PROPIEDAD, HIPOTECAS Y ANOTACIONES PREVENTIVAS": "03 - REGISTRO DE LA PROPIEDAD, HIPOTECAS Y ANOTACIONES PREVENTIVAS",
+            "04 - LIBROS INA": "04 - LIBROS INA",
+            "05 - LIBRO TOMO CONSERVADOR": "05 - LIBRO TOMO CONSERVADOR",
+            "06 - LIBRO DIGITAL PROPIEDAD INMUEBLE": "06 - LIBRO DIGITAL PROPIEDAD INMUEBLE",
+            "07 - LIBRO DE PRESENTACIONES (DIARIO)": "07 - LIBRO DE PRESENTACIONES (DIARIO)",
+            "09 - LIBRO DE INSCRIPCIONES": "09 - LIBRO DE INSCRIPCIONES",
+            "10 - CERTIFICACIONES MUNICIPALES": "10 - CERTIFICACIONES MUNICIPALES",
+            "11 - ANOTACIONES PREVENTIVAS": "11 - ANOTACIONES PREVENTIVAS",
+            "12 - REINSCRIPCIONES": "12 - REINSCRIPCIONES",
+            "13 - LIBRO DE SENTENCIAS": "13 - LIBRO DE SENTENCIAS",
+            "14 - PROPIEDAD HORIZONTAL": "14 - PROPIEDAD HORIZONTAL",
+            "15 - AUXILIAR DE PRENDAS": "15 - AUXILIAR DE PRENDAS",
+            "16 - PRENDAS MERCANTILES": "16 - PRENDAS MERCANTILES",
+            "17 - REGISTRO DE CREDITOS DE AVIO Y REFACCIONARIOS": "17 - REGISTRO DE CREDITOS DE AVIO Y REFACCIONARIOS",
+            "18 - REGISTRO DE AERONAUTICA": "18 - REGISTRO DE AERONAUTICA",
+            "21 - REGISTRO COMERCIANTE SOCIAL": "21 - REGISTRO COMERCIANTE SOCIAL",
+            "22 - REGISTRO COMERCIANTE INDIVIDUAL": "22 - REGISTRO COMERCIANTE INDIVIDUAL",
+            "24 - ESTABLECIMIENTO MERCANTIL": "24 - ESTABLECIMIENTO MERCANTIL",
+            "30 - REGISTRO DE PODERES": "30 - REGISTRO DE PODERES",
+            "34 - REGISTRO MERCANTIL (ANTIGUO)": "34 - REGISTRO MERCANTIL (ANTIGUO)",
+            "35 - LIBRO DE ACTAS DE REGULARIZACION PREDIAL": "35 - LIBRO DE ACTAS DE REGULARIZACION PREDIAL",
+            "36 - PERSONERIAS JURIDICAS": "36 - PERSONERIAS JURIDICAS",
+            "19 - CIRCUNSCRIPCION": "19 - CIRCUNSCRIPCION"
+        };
+
+        function actualizarTipoLibro() {
+            const select = document.getElementById('tipoLibro');
+            const circunscripcion = document.querySelector('input[name="circunscripcion"]:checked')?.value;
+            
+            select.innerHTML = '<option value="">[Seleccionar]</option>';
+            
+            const libros = circunscripcion === 'Nacaome - Valle' ? librosNacaome : librosCholulteca;
+            
+            Object.entries(libros).forEach(([valor, texto]) => {
+                const option = document.createElement('option');
+                option.value = valor;
+                option.textContent = texto;
+                select.appendChild(option);
+            });
+        }
+    </script>
 </x-app-layout>

@@ -85,6 +85,11 @@
 
             Route::put('/antecedentes/{id}', [GorAntecedenteRegistralController::class, 'update'])
                 ->name('antecedentes.update');
+
+            Route::get(
+                '/antecedentes/{id}',
+                [GorAntecedenteRegistralController::class, 'show']
+            )->name('antecedentes.show');
         });
 
 
