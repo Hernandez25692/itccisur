@@ -108,13 +108,8 @@
                         </div>
                     @endif
 
-                    <input type="file" name="comprobante"
-                        accept="image/jpeg,image/png,image/jpg,image/heic,image/heif"
+                    <input type="file" name="comprobante" accept="image/*,.heic,.heif" capture="environment"
                         class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white">
-                    <p class="text-xs text-gray-500 mt-1">
-                        Seleccione una imagen desde la galería del dispositivo.
-                    </p>
-
 
                     <p class="text-xs text-gray-500 mt-1">
                         Si selecciona uno nuevo, reemplazará el anterior.
