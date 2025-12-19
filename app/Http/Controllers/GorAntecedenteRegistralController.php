@@ -66,7 +66,8 @@ class GorAntecedenteRegistralController extends Controller
             'motivo' => 'nullable|string',
 
             // 📸 comprobante
-            'comprobante' => 'nullable|image|max:5120',
+            'comprobante' => 'nullable|mimes:jpg,jpeg,png,heic,heif|max:10240',
+
         ]);
 
         $path = null;
@@ -74,7 +75,10 @@ class GorAntecedenteRegistralController extends Controller
         if ($request->hasFile('comprobante')) {
             $file = $request->file('comprobante');
 
-            $filename = 'gor_' . now()->format('Ymd_His') . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+            $extension = $file->extension() ?: 'jpg';
+
+            $filename = 'gor_' . now()->format('Ymd_His') . '_' . Str::random(8) . '.' . $extension;
+
 
             $path = $file->storeAs(
                 'gor/comprobantes',
@@ -139,7 +143,8 @@ class GorAntecedenteRegistralController extends Controller
             'motivo' => 'nullable|string',
 
             // 📸 comprobante
-            'comprobante' => 'nullable|image|max:5120',
+            'comprobante' => 'nullable|mimes:jpg,jpeg,png,heic,heif|max:10240',
+
         ]);
 
         $registro = GorAntecedenteRegistral::findOrFail($id);
@@ -155,7 +160,10 @@ class GorAntecedenteRegistralController extends Controller
 
             $file = $request->file('comprobante');
 
-            $filename = 'gor_' . now()->format('Ymd_His') . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+            $extension = $file->extension() ?: 'jpg';
+
+            $filename = 'gor_' . now()->format('Ymd_His') . '_' . Str::random(8) . '.' . $extension;
+
 
             $path = $file->storeAs(
                 'gor/comprobantes',

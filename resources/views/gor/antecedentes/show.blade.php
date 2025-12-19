@@ -54,6 +54,20 @@
                     </p>
                 @endif
             </div>
+            @if ($registro->comprobante_path)
+                <hr>
+
+                <div>
+                    <p class="text-sm font-semibold text-gray-700 mb-2">
+                        Comprobante
+                    </p>
+
+                    <a href="{{ asset('storage/' . $registro->comprobante_path) }}" target="_blank">
+                        <img src="{{ asset('storage/' . $registro->comprobante_path) }}"
+                            class="max-w-full rounded-lg border">
+                    </a>
+                </div>
+            @endif
 
             <div class="flex justify-between pt-4">
                 <a href="{{ route('gor.antecedentes.index') }}" class="text-sm underline text-gray-600">
