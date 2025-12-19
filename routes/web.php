@@ -7,6 +7,7 @@
     use App\Http\Controllers\PlanActividadController;
     use App\Http\Controllers\CalendarioEditorialController;
     use App\Http\Controllers\CalendarioEditorialDashboardController;
+    use App\Http\Controllers\GorAntecedenteRegistralController;
 
     Route::get('/', function () {
         return view('welcome');
@@ -65,7 +66,29 @@
                 ->name('dashboard');
         });
 
-        
+    Route::middleware(['auth', 'role:GOR|admin_ti|gerencia'])
+        ->prefix('gor')
+        ->name('gor.')
+        ->group(function () {
+
+            Route::get('/antecedentes', [GorAntecedenteRegistralController::class, 'index'])
+                ->name('antecedentes.index');
+
+            Route::get('/antecedentes/create', [GorAntecedenteRegistralController::class, 'create'])
+                ->name('antecedentes.create');
+
+            Route::post('/antecedentes', [GorAntecedenteRegistralController::class, 'store'])
+                ->name('antecedentes.store');
+
+            Route::get('/antecedentes/{id}/edit', [GorAntecedenteRegistralController::class, 'edit'])
+                ->name('antecedentes.edit');
+
+            Route::put('/antecedentes/{id}', [GorAntecedenteRegistralController::class, 'update'])
+                ->name('antecedentes.update');
+        });
+
+
+
     Route::middleware(['auth', 'role:admin_ti|calendario'])
         ->prefix('calendario-editorial')
         ->name('calendario-editorial.')

@@ -34,7 +34,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('calendario-editorial.index', absolute: false));
         }
 
-        return redirect()->intended(route('dashboard.ti', absolute: false));
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**

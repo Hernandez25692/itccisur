@@ -117,7 +117,15 @@
                             <span class="ml-auto w-1 h-6 bg-white rounded-full"></span>
                         @endif
                     </a>
-
+                    @role('GOR|admin_ti|gerencia')
+                    <a href="{{ route('gor.antecedentes.index') }}"
+                        
+                        class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('gor.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+                        <i class="fas fa-building w-5 text-lg"></i>
+                        <span class="ml-3 font-medium">Gerencia de Operaciones Registrales</span>
+                       
+                    </a>
+                    @endrole
                     @role('admin_ti|gerencia')
                         <a href="{{ route('bitacora.index') }}"
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('bitacora.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
