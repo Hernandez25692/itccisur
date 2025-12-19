@@ -517,15 +517,21 @@
 
                                 @if ($registro->numero_exequatur)
                                     <div class="detail-item">
-                                        <span class="detail-label">Número de Exequátur</span>
+                                        <span class="detail-label">Tipo de libro</span>
                                         <span class="detail-value">
-                                            {{ $registro->numero_exequatur }}
+                                            {{ $registro->tipo_libro }}
                                         </span>
                                     </div>
                                 @endif
                             </div>
 
                             <div class="registro-footer">
+                                <div class="registro-creador">
+                                    Solicitante:
+                                    <span class="creador-name">
+                                        {{ $registro->solicitante_nombre ?? 'N/D' }}
+                                    </span>
+                                </div>
                                 <div class="registro-creador">
                                     Registrado por:
                                     <span class="creador-name">
