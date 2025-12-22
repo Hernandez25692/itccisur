@@ -206,7 +206,7 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-100" id="tableBody">
-                                @forelse ($registros as $item)
+                                @forelse ($registros->sortByDesc('fecha_publicacion') as $item)
                                     @php
                                         $estadoConfig = match ($item->estado) {
                                             'publicado' => [

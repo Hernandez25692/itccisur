@@ -625,12 +625,12 @@
             const fechaInput = document.querySelector('input[name="fecha_recepcion"]');
             fechaInput.max = new Date().toISOString().split('T')[0];
 
-            // Validate file size (5MB)
+            // Validate file size (15MB)
             if (comprobanteInput) {
                 comprobanteInput.addEventListener('change', function() {
                     const file = this.files[0];
-                    if (file && file.size > 5 * 1024 * 1024) {
-                        alert('El archivo es demasiado grande. Máximo 5MB.');
+                    if (file && file.size > 15 * 1024 * 1024) {
+                        alert('El archivo es demasiado grande. Máximo 15MB.');
                         this.value = '';
                     }
                 });
