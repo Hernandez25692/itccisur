@@ -402,24 +402,39 @@
                         </a>
                     @endrole
 
-                    <a href="{{ route('calendario-editorial.index') }}" @click="mobileMenuOpen = false"
-                        class="flex items-center px-4 py-4 text-blue-100 rounded-xl transition-all duration-200 {{ request()->routeIs('calendario-editorial.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
-                        <i class="fas fa-calendar-alt w-6 text-xl flex-shrink-0"></i>
-                        <span class="ml-4 font-medium">Calendario</span>
-                        @if (request()->routeIs('calendario-editorial.*'))
-                            <span class="ml-auto w-2 h-8 bg-white rounded-full flex-shrink-0"></span>
-                        @endif
-                    </a>
-
-                    @role('GOR|admin_ti|gerencia')
-                        <a href="{{ route('gor.antecedentes.index') }}" @click="mobileMenuOpen = false"
-                            class="flex items-center px-4 py-4 text-blue-100 rounded-xl transition-all duration-200 {{ request()->routeIs('gor.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
-                            <i class="fas fa-building w-6 text-xl flex-shrink-0"></i>
-                            <span class="ml-4 font-medium">Gerencia de Operaciones Registrales</span>
-                            @if (request()->routeIs('gor.*'))
+                    @role('admin_ti|gerencia|usuario|calendario')
+                        <a href="{{ route('calendario-editorial.index') }}" @click="mobileMenuOpen = false"
+                            class="flex items-center px-4 py-4 text-blue-100 rounded-xl transition-all duration-200 {{ request()->routeIs('calendario-editorial.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+                            <i class="fas fa-calendar-alt w-6 text-xl flex-shrink-0"></i>
+                            <span class="ml-4 font-medium">Calendario</span>
+                            @if (request()->routeIs('calendario-editorial.*'))
                                 <span class="ml-auto w-2 h-8 bg-white rounded-full flex-shrink-0"></span>
                             @endif
                         </a>
+                    @endrole
+
+                    @role('GOR|admin_ti|gerencia')
+                        <div class="mb-2">
+                            <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide">GOR</p>
+
+                            <a href="{{ route('gor.antecedentes.index') }}" @click="mobileMenuOpen = false"
+                                class="flex items-center px-4 py-4 text-blue-100 rounded-xl transition-all duration-200 {{ request()->routeIs('gor.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+                                <i class="fas fa-file-alt w-6 text-xl flex-shrink-0"></i>
+                                <span class="ml-4 font-medium">Antecedentes Registrales</span>
+                                @if (request()->routeIs('gor.*'))
+                                    <span class="ml-auto w-2 h-8 bg-white rounded-full flex-shrink-0"></span>
+                                @endif
+                            </a>
+
+                            <a href="{{ route('audiencias.index') }}" @click="mobileMenuOpen = false"
+                                class="flex items-center px-4 py-4 text-blue-100 rounded-xl transition-all duration-200 {{ request()->routeIs('audiencias.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+                                <i class="fas fa-gavel w-6 text-xl flex-shrink-0"></i>
+                                <span class="ml-4 font-medium">Control de Audiencias</span>
+                                @if (request()->routeIs('audiencias.*'))
+                                    <span class="ml-auto w-2 h-8 bg-white rounded-full flex-shrink-0"></span>
+                                @endif
+                            </a>
+                        </div>
                     @endrole
 
                     @role('admin_ti|gerencia')
