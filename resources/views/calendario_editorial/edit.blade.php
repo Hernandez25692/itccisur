@@ -16,7 +16,8 @@
                     <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                             </path>
                         </svg>
                         Editar Publicación – Calendario Editorial
@@ -27,7 +28,7 @@
 
             <!-- Form Card -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <form method="POST" action="{{ route('calendario-editorial.update', $calendarioEditorial) }}" 
+                <form method="POST" action="{{ route('calendario-editorial.update', $calendarioEditorial) }}"
                     enctype="multipart/form-data" class="divide-y divide-gray-200">
                     @csrf
                     @method('PUT')
@@ -61,7 +62,7 @@
                                             </path>
                                         </svg>
                                     </div>
-                                    <input type="number" name="semana" min="1" max="52" 
+                                    <input type="number" name="semana" min="1" max="52"
                                         value="{{ old('semana', $calendarioEditorial->semana) }}" required
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                                         placeholder="Ej: 15">
@@ -86,7 +87,8 @@
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none transition-colors duration-200">
                                         <option value="" disabled>Seleccione un día</option>
                                         @foreach (['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as $dia)
-                                            <option value="{{ $dia }}" @selected(old('dia', $calendarioEditorial->dia) === $dia)>{{ $dia }}</option>
+                                            <option value="{{ $dia }}" @selected(old('dia', $calendarioEditorial->dia) === $dia)>
+                                                {{ $dia }}</option>
                                         @endforeach
                                     </select>
                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -113,8 +115,9 @@
                                             </path>
                                         </svg>
                                     </div>
-                                    <input type="date" name="fecha_publicacion" 
-                                        value="{{ old('fecha_publicacion', $calendarioEditorial->fecha_publicacion->format('Y-m-d')) }}" required
+                                    <input type="date" name="fecha_publicacion"
+                                        value="{{ old('fecha_publicacion', $calendarioEditorial->fecha_publicacion->format('Y-m-d')) }}"
+                                        required
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                 </div>
                             </div>
@@ -132,7 +135,7 @@
                                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
                                     </div>
-                                    <input type="time" name="hora" 
+                                    <input type="time" name="hora"
                                         value="{{ old('hora', $calendarioEditorial->hora) }}"
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                 </div>
@@ -195,7 +198,8 @@
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none transition-colors duration-200">
                                         <option value="" selected>Seleccione un área (opcional)</option>
                                         @foreach (['Día festivo', 'Calendario', 'Bienvenida socios', 'Post capacitación', 'Servicio empresarial', 'Comunicado', 'Nota de duelo', 'Nota de prensa', 'Evento', 'Empresa afiliada Ofrece', 'Frase motivacional', 'Campaña muevete y emprende', 'Campaña Consejo laboral - video', 'Video resumen capacitación', 'Video resumen evento CCISUR', 'Servicios de Intermediación laboral', 'Alquiler de salón de eventos', 'Espacio de coworking', 'Alquiler de espacio para zona bancaria', 'Campaña de registro', 'Campaña de afiliación', 'Campaña informativa CAS - consejos'] as $area)
-                                            <option value="{{ $area }}" @selected(old('area', $calendarioEditorial->area) === $area)>{{ $area }}</option>
+                                            <option value="{{ $area }}" @selected(old('area', $calendarioEditorial->area) === $area)>
+                                                {{ $area }}</option>
                                         @endforeach
                                     </select>
                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -226,7 +230,8 @@
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 resize-none"
                                         placeholder="Descripción detallada de la publicación (opcional)">{{ old('encabezado', $calendarioEditorial->encabezado) }}</textarea>
                                 </div>
-                                <p class="text-xs text-gray-500">Texto que acompañará la publicación en redes sociales</p>
+                                <p class="text-xs text-gray-500">Texto que acompañará la publicación en redes sociales
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -252,8 +257,7 @@
                                     <label
                                         class="relative flex flex-col items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
                                         <input type="checkbox" name="contenido[]" value="{{ $tipo }}"
-                                            @checked(in_array($tipo, old('contenido', $calendarioEditorial->contenido ?? [])))
-                                            class="sr-only peer">
+                                            @checked(in_array($tipo, old('contenido', $calendarioEditorial->contenido ?? []))) class="sr-only peer">
                                         <div class="p-2 mb-2 bg-blue-100 rounded-lg peer-checked:bg-blue-500">
                                             @switch($tipo)
                                                 @case('EN VIVO')
@@ -335,8 +339,7 @@
                                     <label
                                         class="relative flex flex-col items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
                                         <input type="checkbox" name="publicar_en[]" value="{{ $red }}"
-                                            @checked(in_array($red, old('publicar_en', $calendarioEditorial->publicar_en ?? [])))
-                                            class="sr-only peer">
+                                            @checked(in_array($red, old('publicar_en', $calendarioEditorial->publicar_en ?? []))) class="sr-only peer">
                                         <div class="p-2 mb-2 bg-blue-100 rounded-lg peer-checked:bg-blue-500">
                                             @switch($red)
                                                 @case('FACEBOOK')
@@ -426,31 +429,82 @@
                                 <p class="text-xs text-gray-500">Separe con comas</p>
                             </div>
 
-                            <!-- Adjunto -->
-                            <div class="space-y-2">
+                            <!-- Archivos adjuntos -->
+                            <div class="space-y-3">
                                 <label class="block text-sm font-medium text-gray-700">
-                                    Adjunto (imagen, video o documento)
+                                    Adjuntos (uno o varios archivos)
                                 </label>
+
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
-                                            </path>
+                                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                         </svg>
                                     </div>
-                                    <input type="file" name="adjunto"
-                                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors duration-200"
-                                        accept="image/*,video/*,.pdf,.doc,.docx">
+
+                                    <input type="file" name="adjuntos[]" multiple
+                                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg
+                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                   file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
+                   file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700
+                   hover:file:bg-blue-100 transition-colors duration-200"
+                                        accept="image/*,video/*,.pdf,.doc,.docx,.zip,.rar">
                                 </div>
-                                @if ($calendarioEditorial->adjunto_path)
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        Archivo actual: {{ $calendarioEditorial->adjunto_nombre }}
-                                    </p>
+
+                                <p class="text-xs text-gray-500">
+                                    Puede agregar uno o varios archivos. Los existentes no se eliminan.
+                                </p>
+
+                                {{-- Adjuntos actuales --}}
+                                @if ($calendarioEditorial->adjunto_path || $calendarioEditorial->adjuntos->count())
+                                    <div class="mt-4 space-y-2">
+
+                                        <p class="text-sm font-medium text-gray-700">
+                                            Archivos actualmente adjuntos
+                                        </p>
+
+                                        
+
+                                        {{-- Adjuntos múltiples --}}
+                                        @foreach ($calendarioEditorial->adjuntos as $adjunto)
+                                            <div
+                                                class="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                                                @php
+                                                    $icono = str_contains($adjunto->mime_type, 'image')
+                                                        ? '🖼️'
+                                                        : (str_contains($adjunto->mime_type, 'video')
+                                                            ? '🎬'
+                                                            : (str_contains($adjunto->mime_type, 'pdf')
+                                                                ? '📄'
+                                                                : '📎'));
+                                                @endphp
+
+                                                <span class="text-lg">{{ $icono }}</span>
+
+                                                <a href="{{ asset('storage/' . $adjunto->ruta) }}" target="_blank"
+                                                    class="text-sm truncate hover:underline text-gray-800 flex-1">
+                                                    {{ $adjunto->nombre_original }}
+                                                </a>
+
+                                                <span class="text-xs text-gray-500">
+                                                    {{ number_format($adjunto->tamano / 1024, 1) }} KB
+                                                </span>
+
+                                                <button type="button" onclick="eliminarAdjunto({{ $adjunto->id }})"
+                                                    class="px-3 py-2 text-xs font-semibold rounded-lg border border-red-200 text-red-700 bg-red-50 hover:bg-red-100 transition">
+                                                    Eliminar
+                                                </button>
+
+                                            </div>
+                                        @endforeach
+
+
+                                    </div>
                                 @endif
-                                <p class="text-xs text-gray-500">Formatos: imágenes, videos, PDF, Word</p>
                             </div>
+
                         </div>
 
                         <!-- Comentario -->
@@ -493,7 +547,7 @@
                                 <div class="space-y-2">
                                     <label class="block text-sm font-medium text-gray-700">Estado</label>
                                     <div class="relative">
-                                        <select name="estado" 
+                                        <select name="estado"
                                             class="block w-full pl-3 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white appearance-none transition-colors duration-200">
                                             @foreach (['pendiente', 'publicado', 'reprogramado', 'cancelado'] as $estado)
                                                 <option value="{{ $estado }}" @selected(old('estado', $calendarioEditorial->estado) === $estado)>
@@ -522,7 +576,7 @@
                                                 </path>
                                             </svg>
                                         </div>
-                                        <input type="text" name="enlace" 
+                                        <input type="text" name="enlace"
                                             value="{{ old('enlace', $calendarioEditorial->enlace) }}"
                                             class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200"
                                             placeholder="URL de la publicación">
@@ -621,4 +675,32 @@
             });
         });
     </script>
+    <script>
+        function eliminarAdjunto(id) {
+            if (!confirm('¿Eliminar este adjunto? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            fetch(`/calendario-editorial/adjuntos/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Error al eliminar');
+                    return response.json();
+                })
+                .then(() => {
+                    // Recargar la página para reflejar cambios
+                    location.reload();
+                })
+                .catch(error => {
+                    alert('No se pudo eliminar el adjunto');
+                    console.error(error);
+                });
+        }
+    </script>
+
 </x-app-layout>

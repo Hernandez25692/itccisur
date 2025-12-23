@@ -32,7 +32,7 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm font-medium text-gray-500">Total</p>
-                                    <p class="text-2xl font-bold text-gray-900">{{ $registros->count() }}</p>
+                                    <p class="text-2xl font-bold text-gray-900">{{ $registros->total() }}</p>
                                 </div>
                                 <div class="p-2 bg-blue-50 rounded-lg">
                                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
@@ -67,7 +67,10 @@
                         <div>
                             <h3 class="text-sm font-semibold text-gray-900 mb-3">Estado de Publicaciones</h3>
                             <div class="flex flex-wrap gap-3">
-                                @foreach ([['color' => 'green', 'label' => 'Publicado', 'count' => $registros->where('estado', 'publicado')->count()], ['color' => 'orange', 'label' => 'Pendiente', 'count' => $registros->where('estado', 'pendiente')->count()], ['color' => 'yellow', 'label' => 'Reprogramado', 'count' => $registros->where('estado', 'reprogramado')->count()], ['color' => 'red', 'label' => 'Cancelado', 'count' => $registros->where('estado', 'cancelado')->count()]] as $status)
+                                @php
+                                    $allRegistros = \App\Models\CalendarioEditorial::all();
+                                @endphp
+                                @foreach ([['color' => 'green', 'label' => 'Publicado', 'count' => $allRegistros->where('estado', 'publicado')->count()], ['color' => 'orange', 'label' => 'Pendiente', 'count' => $allRegistros->where('estado', 'pendiente')->count()], ['color' => 'yellow', 'label' => 'Reprogramado', 'count' => $allRegistros->where('estado', 'reprogramado')->count()], ['color' => 'red', 'label' => 'Cancelado', 'count' => $allRegistros->where('estado', 'cancelado')->count()]] as $status)
                                     <div class="flex items-center gap-2">
                                         <div class="flex items-center gap-1.5">
                                             <span class="w-3 h-3 rounded-full bg-{{ $status['color'] }}-500"></span>
@@ -82,17 +85,13 @@
                                 @endforeach
                             </div>
                         </div>
-
-
                     </div>
                 </div>
             </div>
+
             <!-- Filtros de Búsqueda Mejorados -->
             <form method="GET" class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-
-
-
                     <!-- Estado -->
                     <select name="estado" class="border rounded-lg p-2 text-sm">
                         <option value="">Todos los estados</option>
@@ -107,7 +106,6 @@
                     <input type="number" name="semana" value="{{ request('semana') }}" placeholder="Semana"
                         class="border rounded-lg p-2 text-sm">
 
-                    <!-- Mes -->
                     <!-- Mes -->
                     <select name="mes" class="border rounded-lg p-2 text-sm">
                         <option value="">Todos los meses</option>
@@ -133,7 +131,7 @@
             </form>
 
             <!-- Desktop Table View - Mejorado -->
-            <div class="hidden lg:block">
+            <div class="hidden lg:block mt-8">
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -206,7 +204,7 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-100" id="tableBody">
-                                @forelse ($registros->sortByDesc('fecha_publicacion') as $item)
+                                @forelse ($registros as $item)
                                     @php
                                         $estadoConfig = match ($item->estado) {
                                             'publicado' => [
@@ -545,11 +543,23 @@
                             }
                         </script>
                     </div>
+
+                    <!-- Paginación Desktop -->
+                    <div class="bg-white px-8 py-6 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm text-gray-600">
+                                Mostrando <span class="font-medium">{{ $registros->firstItem() ?? 0 }}</span> a <span class="font-medium">{{ $registros->lastItem() ?? 0 }}</span> de <span class="font-medium">{{ $registros->total() }}</span> registros
+                            </div>
+                            <div class="flex gap-2">
+                                {{ $registros->links('pagination::tailwind') }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Mobile Card View - Mejorado -->
-            <div class="lg:hidden space-y-4">
+            <div class="lg:hidden space-y-4 mt-8">
                 @forelse ($registros as $item)
                     @php
                         $estadoConfig = match ($item->estado) {
@@ -657,18 +667,6 @@
                                             class="px-3 py-1 bg-white/70 text-gray-700 rounded-full text-xs font-medium border border-gray-200">
                                             {{ $item->area }}
                                         </span>
-                                    </div>
-                                @endif
-
-                                @if (!empty($item->contenido))
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <span class="text-xs font-medium text-gray-500">Contenido:</span>
-                                        @foreach ($item->contenido as $c)
-                                            <span
-                                                class="px-2.5 py-1 bg-white/70 text-gray-700 rounded-lg text-xs border border-gray-200">
-                                                {{ $c }}
-                                            </span>
-                                        @endforeach
                                     </div>
                                 @endif
 
@@ -786,6 +784,20 @@
                         </div>
                     </div>
                 @endforelse
+
+                <!-- Paginación Mobile -->
+                @if ($registros->hasPages())
+                    <div class="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="text-sm text-gray-600 text-center">
+                                Mostrando <span class="font-medium">{{ $registros->firstItem() ?? 0 }}</span> a <span class="font-medium">{{ $registros->lastItem() ?? 0 }}</span> de <span class="font-medium">{{ $registros->total() }}</span> registros
+                            </div>
+                            <div class="w-full">
+                                {{ $registros->links('pagination::tailwind') }}
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- SweetAlert2 Script -->

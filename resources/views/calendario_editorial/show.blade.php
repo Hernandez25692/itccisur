@@ -464,40 +464,68 @@
                                         @endif
                                     </div>
 
-                                    <!-- Archivo adjunto -->
-                                    @if ($calendarioEditorial->adjunto_path)
-                                        <div>
+                                    <!-- Archivos adjuntos -->
+                                    @if ($calendarioEditorial->adjunto_path || $calendarioEditorial->adjuntos->count())
+                                        <div class="mt-8">
                                             <div class="flex items-center gap-3 mb-6">
                                                 <div class="p-2 bg-blue-50 rounded-lg">
                                                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
-                                                        </path>
+                                                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                                     </svg>
                                                 </div>
-                                                <h2 class="text-lg font-semibold text-gray-900">Archivo adjunto</h2>
+                                                <h2 class="text-lg font-semibold text-gray-900">
+                                                    Archivos adjuntos
+                                                </h2>
                                             </div>
 
-                                            <a href="{{ asset('storage/' . $calendarioEditorial->adjunto_path) }}"
-                                                target="_blank"
-                                                class="inline-flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-800 rounded-lg border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 group">
-                                                <svg class="w-6 h-6 group-hover:scale-110 transition-transform duration-200"
-                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                                    </path>
-                                                </svg>
-                                                <div>
-                                                    <div class="font-medium truncate max-w-xs">
-                                                        {{ $calendarioEditorial->adjunto_nombre }}
-                                                    </div>
-                                                    <div class="text-xs text-blue-600 mt-1">Haz clic para descargar</div>
-                                                </div>
-                                            </a>
+                                            <div class="space-y-3">
+
+
+                                                {{-- Adjuntos múltiples --}}
+                                                @foreach ($calendarioEditorial->adjuntos as $adjunto)
+                                                    <a href="{{ asset('storage/' . $adjunto->ruta) }}" target="_blank"
+                                                        class="flex items-center gap-3 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg
+                          border border-gray-200 hover:bg-gray-100 hover:border-gray-300
+                          transition-all duration-200 group">
+
+                                                        {{-- Icono según tipo --}}
+                                                        @php
+                                                            $icono = str_contains($adjunto->mime_type, 'image')
+                                                                ? '🖼️'
+                                                                : (str_contains($adjunto->mime_type, 'video')
+                                                                    ? '🎬'
+                                                                    : (str_contains($adjunto->mime_type, 'pdf')
+                                                                        ? '📄'
+                                                                        : '📎'));
+                                                        @endphp
+
+                                                        <span class="text-xl">{{ $icono }}</span>
+
+                                                        <div class="flex-1">
+                                                            <div class="font-medium truncate">
+                                                                {{ $adjunto->nombre_original }}
+                                                            </div>
+                                                            <div class="text-xs text-gray-500">
+                                                                {{ strtoupper(pathinfo($adjunto->nombre_original, PATHINFO_EXTENSION)) }}
+                                                                · {{ number_format($adjunto->tamano / 1024, 1) }} KB
+                                                            </div>
+                                                        </div>
+
+                                                        <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600"
+                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
+                                                        </svg>
+                                                    </a>
+                                                @endforeach
+
+                                            </div>
                                         </div>
                                     @endif
+
                                 </div>
 
                                 <!-- Etiquetas y comentarios -->

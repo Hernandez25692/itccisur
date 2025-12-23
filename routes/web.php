@@ -123,7 +123,15 @@
                 '/{calendarioEditorial}',
                 [CalendarioEditorialController::class, 'show']
             )->name('show');
+
+   
         });
+
+    Route::delete(
+        '/calendario-editorial/adjuntos/{adjunto}',
+        [CalendarioEditorialController::class, 'destroyAdjunto']
+    )->name('calendario-editorial.adjuntos.destroy');
+
 
     // Bitácora de Actividades TI
     Route::middleware(['auth'])->group(function () {

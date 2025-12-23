@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\CalendarioEditorial;
+use App\Models\CalendarioEditorialAdjunto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+
 
 class CalendarioEditorialController extends Controller
 {
@@ -53,31 +55,54 @@ class CalendarioEditorialController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'semana' => 'required|integer',
-            'dia' => 'required|string',
+            'semana'            => 'required|integer',
+            'dia'               => 'required|string',
             'fecha_publicacion' => 'required|date',
-            'hora' => 'nullable',
-            'tema' => 'required|string',
-            'area' => 'nullable|string',
-            'encabezado' => 'nullable|string',
-            'contenido' => 'nullable|array',
-            'publicar_en' => 'nullable|array',
-            'etiquetas' => 'nullable|string',
-            'comentario' => 'nullable|string',
-            'adjunto' => 'nullable|file|max:20480',
+            'hora'              => 'nullable',
+            'tema'              => 'required|string',
+            'area'              => 'nullable|string',
+            'encabezado'        => 'nullable|string',
+            'contenido'         => 'nullable|array',
+            'publicar_en'       => 'nullable|array',
+            'etiquetas'         => 'nullable|string',
+            'comentario'        => 'nullable|string',
+
+            // UN SOLO SELECTOR, múltiples archivos
+            'adjuntos'          => 'nullable|array',
+            'adjuntos.*'        => 'file|max:20480',
         ]);
 
-        // Adjunto
-        if ($request->hasFile('adjunto')) {
-            $path = $request->file('adjunto')->store('calendario_editorial', 'public');
-            $data['adjunto_path'] = $path;
-            $data['adjunto_nombre'] = $request->file('adjunto')->getClientOriginalName();
-        }
-
         $data['creado_por'] = Auth::id();
-        $data['estado'] = 'pendiente';
+        $data['estado']     = 'pendiente';
 
-        CalendarioEditorial::create($data);
+        // Crear publicación
+        $calendario = CalendarioEditorial::create($data);
+
+        /* =========================
+         |  GUARDAR ADJUNTOS
+         ========================= */
+        if ($request->hasFile('adjuntos')) {
+            foreach ($request->file('adjuntos') as $index => $file) {
+
+                $ruta = $file->store('calendario_editorial', 'public');
+
+                // Primer archivo = adjunto principal (compatibilidad)
+                if ($index === 0) {
+                    $calendario->update([
+                        'adjunto_path'   => $ruta,
+                        'adjunto_nombre' => $file->getClientOriginalName(),
+                    ]);
+                }
+
+                // Todos van a la tabla de adjuntos
+                $calendario->adjuntos()->create([
+                    'ruta'            => $ruta,
+                    'nombre_original' => $file->getClientOriginalName(),
+                    'mime_type'       => $file->getMimeType(),
+                    'tamano'          => $file->getSize(),
+                ]);
+            }
+        }
 
         return redirect()
             ->route('calendario-editorial.index')
@@ -89,7 +114,6 @@ class CalendarioEditorialController extends Controller
      ========================= */
     public function edit(CalendarioEditorial $calendarioEditorial)
     {
-        // El calendario solo edita lo suyo
         if (
             Auth::user()->hasRole('calendario') &&
             $calendarioEditorial->creado_por !== Auth::id()
@@ -105,50 +129,82 @@ class CalendarioEditorialController extends Controller
      ========================= */
     public function update(Request $request, CalendarioEditorial $calendarioEditorial)
     {
-        // Validación (estado ABIERTO, sin roles)
         $data = $request->validate([
-            'semana' => 'required|integer',
-            'dia' => 'required|string',
+            'semana'            => 'required|integer',
+            'dia'               => 'required|string',
             'fecha_publicacion' => 'required|date',
-            'hora' => 'nullable',
-            'tema' => 'required|string',
-            'area' => 'nullable|string',
-            'encabezado' => 'nullable|string',
-            'contenido' => 'nullable|array',
-            'publicar_en' => 'nullable|array',
-            'etiquetas' => 'nullable|string',
-            'comentario' => 'nullable|string',
-            'enlace' => 'nullable|string',
-            'estado' => 'required|in:pendiente,publicado,reprogramado,cancelado',
-            'adjunto' => 'nullable|file|max:20480',
+            'hora'              => 'nullable',
+            'tema'              => 'required|string',
+            'area'              => 'nullable|string',
+            'encabezado'        => 'nullable|string',
+            'contenido'         => 'nullable|array',
+            'publicar_en'       => 'nullable|array',
+            'etiquetas'         => 'nullable|string',
+            'comentario'        => 'nullable|string',
+            'estado'            => 'required|in:pendiente,publicado,reprogramado,cancelado',
+
+            // 🔴 CLAVE: validar adjuntos también en editar
+            'adjuntos'   => 'nullable|array',
+            'adjuntos.*' => 'file|max:20480',
         ]);
 
-        // Manejo de adjunto
-        if ($request->hasFile('adjunto')) {
-            if ($calendarioEditorial->adjunto_path) {
-                Storage::disk('public')->delete($calendarioEditorial->adjunto_path);
-            }
-
-            $path = $request->file('adjunto')->store('calendario_editorial', 'public');
-            $data['adjunto_path'] = $path;
-            $data['adjunto_nombre'] = $request->file('adjunto')->getClientOriginalName();
-        }
-
-        // Si cambia a PUBLICADO, registrar metadata (una sola vez)
+        // Control de publicación
         if (
             $data['estado'] === 'publicado' &&
             $calendarioEditorial->estado !== 'publicado'
         ) {
             $data['fecha_publicado'] = now();
-            $data['publicado_por'] = Auth::id();
+            $data['publicado_por']   = Auth::id();
         }
 
-        // Actualizar
+        // Actualizar datos principales
         $calendarioEditorial->update($data);
+
+        /* =========================
+     |  GUARDAR NUEVOS ADJUNTOS
+     |  (SIN TOCAR LOS EXISTENTES)
+     ========================= */
+        if ($request->hasFile('adjuntos')) {
+            foreach ($request->file('adjuntos') as $file) {
+
+                $ruta = $file->store('calendario_editorial', 'public');
+
+                $calendarioEditorial->adjuntos()->create([
+                    'ruta'            => $ruta,
+                    'nombre_original' => $file->getClientOriginalName(),
+                    'mime_type'       => $file->getMimeType(),
+                    'tamano'          => $file->getSize(),
+                ]);
+            }
+        }
 
         return redirect()
             ->route('calendario-editorial.index')
             ->with('success', 'Actividad actualizada correctamente');
+    }
+
+
+
+    public function destroyAdjunto(CalendarioEditorialAdjunto $adjunto)
+    {
+        $cal = $adjunto->calendarioEditorial; // relación inversa (la ponemos en el modelo adjunto abajo)
+
+        // Seguridad:
+        // - admin_ti puede borrar cualquiera
+        // - rol calendario solo puede borrar los que él creó
+        if (Auth::user()->hasRole('calendario') && $cal->creado_por !== Auth::id()) {
+            abort(403);
+        }
+
+        // Eliminar archivo físico
+        if ($adjunto->ruta) {
+            Storage::disk('public')->delete($adjunto->ruta);
+        }
+
+        // Eliminar registro
+        $adjunto->delete();
+
+        return response()->json(['success' => true]);
     }
 
 

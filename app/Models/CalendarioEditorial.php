@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CalendarioEditorialAdjunto;
+
 
 class CalendarioEditorial extends Model
 {
@@ -106,5 +108,16 @@ class CalendarioEditorial extends Model
     public function esPublicado(): bool
     {
         return $this->estado === 'publicado';
+    }
+
+    /* =========================
+ |  ADJUNTOS MÚLTIPLES
+ ========================= */
+    public function adjuntos()
+    {
+        return $this->hasMany(
+            \App\Models\CalendarioEditorialAdjunto::class,
+            'calendario_editorial_id'
+        );
     }
 }

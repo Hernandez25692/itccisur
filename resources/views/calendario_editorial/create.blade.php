@@ -65,7 +65,7 @@
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                                         placeholder="Ej: 15">
                                 </div>
-                               
+
                             </div>
 
                             <!-- Día -->
@@ -133,7 +133,7 @@
                                     <input type="time" name="hora"
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                 </div>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -424,23 +424,33 @@
                             <!-- Adjunto -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
-                                    Adjunto (imagen, video o documento)
+                                    Adjuntos (uno o varios archivos)
                                 </label>
+
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
-                                            </path>
+                                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                         </svg>
                                     </div>
-                                    <input type="file" name="adjunto"
-                                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors duration-200"
-                                        accept="image/*,video/*,.pdf,.doc,.docx">
+
+                                    <input type="file" name="adjuntos[]" multiple
+                                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg
+                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                   file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
+                   file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700
+                   hover:file:bg-blue-100 transition-colors duration-200"
+                                        accept="image/*,video/*,.pdf,.doc,.docx,.zip,.rar">
                                 </div>
-                                <p class="text-xs text-gray-500">Formatos: imágenes, videos, PDF, Word</p>
+
+                                <p class="text-xs text-gray-500">
+                                    Puede seleccionar uno o varios archivos (imágenes, videos, PDF, ZIP, Word).
+                                </p>
                             </div>
+
+
                         </div>
 
                         <!-- Comentario -->
