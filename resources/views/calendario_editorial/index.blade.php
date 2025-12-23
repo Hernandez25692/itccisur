@@ -203,7 +203,7 @@
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-100" id="tableBody">
+                            <tbody class="bg-white divide-y-2 divide-gray-300" id="tableBody">
                                 @forelse ($registros as $item)
                                     @php
                                         $estadoConfig = match ($item->estado) {
@@ -213,7 +213,8 @@
                                                 'badge' =>
                                                     'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200',
                                                 'dot' => 'bg-green-500',
-                                                'border' => 'border-green-200',
+                                                'border' => 'border-green-300',
+                                                'borderColor' => '#10B981',
                                             ],
                                             'pendiente' => [
                                                 'bg' => 'bg-gradient-to-r from-orange-50 to-amber-50',
@@ -221,7 +222,8 @@
                                                 'badge' =>
                                                     'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border border-orange-200',
                                                 'dot' => 'bg-orange-500',
-                                                'border' => 'border-orange-200',
+                                                'border' => 'border-orange-300',
+                                                'borderColor' => '#F97316',
                                             ],
                                             'reprogramado' => [
                                                 'bg' => 'bg-gradient-to-r from-yellow-50 to-amber-50',
@@ -229,7 +231,8 @@
                                                 'badge' =>
                                                     'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200',
                                                 'dot' => 'bg-yellow-500',
-                                                'border' => 'border-yellow-200',
+                                                'border' => 'border-yellow-300',
+                                                'borderColor' => '#EAB308',
                                             ],
                                             'cancelado' => [
                                                 'bg' => 'bg-gradient-to-r from-red-50 to-rose-50',
@@ -237,7 +240,8 @@
                                                 'badge' =>
                                                     'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200',
                                                 'dot' => 'bg-red-500',
-                                                'border' => 'border-red-200',
+                                                'border' => 'border-red-300',
+                                                'borderColor' => '#EF4444',
                                             ],
                                             default => [
                                                 'bg' => 'bg-gradient-to-r from-gray-50 to-gray-100',
@@ -245,13 +249,14 @@
                                                 'badge' =>
                                                     'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-200',
                                                 'dot' => 'bg-gray-500',
-                                                'border' => 'border-gray-200',
+                                                'border' => 'border-gray-300',
+                                                'borderColor' => '#6B7280',
                                             ],
                                         };
                                     @endphp
 
                                     <tr class="hover:bg-gray-50/50 transition-all duration-200 group {{ $estadoConfig['bg'] }}"
-                                        style="border-left: 4px solid {{ $estadoConfig['dot'] == 'bg-green-500' ? '#10B981' : ($estadoConfig['dot'] == 'bg-orange-500' ? '#F97316' : ($estadoConfig['dot'] == 'bg-yellow-500' ? '#EAB308' : '#EF4444')) }};"
+                                        style="border-left: 6px solid {{ $estadoConfig['borderColor'] }}; border-right: 3px solid {{ $estadoConfig['borderColor'] }};"
                                         data-semana="{{ $item->semana }}"
                                         data-fecha="{{ $item->fecha_publicacion->format('Y-m-d') }}"
                                         data-contenido="{{ strtolower($item->tema) }}"
