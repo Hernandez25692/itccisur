@@ -30,10 +30,7 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
         
-        if ($user->hasRole('calendario')) {
-            return redirect()->intended(route('calendario-editorial.index', absolute: false));
-        }
-
+     
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

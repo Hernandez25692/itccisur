@@ -8,6 +8,8 @@
     use App\Http\Controllers\CalendarioEditorialController;
     use App\Http\Controllers\CalendarioEditorialDashboardController;
     use App\Http\Controllers\GorAntecedenteRegistralController;
+    use App\Http\Controllers\ControlAudienciaController;
+
 
     Route::get('/', function () {
         return view('welcome');
@@ -123,8 +125,6 @@
                 '/{calendarioEditorial}',
                 [CalendarioEditorialController::class, 'show']
             )->name('show');
-
-   
         });
 
     Route::delete(
@@ -200,6 +200,32 @@
         Route::post('plan-trabajo/{plan}/rechazar', [PlanTrabajoController::class, 'rechazar'])
             ->name('plan-trabajo.rechazar');
     });
+
+    Route::middleware(['auth', 'role:GOR|admin_ti|gerencia'])
+        ->prefix('audiencias')
+        ->name('audiencias.')
+        ->group(function () {
+
+            Route::get('/', [ControlAudienciaController::class, 'index'])
+                ->name('index');
+
+            Route::get('/create', [ControlAudienciaController::class, 'create'])
+                ->name('create');
+
+            Route::post('/', [ControlAudienciaController::class, 'store'])
+                ->name('store');
+
+            Route::get('/{id}', [ControlAudienciaController::class, 'show'])
+                ->name('show');
+
+            Route::get('/{id}/edit', [ControlAudienciaController::class, 'edit'])
+                ->name('edit');
+
+            Route::put('/{id}', [ControlAudienciaController::class, 'update'])
+                ->name('update');
+        });
+
+
 
     Route::get('/dashboard', function () {
         return view('dashboard');
