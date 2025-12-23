@@ -1,15 +1,23 @@
 <x-app-layout>
     <style>
         :root {
-            --primary-dark: #0C1C3C;
-            --primary-medium: #1A2A4F;
-            --gold-primary: #C5A049;
-            --gold-light: #D4B56C;
+            --primary-dark: #1e3a5f;
+            --primary-medium: #2d5a8c;
+            --primary-light: #3d7ab8;
+            --accent: #f59e0b;
+            --accent-light: #fbbf24;
+            --success: #10b981;
+            --danger: #ef4444;
+            --gray-light: #f3f4f6;
+            --gray-medium: #e5e7eb;
+            --gray-dark: #374151;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
         }
 
         .public-container {
             min-height: 100vh;
-            background: linear-gradient(135deg, #f8fafc 0%, #e6eef7 100%);
+            background: linear-gradient(135deg, #f0f7ff 0%, #e0f0ff 100%);
             padding: 1rem;
         }
 
@@ -17,9 +25,9 @@
             max-width: 100%;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 8px 25px rgba(12, 28, 60, 0.1);
+            box-shadow: 0 8px 25px rgba(30, 58, 95, 0.12);
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(61, 122, 184, 0.1);
         }
 
         @media (min-width: 640px) {
@@ -51,7 +59,7 @@
             left: 0;
             width: 100%;
             height: 3px;
-            background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
         }
 
         .public-title {
@@ -87,7 +95,7 @@
         .error-container {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
             border: 1px solid rgba(239, 68, 68, 0.2);
-            border-left: 3px solid #EF4444;
+            border-left: 3px solid var(--danger);
             border-radius: 10px;
             padding: 1rem;
             margin-bottom: 1.5rem;
@@ -98,7 +106,7 @@
             padding: 0;
             margin: 0;
             font-size: 0.875rem;
-            color: #DC2626;
+            color: #dc2626;
         }
 
         .error-list li {
@@ -126,7 +134,7 @@
             margin-bottom: 0.75rem;
         }
 
-        /* Radio Buttons (Circunscripción) */
+        /* Radio Buttons */
         .radio-group {
             display: flex;
             flex-direction: column;
@@ -138,7 +146,7 @@
             align-items: center;
             gap: 0.75rem;
             padding: 1rem;
-            border: 2px solid #E5E7EB;
+            border: 2px solid var(--gray-medium);
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -147,19 +155,19 @@
 
         .radio-label:hover,
         .radio-label:focus-within {
-            border-color: var(--gold-light);
-            background: rgba(197, 160, 73, 0.05);
+            border-color: var(--accent-light);
+            background: rgba(245, 158, 11, 0.05);
         }
 
         .radio-label.selected {
-            border-color: var(--gold-primary);
-            background: rgba(197, 160, 73, 0.1);
+            border-color: var(--accent);
+            background: rgba(245, 158, 11, 0.1);
         }
 
         .radio-input {
             width: 1.25rem;
             height: 1.25rem;
-            accent-color: var(--gold-primary);
+            accent-color: var(--accent);
             flex-shrink: 0;
         }
 
@@ -169,49 +177,49 @@
         .form-textarea {
             width: 100%;
             padding: 0.875rem;
-            border: 2px solid #E5E7EB;
+            border: 2px solid var(--gray-medium);
             border-radius: 10px;
             font-size: 1rem;
-            color: #1F2937;
+            color: var(--text-dark);
             background: white;
             transition: all 0.2s ease;
             -webkit-appearance: none;
         }
 
-        /* Fix for iOS zoom */
-        .form-input,
-        .form-select,
-        .form-textarea {
-            font-size: 16px;
+        .form-input::placeholder,
+        .form-select::placeholder,
+        .form-textarea::placeholder {
+            color: var(--text-light);
         }
 
         .form-input:focus,
         .form-select:focus,
         .form-textarea:focus {
             outline: none;
-            border-color: var(--gold-primary);
-            box-shadow: 0 0 0 3px rgba(197, 160, 73, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
         }
 
         .form-textarea {
             min-height: 100px;
             resize: vertical;
+            font-family: inherit;
         }
 
         /* File Upload */
         .file-upload {
-            border: 2px dashed #E5E7EB;
+            border: 2px dashed var(--gray-medium);
             border-radius: 10px;
             padding: 1.5rem;
             text-align: center;
-            background: #F9FAFB;
+            background: var(--gray-light);
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .file-upload:hover {
-            border-color: var(--gold-light);
-            background: rgba(197, 160, 73, 0.05);
+            border-color: var(--accent-light);
+            background: rgba(245, 158, 11, 0.05);
         }
 
         .file-input {
@@ -223,35 +231,35 @@
             flex-direction: column;
             align-items: center;
             gap: 0.75rem;
-            color: #4B5563;
+            color: var(--text-dark);
             cursor: pointer;
         }
 
         .file-icon {
             font-size: 1.5rem;
-            color: var(--gold-primary);
+            color: var(--accent);
         }
 
         .file-info {
             font-size: 0.75rem;
-            color: #6B7280;
+            color: var(--text-light);
         }
 
         .camera-hint {
             margin-top: 0.5rem;
             font-size: 0.75rem;
-            color: #6B7280;
-            background: rgba(197, 160, 73, 0.1);
+            color: var(--text-dark);
+            background: rgba(245, 158, 11, 0.1);
             padding: 0.5rem;
             border-radius: 6px;
-            border-left: 3px solid var(--gold-primary);
+            border-left: 3px solid var(--accent);
         }
 
         /* Submit Button */
         .submit-btn {
             width: 100%;
             padding: 1rem;
-            background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-light) 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
             color: white;
             font-size: 1rem;
             font-weight: 600;
@@ -269,7 +277,7 @@
         .submit-btn:hover,
         .submit-btn:active {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(197, 160, 73, 0.3);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
         }
 
         .submit-btn:active {
@@ -279,13 +287,12 @@
         /* Section Dividers */
         .section-divider {
             height: 1px;
-            background: linear-gradient(90deg, transparent, #E5E7EB, transparent);
+            background: linear-gradient(90deg, transparent, var(--gray-medium), transparent);
             margin: 1.5rem 0;
         }
 
         /* Touch Optimizations */
         @media (hover: none) and (pointer: coarse) {
-
             .radio-label,
             .submit-btn,
             .file-upload {
@@ -304,14 +311,13 @@
             .form-select,
             .form-textarea {
                 font-size: 16px;
-                /* Prevent iOS zoom */
             }
         }
 
         /* iOS specific fixes */
         @supports (-webkit-touch-callout: none) {
             .form-select {
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234B5563'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
                 background-repeat: no-repeat;
                 background-position: right 1rem center;
                 background-size: 1.25rem;
@@ -340,53 +346,58 @@
             }
         }
 
-        /* Android/Chrome fixes */
-        @media not all and (min-resolution:.001dpcm) {
-            @supports (-webkit-appearance:none) {
-                .form-select {
-                    -webkit-appearance: none;
-                    appearance: none;
-                }
-            }
-        }
-
         /* Dark mode support */
         @media (prefers-color-scheme: dark) {
+            .public-container {
+                background: linear-gradient(135deg, #0f1e2e 0%, #1a2f45 100%);
+            }
+
             .public-card {
-                background: #1F2937;
-                border-color: #374151;
+                background: #1f2937;
+                border-color: rgba(61, 122, 184, 0.2);
             }
 
             .form-label {
-                color: #E5E7EB;
+                color: #e0f0ff;
             }
 
             .form-input,
             .form-select,
             .form-textarea {
                 background: #374151;
-                border-color: #4B5563;
-                color: #E5E7EB;
+                border-color: #4b5563;
+                color: #e5e7eb;
+            }
+
+            .form-input::placeholder,
+            .form-select::placeholder,
+            .form-textarea::placeholder {
+                color: #9ca3af;
             }
 
             .radio-label {
                 background: #374151;
-                border-color: #4B5563;
+                border-color: #4b5563;
+                color: #e5e7eb;
             }
 
             .radio-label:hover,
             .radio-label:focus-within {
-                background: rgba(197, 160, 73, 0.15);
+                background: rgba(245, 158, 11, 0.15);
             }
 
             .file-upload {
                 background: #374151;
-                border-color: #4B5563;
+                border-color: #4b5563;
+            }
+
+            .file-label {
+                color: #e5e7eb;
             }
 
             .file-info,
             .camera-hint {
-                color: #9CA3AF;
+                color: #9ca3af;
             }
         }
     </style>
@@ -530,7 +541,6 @@
     </div>
 
     <script>
-        // Datos de libros
         const librosCholuteca = {
             "01 - REGISTRO DE LA PROPIEDAD": "01 - REGISTRO DE LA PROPIEDAD",
             "02 - REGISTRO DE HIPOTECAS": "02 - REGISTRO DE HIPOTECAS",
@@ -565,7 +575,7 @@
             "04 - LIBROS INA": "04 - LIBROS INA",
             "05 - LIBRO TOMO CONSERVADOR": "05 - LIBRO TOMO CONSERVADOR",
             "06 - LIBRO DIGITAL PROPIEDAD INMUEBLE": "06 - LIBRO DIGITAL PROPIEDAD INMUEBLE",
-            "07 - LIBRO DE PRESENTACIONES (DIARio)": "07 - LIBRO DE PRESENTACIONES (DIARIO)",
+            "07 - LIBRO DE PRESENTACIONES (DIARIO)": "07 - LIBRO DE PRESENTACIONES (DIARIO)",
             "09 - LIBRO DE INSCRIPCIONES": "09 - LIBRO DE INSCRIPCIONES",
             "10 - CERTIFICACIONES MUNICIPALES": "10 - CERTIFICACIONES MUNICIPALES",
             "11 - ANOTACIONES PREVENTIVAS": "11 - ANOTACIONES PREVENTIVAS",
@@ -590,7 +600,6 @@
             const select = document.getElementById('tipoLibro');
             const circunscripcion = document.querySelector('input[name="circunscripcion"]:checked')?.value;
 
-            // Update radio button styles
             document.querySelectorAll('.radio-label').forEach(label => {
                 label.classList.remove('selected');
             });
@@ -601,7 +610,6 @@
                 document.getElementById('radioCholuteca').classList.add('selected');
             }
 
-            // Clear and populate select
             select.innerHTML = '<option value="">[Seleccionar]</option>';
 
             if (circunscripcion) {
@@ -616,16 +624,13 @@
             }
         }
 
-        // Form validation
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('registroForm');
             const comprobanteInput = document.getElementById('comprobanteInput');
 
-            // Set today as max date
             const fechaInput = document.querySelector('input[name="fecha_recepcion"]');
             fechaInput.max = new Date().toISOString().split('T')[0];
 
-            // Validate file size (15MB)
             if (comprobanteInput) {
                 comprobanteInput.addEventListener('change', function() {
                     const file = this.files[0];
@@ -636,16 +641,14 @@
                 });
             }
 
-            // Form submission
             form.addEventListener('submit', function(e) {
                 let valid = true;
 
-                // Check required fields
                 const requiredFields = form.querySelectorAll('[required]');
                 requiredFields.forEach(field => {
                     if (!field.value.trim()) {
                         valid = false;
-                        field.style.borderColor = '#EF4444';
+                        field.style.borderColor = '#ef4444';
                         field.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.15)';
                     }
                 });
@@ -656,7 +659,6 @@
                 }
             });
 
-            // Remove error styles on input
             form.querySelectorAll('input, select, textarea').forEach(field => {
                 field.addEventListener('input', function() {
                     this.style.borderColor = '';
@@ -665,7 +667,6 @@
             });
         });
 
-        // Fix for iOS date input
         if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
             document.querySelector('input[type="date"]').addEventListener('focus', function() {
                 this.type = 'text';
