@@ -109,6 +109,10 @@
                             <option value="Sistemas y Desarrollo"
                                 {{ old('seccion') == 'Sistemas y Desarrollo' ? 'selected' : '' }}>Sistemas y Desarrollo
                             </option>
+                            <option value="Soporte, Capacitación y Procesos"
+                                {{ old('seccion') == 'Soporte, Capacitación y Procesos' ? 'selected' : '' }}>
+                                {{ old('seccion') == 'Soporte, Capacitación y Procesos' ? 'selected' : '' }}Soporte, Capacitación y Procesos
+                            </option>
                         </select>
                         @error('seccion')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
