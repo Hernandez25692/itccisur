@@ -277,7 +277,9 @@
                             </svg>
                         </div>
                     </div>
-                    
+                    <div class="mt-4 pt-4 border-t border-emerald-100">
+                        <p class="text-xs text-gray-600"> Audiencias</p>
+                    </div>
                 </div>
             </div>
 

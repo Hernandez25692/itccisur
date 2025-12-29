@@ -20,15 +20,34 @@
                         </div>
                         <div>
                             <p class="text-sm text-blue-200">Periodo seleccionado</p>
-                            <p class="text-lg font-bold text-white">{{ $mes }}/{{ $anio }}</p>
+                            <p class="text-lg font-bold text-white">
+                                @if(request('filtro') === 'todo')
+                                    Todo el historial
+                                @else
+                                    {{ \Carbon\Carbon::createFromDate($anio, $mes, 1)->translatedFormat('F Y') }}
+                                @endif
+                            </p>
                         </div>
                     </div>
                 </div>
 
                 <form method="GET"
-                    class="flex gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/20 items-end">
+                    class="flex gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/20 items-end flex-wrap">
                     
-                    <div class="flex flex-col">
+                    <div class="flex gap-2 items-end">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="filtro" value="todo" @checked(request('filtro') === 'todo')
+                                class="w-4 h-4 text-cyan-500 rounded focus:ring-2 focus:ring-cyan-400">
+                            <span class="text-sm font-medium text-blue-100">Todo</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="filtro" value="especifico" @checked(request('filtro') !== 'todo' || !request('filtro'))
+                                class="w-4 h-4 text-cyan-500 rounded focus:ring-2 focus:ring-cyan-400">
+                            <span class="text-sm font-medium text-blue-100">Mes/Año</span>
+                        </label>
+                    </div>
+
+                    <div class="flex flex-col" id="mesSelect" @style("display: " . (request('filtro') === 'todo' ? 'none' : 'block'))>
                         <label class="text-xs text-blue-200 mb-1 font-semibold">Mes</label>
                         <select name="mes"
                             class="bg-white/90 border-0 rounded-lg p-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-cyan-400 focus:outline-none shadow-md">
@@ -40,13 +59,12 @@
                         </select>
                     </div>
 
-                    <div class="flex flex-col">
+                    <div class="flex flex-col" id="anioSelect" @style("display: " . (request('filtro') === 'todo' ? 'none' : 'block'))>
                         <label class="text-xs text-blue-200 mb-1 font-semibold">Año</label>
                         <select name="anio"
                             class="bg-white/90 border-0 rounded-lg p-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-cyan-400 focus:outline-none shadow-md">
                             @foreach (range(now()->year - 2, now()->year + 1) as $y)
-                                <option value="{{ $y }}" @selected($anio == $y)>{{ $y }}
-                                </option>
+                                <option value="{{ $y }}" @selected($anio == $y)>{{ $y }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -57,6 +75,22 @@
                     </button>
                 </form>
             </div>
+
+            <script>
+                document.querySelectorAll('input[name="filtro"]').forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        const mesSelect = document.getElementById('mesSelect');
+                        const anioSelect = document.getElementById('anioSelect');
+                        if (this.value === 'todo') {
+                            mesSelect.style.display = 'none';
+                            anioSelect.style.display = 'none';
+                        } else {
+                            mesSelect.style.display = 'block';
+                            anioSelect.style.display = 'block';
+                        }
+                    });
+                });
+            </script>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
