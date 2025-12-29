@@ -9,12 +9,16 @@ class CalendarioEditorialDashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $mes  = $request->input('mes', now()->month);
-        $anio = $request->input('anio', now()->year);
+        $mes  = $request->input('mes');
+        $anio = $request->input('anio');
 
-        $base = CalendarioEditorial::query()
-            ->whereMonth('fecha_publicacion', $mes)
-            ->whereYear('fecha_publicacion', $anio);
+        $base = CalendarioEditorial::query();
+
+        // 👉 SOLO filtrar si mes y año vienen definidos
+        if ($mes && $anio) {
+            $base->whereMonth('fecha_publicacion', $mes)
+                ->whereYear('fecha_publicacion', $anio);
+        }
 
         /* =========================
          | KPIs
