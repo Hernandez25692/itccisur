@@ -338,10 +338,10 @@
                         Acciones rápidas
                     </h3>
 
-                    <div class="flex flex-wrap gap-2">
+                    <div class="flex flex-col sm:flex-row gap-3">
                         @if (!$audiencia->fecha_hora_atencion)
                             <a href="{{ route('audiencias.edit', $audiencia->id) }}"
-                                class="inline-flex items-center gap-1.5 px-3 py-2 bg-white text-blue-700 text-sm font-medium rounded-lg border border-blue-200 hover:bg-blue-50 transition duration-200">
+                                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-blue-700 text-sm font-medium rounded-lg border border-blue-200 hover:bg-blue-50 transition duration-200 shadow-sm flex-1 sm:flex-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M5 13l4 4L19 7" />
@@ -350,16 +350,281 @@
                             </a>
                         @endif
 
-                        <button onclick="window.print()"
-                            class="inline-flex items-center gap-1.5 px-3 py-2 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-200 hover:bg-gray-50 transition duration-200">
+                        <button onclick="printFullDetails()"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-amber-700 text-sm font-medium rounded-lg border border-amber-300 hover:bg-amber-50 transition duration-200 shadow-sm flex-1 sm:flex-none">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                             </svg>
                             Imprimir
                         </button>
+
+                        
                     </div>
                 </div>
+
+                <div id="printContent" class="hidden">
+                    <div class="print-document bg-white p-8">
+                        <div class="mb-8 border-b-2 border-gray-900 pb-6">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">Detalle de Audiencia</h1>
+                            <p class="text-gray-600">ID: #{{ str_pad($audiencia->id, 6, '0', STR_PAD_LEFT) }}</p>
+                            <p class="text-sm text-gray-500 mt-2">Generado el {{ now()->format('d/m/Y H:i') }}</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-8 mb-8">
+                            <div>
+                                <h2 class="text-sm font-bold text-gray-900 uppercase mb-4">Solicitante</h2>
+                                <p class="mb-2"><span class="font-semibold">Nombre:</span> {{ $audiencia->nombre_solicitante }}</p>
+                                <p><span class="font-semibold">Documento:</span> {{ $audiencia->numero_documento }}</p>
+                            </div>
+                            <div>
+                                <h2 class="text-sm font-bold text-gray-900 uppercase mb-4">Estado</h2>
+                                <p class="mb-2"><span class="font-semibold">Estado:</span> 
+                                    @if ($audiencia->fecha_hora_atencion) Atendido @else Pendiente @endif
+                                </p>
+                                <p><span class="font-semibold">Fecha Recepción:</span> {{ $audiencia->fecha_recepcion->format('d/m/Y') }}</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-8">
+                            <h2 class="text-sm font-bold text-gray-900 uppercase mb-3 pb-2 border-b border-gray-300">Motivo</h2>
+                            <p class="text-gray-700 whitespace-pre-line text-justify">{{ $audiencia->motivo }}</p>
+                        </div>
+
+                        @if ($audiencia->fecha_hora_atencion)
+                            <div class="mb-8">
+                                <h2 class="text-sm font-bold text-gray-900 uppercase mb-3 pb-2 border-b border-gray-300">Atención</h2>
+                                <p class="text-gray-700 mb-2"><span class="font-semibold">Fecha/Hora:</span> 
+                                    {{ \Carbon\Carbon::parse($audiencia->fecha_hora_atencion)->format('d/m/Y H:i') }}
+                                </p>
+                            </div>
+                        @endif
+
+                        @if ($audiencia->dictamen)
+                            <div class="mb-8">
+                                <h2 class="text-sm font-bold text-gray-900 uppercase mb-3 pb-2 border-b border-gray-300">Dictamen</h2>
+                                <p class="text-gray-700 whitespace-pre-line text-justify">{{ $audiencia->dictamen }}</p>
+                            </div>
+                        @endif
+
+                        <div class="mt-12 pt-6 border-t border-gray-300 text-xs text-gray-600">
+                            <p><span class="font-semibold">Registrado por:</span> {{ $audiencia->creador->name ?? 'N/D' }}</p>
+                            <p><span class="font-semibold">Última actualización:</span> {{ $audiencia->updated_at->format('d/m/Y H:i') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+            <script>
+            function printFullDetails() {
+                const printWindow = window.open('', '_blank');
+                const printContent = document.getElementById('printContent').innerHTML;
+                
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Audiencia #{{ str_pad($audiencia->id, 6, '0', STR_PAD_LEFT) }}</title>
+                        <style>
+                            * {
+                                margin: 0;
+                                padding: 0;
+                                box-sizing: border-box;
+                            }
+                            
+                            body {
+                                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                                background: white;
+                                color: #333;
+                                line-height: 1.5;
+                            }
+                            
+                            .print-document {
+                                max-width: 210mm;
+                                height: 297mm;
+                                margin: 0 auto;
+                                padding: 20mm;
+                                background: white;
+                                overflow: hidden;
+                            }
+                            
+                            .print-header {
+                                border-bottom: 3px solid #1e40af;
+                                margin-bottom: 20px;
+                                padding-bottom: 15px;
+                                text-align: center;
+                            }
+                            
+                            .print-header h1 {
+                                font-size: 24px;
+                                color: #1e40af;
+                                margin-bottom: 5px;
+                            }
+                            
+                            .print-header p {
+                                font-size: 12px;
+                                color: #666;
+                            }
+                            
+                            .grid-cols-2 {
+                                display: grid;
+                                grid-template-columns: 1fr 1fr;
+                                gap: 20px;
+                                margin-bottom: 15px;
+                            }
+                            
+                            .section-title {
+                                font-size: 11px;
+                                font-weight: 700;
+                                color: #1e40af;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                                margin-top: 12px;
+                                margin-bottom: 8px;
+                                padding-bottom: 5px;
+                                border-bottom: 1px solid #ddd;
+                            }
+                            
+                            .field {
+                                margin-bottom: 8px;
+                                font-size: 12px;
+                            }
+                            
+                            .field-label {
+                                font-weight: 600;
+                                color: #555;
+                                display: inline;
+                            }
+                            
+                            .field-value {
+                                color: #333;
+                            }
+                            
+                            .status-badge {
+                                display: inline-block;
+                                padding: 4px 10px;
+                                border-radius: 4px;
+                                font-weight: 600;
+                                font-size: 11px;
+                            }
+                            
+                            .status-pending {
+                                background-color: #fef08a;
+                                color: #854d0e;
+                            }
+                            
+                            .status-attended {
+                                background-color: #bbf7d0;
+                                color: #166534;
+                            }
+                            
+                            .content-box {
+                                background-color: #f9fafb;
+                                padding: 10px;
+                                border-left: 3px solid #1e40af;
+                                margin: 10px 0;
+                                font-size: 12px;
+                                line-height: 1.5;
+                                white-space: pre-wrap;
+                            }
+                            
+                            .print-footer {
+                                margin-top: 15px;
+                                padding-top: 10px;
+                                border-top: 1px solid #ddd;
+                                font-size: 10px;
+                                color: #999;
+                            }
+                            
+                            .footer-item {
+                                margin-bottom: 3px;
+                            }
+                            
+                            @media print {
+                                body {
+                                    margin: 0;
+                                    padding: 0;
+                                    background: white;
+                                }
+                                .print-document {
+                                    max-width: 100%;
+                                    height: auto;
+                                    padding: 0;
+                                    margin: 0;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="print-document">
+                            <div class="print-header">
+                                <h1>📋 Detalle de Audiencia</h1>
+                                <p>ID: #{{ str_pad($audiencia->id, 6, '0', STR_PAD_LEFT) }} | Generado: {{ now()->format('d/m/Y H:i') }}</p>
+                                <p>
+                                    <span class="status-badge 
+                                        @if($audiencia->fecha_hora_atencion) status-attended @else status-pending @endif">
+                                        @if($audiencia->fecha_hora_atencion) ✓ Atendido @else ⏳ Pendiente @endif
+                                    </span>
+                                </p>
+                            </div>
+
+                            <div class="grid-cols-2">
+                                <div>
+                                    <h2 class="section-title">👤 Solicitante</h2>
+                                    <div class="field">
+                                        <span class="field-label">Nombre:</span>
+                                        <span class="field-value">{{ $audiencia->nombre_solicitante }}</span>
+                                    </div>
+                                    <div class="field">
+                                        <span class="field-label">Documento:</span>
+                                        <span class="field-value">{{ $audiencia->numero_documento }}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h2 class="section-title">📅 Fechas</h2>
+                                    <div class="field">
+                                        <span class="field-label">Recepción:</span>
+                                        <span class="field-value">{{ $audiencia->fecha_recepcion->format('d/m/Y') }}</span>
+                                    </div>
+                                    @if($audiencia->fecha_hora_atencion)
+                                    <div class="field">
+                                        <span class="field-label">Atención:</span>
+                                        <span class="field-value">{{ \Carbon\Carbon::parse($audiencia->fecha_hora_atencion)->format('d/m/Y H:i') }}</span>
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div>
+                                <h2 class="section-title">💬 Motivo</h2>
+                                <div class="content-box">{{ $audiencia->motivo }}</div>
+                            </div>
+
+                            @if($audiencia->dictamen)
+                            <div>
+                                <h2 class="section-title">✅ Dictamen</h2>
+                                <div class="content-box">{{ $audiencia->dictamen }}</div>
+                            </div>
+                            @endif
+
+                            <div class="print-footer">
+                                <div class="footer-item"><span class="field-label">Registrado por:</span> {{ $audiencia->creador->name ?? 'N/D' }}</div>
+                                <div class="footer-item"><span class="field-label">Actualizado:</span> {{ $audiencia->updated_at->format('d/m/Y H:i') }}</div>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                
+                printWindow.document.close();
+                printWindow.print();
+            }
+
+            function downloadPDF() {
+                alert('Para descargar como PDF, usa la opción de imprimir y selecciona "Guardar como PDF"');
+                printFullDetails();
+            }
+            </script>
             </div>
 
         </div>

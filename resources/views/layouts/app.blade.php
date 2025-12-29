@@ -145,6 +145,22 @@
                         @endif
                     @endrole
 
+                    @role('GOR|admin_ti|gerencia')
+                        @if (Route::has('gor.resumen'))
+                            <a href="{{ route('gor.resumen') }}"
+                                class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('gor.resumen') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
+                                :class="{ 'justify-center px-3': !sidebarOpen }"
+                                :title="!sidebarOpen ? 'Resumen GOR' : ''">
+                                <i class="fas fa-chart-bar w-5 text-lg flex-shrink-0"></i>
+                                <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Resumen GOR</span>
+                                @if (request()->routeIs('gor.resumen'))
+                                    <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
+                                        :class="{ 'hidden': !sidebarOpen }"></span>
+                                @endif
+                            </a>
+                        @endif
+                    @endrole
+
                     @role('admin_ti|gerencia')
                         <a href="{{ route('dashboard.ti') }}"
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('dashboard.ti') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
@@ -369,6 +385,19 @@
                                 <i class="fas fa-chart-line w-6 text-xl flex-shrink-0"></i>
                                 <span class="ml-4 font-medium">Resumen Calendario</span>
                                 @if (request()->routeIs('calendario-editorial.dashboard'))
+                                    <span class="ml-auto w-2 h-8 bg-white rounded-full flex-shrink-0"></span>
+                                @endif
+                            </a>
+                        @endif
+                    @endrole
+
+                    @role('GOR|admin_ti|gerencia')
+                        @if (Route::has('gor.resumen'))
+                            <a href="{{ route('gor.resumen') }}" @click="mobileMenuOpen = false"
+                                class="flex items-center px-4 py-4 text-blue-100 rounded-xl transition-all duration-200 {{ request()->routeIs('gor.resumen') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+                                <i class="fas fa-chart-bar w-6 text-xl flex-shrink-0"></i>
+                                <span class="ml-4 font-medium">Resumen GOR</span>
+                                @if (request()->routeIs('gor.resumen'))
                                     <span class="ml-auto w-2 h-8 bg-white rounded-full flex-shrink-0"></span>
                                 @endif
                             </a>

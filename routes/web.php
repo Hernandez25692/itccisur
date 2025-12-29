@@ -9,7 +9,7 @@
     use App\Http\Controllers\CalendarioEditorialDashboardController;
     use App\Http\Controllers\GorAntecedenteRegistralController;
     use App\Http\Controllers\ControlAudienciaController;
-
+    use App\Http\Controllers\GorResumenController;
 
     Route::get('/', function () {
         return view('welcome');
@@ -23,7 +23,9 @@
             Route::resource('users', UserController::class);
         });
 
-
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/gor/resumen', [GorResumenController::class, 'index'])->name('gor.resumen');
+    });
 
     Route::middleware(['auth'])->group(function () {
 
