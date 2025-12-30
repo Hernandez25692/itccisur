@@ -309,10 +309,12 @@
                                 @endphp
 
                                 @if ($isPdf)
-                                    <div class="h-40 w-32 rounded-lg shadow-md border border-gray-200 bg-gray-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                                    <div
+                                        class="h-40 w-32 rounded-lg shadow-md border border-gray-200 bg-gray-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                                         <svg class="w-12 h-12 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M7 2H5a2 2 0 00-2 2v16a2 2 0 002 2h14a2 2 0 002-2V9l-5-5H7z"/>
-                                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="text-xs font-bold fill-red-600">PDF</text>
+                                            <path d="M7 2H5a2 2 0 00-2 2v16a2 2 0 002 2h14a2 2 0 002-2V9l-5-5H7z" />
+                                            <text x="50%" y="50%" text-anchor="middle" dy=".3em"
+                                                class="text-xs font-bold fill-red-600">PDF</text>
                                         </svg>
                                     </div>
                                 @else
@@ -320,10 +322,12 @@
                                         class="h-40 rounded-lg shadow-md border border-gray-200 object-cover group-hover:scale-105 transition-transform duration-300">
                                 @endif
 
-                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                <div
+                                    class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
                                     <a href="{{ asset($evidenciaPath) }}" target="_blank"
                                         class="bg-white/90 text-gray-900 p-2 rounded-full shadow-lg hover:bg-white transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4m-4-6l6-6m0 0l-6 6m6-6v12">
                                             </path>
@@ -413,7 +417,8 @@
                 </div>
 
                 <div class="flex items-center space-x-2">
-                    {{ $actividades->onEachSide(1)->links('vendor.pagination.custom') }}
+                    {{ $actividades->onEachSide(1)->links() }}
+
                 </div>
             </div>
         </div>
