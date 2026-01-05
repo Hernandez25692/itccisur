@@ -358,273 +358,8 @@
                             </svg>
                             Imprimir
                         </button>
-
-                        
                     </div>
                 </div>
-
-                <div id="printContent" class="hidden">
-                    <div class="print-document bg-white p-8">
-                        <div class="mb-8 border-b-2 border-gray-900 pb-6">
-                            <h1 class="text-3xl font-bold text-gray-900 mb-2">Detalle de Audiencia</h1>
-                            <p class="text-gray-600">ID: #{{ str_pad($audiencia->id, 6, '0', STR_PAD_LEFT) }}</p>
-                            <p class="text-sm text-gray-500 mt-2">Generado el {{ now()->format('d/m/Y H:i') }}</p>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-8 mb-8">
-                            <div>
-                                <h2 class="text-sm font-bold text-gray-900 uppercase mb-4">Solicitante</h2>
-                                <p class="mb-2"><span class="font-semibold">Nombre:</span> {{ $audiencia->nombre_solicitante }}</p>
-                                <p><span class="font-semibold">Documento:</span> {{ $audiencia->numero_documento }}</p>
-                            </div>
-                            <div>
-                                <h2 class="text-sm font-bold text-gray-900 uppercase mb-4">Estado</h2>
-                                <p class="mb-2"><span class="font-semibold">Estado:</span> 
-                                    @if ($audiencia->fecha_hora_atencion) Atendido @else Pendiente @endif
-                                </p>
-                                <p><span class="font-semibold">Fecha Recepción:</span> {{ $audiencia->fecha_recepcion->format('d/m/Y') }}</p>
-                            </div>
-                        </div>
-
-                        <div class="mb-8">
-                            <h2 class="text-sm font-bold text-gray-900 uppercase mb-3 pb-2 border-b border-gray-300">Motivo</h2>
-                            <p class="text-gray-700 whitespace-pre-line text-justify">{{ $audiencia->motivo }}</p>
-                        </div>
-
-                        @if ($audiencia->fecha_hora_atencion)
-                            <div class="mb-8">
-                                <h2 class="text-sm font-bold text-gray-900 uppercase mb-3 pb-2 border-b border-gray-300">Atención</h2>
-                                <p class="text-gray-700 mb-2"><span class="font-semibold">Fecha/Hora:</span> 
-                                    {{ \Carbon\Carbon::parse($audiencia->fecha_hora_atencion)->format('d/m/Y H:i') }}
-                                </p>
-                            </div>
-                        @endif
-
-                        @if ($audiencia->dictamen)
-                            <div class="mb-8">
-                                <h2 class="text-sm font-bold text-gray-900 uppercase mb-3 pb-2 border-b border-gray-300">Dictamen</h2>
-                                <p class="text-gray-700 whitespace-pre-line text-justify">{{ $audiencia->dictamen }}</p>
-                            </div>
-                        @endif
-
-                        <div class="mt-12 pt-6 border-t border-gray-300 text-xs text-gray-600">
-                            <p><span class="font-semibold">Registrado por:</span> {{ $audiencia->creador->name ?? 'N/D' }}</p>
-                            <p><span class="font-semibold">Última actualización:</span> {{ $audiencia->updated_at->format('d/m/Y H:i') }}</p>
-                        </div>
-                    </div>
-                </div>
-
-            <script>
-            function printFullDetails() {
-                const printWindow = window.open('', '_blank');
-                const printContent = document.getElementById('printContent').innerHTML;
-                
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Audiencia #{{ str_pad($audiencia->id, 6, '0', STR_PAD_LEFT) }}</title>
-                        <style>
-                            * {
-                                margin: 0;
-                                padding: 0;
-                                box-sizing: border-box;
-                            }
-                            
-                            body {
-                                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                                background: white;
-                                color: #333;
-                                line-height: 1.5;
-                            }
-                            
-                            .print-document {
-                                max-width: 210mm;
-                                height: 297mm;
-                                margin: 0 auto;
-                                padding: 20mm;
-                                background: white;
-                                overflow: hidden;
-                            }
-                            
-                            .print-header {
-                                border-bottom: 3px solid #1e40af;
-                                margin-bottom: 20px;
-                                padding-bottom: 15px;
-                                text-align: center;
-                            }
-                            
-                            .print-header h1 {
-                                font-size: 24px;
-                                color: #1e40af;
-                                margin-bottom: 5px;
-                            }
-                            
-                            .print-header p {
-                                font-size: 12px;
-                                color: #666;
-                            }
-                            
-                            .grid-cols-2 {
-                                display: grid;
-                                grid-template-columns: 1fr 1fr;
-                                gap: 20px;
-                                margin-bottom: 15px;
-                            }
-                            
-                            .section-title {
-                                font-size: 11px;
-                                font-weight: 700;
-                                color: #1e40af;
-                                text-transform: uppercase;
-                                letter-spacing: 0.5px;
-                                margin-top: 12px;
-                                margin-bottom: 8px;
-                                padding-bottom: 5px;
-                                border-bottom: 1px solid #ddd;
-                            }
-                            
-                            .field {
-                                margin-bottom: 8px;
-                                font-size: 12px;
-                            }
-                            
-                            .field-label {
-                                font-weight: 600;
-                                color: #555;
-                                display: inline;
-                            }
-                            
-                            .field-value {
-                                color: #333;
-                            }
-                            
-                            .status-badge {
-                                display: inline-block;
-                                padding: 4px 10px;
-                                border-radius: 4px;
-                                font-weight: 600;
-                                font-size: 11px;
-                            }
-                            
-                            .status-pending {
-                                background-color: #fef08a;
-                                color: #854d0e;
-                            }
-                            
-                            .status-attended {
-                                background-color: #bbf7d0;
-                                color: #166534;
-                            }
-                            
-                            .content-box {
-                                background-color: #f9fafb;
-                                padding: 10px;
-                                border-left: 3px solid #1e40af;
-                                margin: 10px 0;
-                                font-size: 12px;
-                                line-height: 1.5;
-                                white-space: pre-wrap;
-                            }
-                            
-                            .print-footer {
-                                margin-top: 15px;
-                                padding-top: 10px;
-                                border-top: 1px solid #ddd;
-                                font-size: 10px;
-                                color: #999;
-                            }
-                            
-                            .footer-item {
-                                margin-bottom: 3px;
-                            }
-                            
-                            @media print {
-                                body {
-                                    margin: 0;
-                                    padding: 0;
-                                    background: white;
-                                }
-                                .print-document {
-                                    max-width: 100%;
-                                    height: auto;
-                                    padding: 0;
-                                    margin: 0;
-                                }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="print-document">
-                            <div class="print-header">
-                                <h1>📋 Detalle de Audiencia</h1>
-                                <p>ID: #{{ str_pad($audiencia->id, 6, '0', STR_PAD_LEFT) }} | Generado: {{ now()->format('d/m/Y H:i') }}</p>
-                                <p>
-                                    <span class="status-badge 
-                                        @if($audiencia->fecha_hora_atencion) status-attended @else status-pending @endif">
-                                        @if($audiencia->fecha_hora_atencion) ✓ Atendido @else ⏳ Pendiente @endif
-                                    </span>
-                                </p>
-                            </div>
-
-                            <div class="grid-cols-2">
-                                <div>
-                                    <h2 class="section-title">👤 Solicitante</h2>
-                                    <div class="field">
-                                        <span class="field-label">Nombre:</span>
-                                        <span class="field-value">{{ $audiencia->nombre_solicitante }}</span>
-                                    </div>
-                                    <div class="field">
-                                        <span class="field-label">Documento:</span>
-                                        <span class="field-value">{{ $audiencia->numero_documento }}</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h2 class="section-title">📅 Fechas</h2>
-                                    <div class="field">
-                                        <span class="field-label">Recepción:</span>
-                                        <span class="field-value">{{ $audiencia->fecha_recepcion->format('d/m/Y') }}</span>
-                                    </div>
-                                    @if($audiencia->fecha_hora_atencion)
-                                    <div class="field">
-                                        <span class="field-label">Atención:</span>
-                                        <span class="field-value">{{ \Carbon\Carbon::parse($audiencia->fecha_hora_atencion)->format('d/m/Y H:i') }}</span>
-                                    </div>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <div>
-                                <h2 class="section-title">💬 Motivo</h2>
-                                <div class="content-box">{{ $audiencia->motivo }}</div>
-                            </div>
-
-                            @if($audiencia->dictamen)
-                            <div>
-                                <h2 class="section-title">✅ Dictamen</h2>
-                                <div class="content-box">{{ $audiencia->dictamen }}</div>
-                            </div>
-                            @endif
-
-                            <div class="print-footer">
-                                <div class="footer-item"><span class="field-label">Registrado por:</span> {{ $audiencia->creador->name ?? 'N/D' }}</div>
-                                <div class="footer-item"><span class="field-label">Actualizado:</span> {{ $audiencia->updated_at->format('d/m/Y H:i') }}</div>
-                            </div>
-                        </div>
-                    </body>
-                    </html>
-                `);
-                
-                printWindow.document.close();
-                printWindow.print();
-            }
-
-            function downloadPDF() {
-                alert('Para descargar como PDF, usa la opción de imprimir y selecciona "Guardar como PDF"');
-                printFullDetails();
-            }
-            </script>
             </div>
 
         </div>
@@ -682,55 +417,329 @@
                 badge.style.animation = 'pulse 2s infinite';
             });
         });
+    </script>
 
-        // Agregar estilos CSS para animaciones
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.5; }
-            }
-            
-            .prose p {
-                margin-bottom: 0.5em;
-                line-height: 1.6;
-            }
-            
-            .hover-lift {
-                transition: transform 0.2s ease;
-            }
-            
-            .hover-lift:hover {
-                transform: translateY(-2px);
-            }
-            
-            @media print {
-                .no-print {
-                    display: none !important;
-                }
-                
-                body {
-                    background: white !important;
-                }
-                
-                .bg-gradient-to-br, .bg-white, .bg-gray-50, .bg-blue-50, .bg-green-50 {
-                    background: white !important;
-                }
-                
-                .shadow-xl, .shadow-lg, .shadow-md, .shadow-sm {
-                    box-shadow: none !important;
-                }
-                
-                .rounded-2xl, .rounded-xl, .rounded-lg {
-                    border-radius: 0 !important;
-                }
-                
-                .border, .border-t, .border-b {
-                    border-color: #000 !important;
-                }
-            }
-        `;
-        document.head.appendChild(style);
+    <!-- Script de impresión profesional -->
+    <script>
+        function printFullDetails() {
+            const printWindow = window.open('', '_blank');
+
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Audiencia #{{ str_pad($audiencia->id, 6, '0', STR_PAD_LEFT) }}</title>
+                    <style>
+                        @page {
+                            size: A4 portrait;
+                            margin: 15mm 15mm 15mm 15mm;
+                        }
+                        
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        
+                        body {
+                            font-family: 'Calibri', 'Arial', sans-serif;
+                            font-size: 10pt;
+                            line-height: 1.1;
+                            color: #000;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        
+                        .container {
+                            width: 100%;
+                            max-width: 210mm;
+                            margin: 0 auto;
+                            padding: 0;
+                        }
+                        
+                        .header {
+                            text-align: center;
+                            margin-bottom: 8pt;
+                            padding-bottom: 6pt;
+                            border-bottom: 2pt solid #1e40af;
+                        }
+                        
+                        .logo-container {
+                            margin-bottom: 4pt;
+                        }
+                        
+                        .logo {
+                            height: 35pt;
+                            max-height: 35pt;
+                        }
+                        
+                        .header h1 {
+                            font-size: 12pt;
+                            font-weight: bold;
+                            margin: 2pt 0;
+                            color: #1e40af;
+                        }
+                        
+                        .header p {
+                            font-size: 9pt;
+                            margin: 0;
+                            color: #666;
+                        }
+                        
+                        .ref-section {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-bottom: 8pt;
+                            font-size: 9pt;
+                            padding: 3pt 0;
+                            border-bottom: 1pt solid #ccc;
+                        }
+                        
+                        .ref-item {
+                            font-weight: bold;
+                        }
+                        
+                        .data-section {
+                            margin-bottom: 6pt;
+                            page-break-inside: avoid;
+                        }
+                        
+                        .section-title {
+                            font-weight: bold;
+                            font-size: 10pt;
+                            margin-bottom: 3pt;
+                            padding-bottom: 2pt;
+                            border-bottom: 1pt solid #1e40af;
+                            color: #1e40af;
+                            text-transform: uppercase;
+                        }
+                        
+                        .row {
+                            display: flex;
+                            margin-bottom: 2pt;
+                            font-size: 9pt;
+                            min-height: 10pt;
+                        }
+                        
+                        .label {
+                            font-weight: bold;
+                            width: 85pt;
+                            flex-shrink: 0;
+                        }
+                        
+                        .value {
+                            flex: 1;
+                            word-break: break-word;
+                        }
+                        
+                        .content-box {
+                            border: 0.5pt solid #ccc;
+                            padding: 5pt;
+                            margin: 2pt 0;
+                            font-size: 9pt;
+                            line-height: 1.2;
+                            white-space: pre-wrap;
+                            word-wrap: break-word;
+                            background-color: #f8fafc;
+                            border-left: 2pt solid #1e40af;
+                        }
+                        
+                        .two-columns {
+                            display: flex;
+                            gap: 12pt;
+                            margin-bottom: 6pt;
+                        }
+                        
+                        .column {
+                            flex: 1;
+                        }
+                        
+                        .footer {
+                            margin-top: 12pt;
+                            padding-top: 6pt;
+                            border-top: 1pt solid #ccc;
+                            font-size: 8pt;
+                        }
+                        
+                        .signature-area {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-top: 12pt;
+                            padding-top: 6pt;
+                        }
+                        
+                        .signature-box {
+                            width: 45%;
+                            text-align: center;
+                            padding-top: 15pt;
+                            font-size: 9pt;
+                            border-top: 1pt solid #000;
+                        }
+                        
+                        .metadata {
+                            margin-top: 4pt;
+                            font-size: 8pt;
+                            color: #666;
+                        }
+                        
+                        .status-badge {
+                            display: inline-block;
+                            padding: 1pt 3pt;
+                            font-size: 8pt;
+                            font-weight: bold;
+                            border-radius: 2pt;
+                            margin-left: 3pt;
+                        }
+                        
+                        .status-atendido {
+                            background-color: #d1fae5;
+                            color: #065f46;
+                        }
+                        
+                        .status-pendiente {
+                            background-color: #fef3c7;
+                            color: #92400e;
+                        }
+                        
+                        @media print {
+                            body {
+                                margin: 0;
+                                padding: 0;
+                                font-size: 10pt !important;
+                            }
+                            
+                            .container {
+                                padding: 0;
+                                width: 100%;
+                                max-width: none;
+                            }
+                            
+                            .no-print {
+                                display: none !important;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <div class="logo-container">
+                                <img src="{{ asset('storage/logos/logo2.png') }}" alt="CCISUR" class="logo">
+                            </div>
+                            <h1>ACTA DE AUDIENCIA</h1>
+                            <p>Cámara de Comercio e Industrias del Sur - CCISUR</p>
+                        </div>
+                        
+                        <div class="ref-section">
+                            <div class="row">
+                                    <div class="label">Código:</div>
+                                    <div class="value">AUD-{{ str_pad($audiencia->id, 6, '0', STR_PAD_LEFT) }}</div>
+                                </div>
+                            
+                        </div>
+                        
+                        <div class="two-columns">
+                            <div class="column">
+                                <div class="data-section">
+                                    <div class="section-title">INFORMACIÓN DEL SOLICITANTE</div>
+                                    <div class="row">
+                                        <div class="label">Nombre:</div>
+                                        <div class="value">{{ $audiencia->nombre_solicitante }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="label">Documento:</div>
+                                        <div class="value">{{ $audiencia->numero_documento }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="column">
+                                <div class="data-section">
+                                    <div class="section-title">FECHAS DEL PROCESO</div>
+                                    <div class="row">
+                                        <div class="label">Recepción:</div>
+                                        <div class="value">{{ $audiencia->fecha_recepcion->format('d/m/Y') }}</div>
+                                    </div>
+                                    @if ($audiencia->fecha_hora_atencion)
+                                    <div class="row">
+                                        <div class="label">Atención:</div>
+                                        <div class="value">{{ \Carbon\Carbon::parse($audiencia->fecha_hora_atencion)->format('d/m/Y H:i') }}</div>
+                                    </div>
+                                    @endif
+                                    <div class="row">
+                                        <div class="label">Estado:</div>
+                                        <div class="value">
+                                            @if ($audiencia->fecha_hora_atencion)
+                                            ATENDIDO
+                                            <span class="status-badge status-atendido">●</span>
+                                            @else
+                                            PENDIENTE
+                                            <span class="status-badge status-pendiente">●</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="data-section">
+                            <div class="section-title">MOTIVO DE LA AUDIENCIA</div>
+                            <div class="content-box">{{ $audiencia->motivo }}</div>
+                        </div>
+                        
+                        @if ($audiencia->dictamen)
+                        <div class="data-section">
+                            <div class="section-title">DICTAMEN</div>
+                            <div class="content-box">{{ $audiencia->dictamen }}</div>
+                        </div>
+                        @endif
+                        
+                        <div class="footer">
+                            <div class="metadata">
+                                <div class="row">
+                                    <div class="label">Registrado por:</div>
+                                    <div class="value">{{ $audiencia->creador->name ?? 'N/D' }}</div>
+                                </div>
+                                
+                                
+                            </div>
+                            
+                            <div class="signature-area">
+                                <div class="signature-box">
+                                    SOLICITANTE<br>
+                                    {{ $audiencia->nombre_solicitante }}<br>
+                                    
+                                </div>
+                                <div class="signature-box">
+                                    Encargado CCISUR<br>
+                                    {{ $audiencia->creador->name ?? 'N/D' }}<br>
+                                    
+                                </div>
+                            </div>
+                            
+                            <div class="metadata" style="text-align: center; margin-top: 8pt; font-size: 7pt; color: #999;">
+                                Documento generado automáticamente por el Sistema de Gestión de Audiencias CCISUR
+                                <br>Impresión: {{ now()->format('d/m/Y H:i:s') }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() {
+                                window.close();
+                            }, 100);
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+
+            printWindow.document.close();
+        }
     </script>
 
     <!-- Estilos personalizados para impresión -->
