@@ -98,7 +98,7 @@
 
 
 
-    Route::middleware(['auth', 'role:admin_ti|calendario'])
+    Route::middleware(['auth', 'role:admin_ti|gerencia|usuario|calendario'])
         ->prefix('calendario-editorial')
         ->name('calendario-editorial.')
         ->group(function () {
