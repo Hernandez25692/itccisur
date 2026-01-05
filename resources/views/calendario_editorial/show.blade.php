@@ -481,50 +481,95 @@
                                             </div>
 
                                             <div class="space-y-3">
-
-
                                                 {{-- Adjuntos múltiples --}}
                                                 @foreach ($calendarioEditorial->adjuntos as $adjunto)
-                                                    <a href="{{ asset('storage/' . $adjunto->ruta) }}" target="_blank"
-                                                        class="flex items-center gap-3 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg
-                          border border-gray-200 hover:bg-gray-100 hover:border-gray-300
-                          transition-all duration-200 group">
+                                                    <div class="group">
+                                                        <button onclick="mostrarPreview('{{ asset('storage/' . $adjunto->ruta) }}', '{{ $adjunto->mime_type }}')"
+                                                            class="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg
+                                                            border border-gray-200 hover:bg-gray-100 hover:border-gray-300
+                                                            transition-all duration-200">
 
-                                                        {{-- Icono según tipo --}}
-                                                        @php
-                                                            $icono = str_contains($adjunto->mime_type, 'image')
-                                                                ? '🖼️'
-                                                                : (str_contains($adjunto->mime_type, 'video')
-                                                                    ? '🎬'
-                                                                    : (str_contains($adjunto->mime_type, 'pdf')
-                                                                        ? '📄'
-                                                                        : '📎'));
-                                                        @endphp
+                                                            {{-- Icono según tipo --}}
+                                                            @php
+                                                                $icono = str_contains($adjunto->mime_type, 'image')
+                                                                    ? '🖼️'
+                                                                    : (str_contains($adjunto->mime_type, 'video')
+                                                                        ? '🎬'
+                                                                        : (str_contains($adjunto->mime_type, 'pdf')
+                                                                            ? '📄'
+                                                                            : '📎'));
+                                                            @endphp
 
-                                                        <span class="text-xl">{{ $icono }}</span>
+                                                            <span class="text-xl">{{ $icono }}</span>
 
-                                                        <div class="flex-1">
-                                                            <div class="font-medium truncate">
-                                                                {{ $adjunto->nombre_original }}
+                                                            <div class="flex-1 text-left">
+                                                                <div class="font-medium truncate">
+                                                                    {{ $adjunto->nombre_original }}
+                                                                </div>
+                                                                <div class="text-xs text-gray-500">
+                                                                    {{ strtoupper(pathinfo($adjunto->nombre_original, PATHINFO_EXTENSION)) }}
+                                                                    · {{ number_format($adjunto->tamano / 1024, 1) }} KB
+                                                                </div>
                                                             </div>
-                                                            <div class="text-xs text-gray-500">
-                                                                {{ strtoupper(pathinfo($adjunto->nombre_original, PATHINFO_EXTENSION)) }}
-                                                                · {{ number_format($adjunto->tamano / 1024, 1) }} KB
-                                                            </div>
-                                                        </div>
 
-                                                        <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600"
-                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
-                                                        </svg>
-                                                    </a>
+                                                            <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
                                                 @endforeach
-
                                             </div>
                                         </div>
                                     @endif
+
+                                    <!-- Modal de vista previa -->
+                                    <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                                        <div class="bg-white rounded-xl shadow-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
+                                            <div class="sticky top-0 flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+                                                <h3 class="text-lg font-semibold text-gray-900">Vista previa</h3>
+                                                <button onclick="cerrarPreview()" class="text-gray-500 hover:text-gray-700">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div class="p-6">
+                                                <div id="previewContent" class="flex items-center justify-center">
+                                                    <!-- Se llena dinámicamente -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <script>
+                                        function mostrarPreview(url, mimeType) {
+                                            const modal = document.getElementById('previewModal');
+                                            const content = document.getElementById('previewContent');
+                                            
+                                            if (mimeType.includes('image')) {
+                                                content.innerHTML = `<img src="${url}" alt="Preview" class="w-full h-auto rounded-lg">`;
+                                            } else if (mimeType.includes('video')) {
+                                                content.innerHTML = `<video controls class="w-full h-auto rounded-lg"><source src="${url}" type="${mimeType}">Tu navegador no soporta videos.</video>`;
+                                            } else if (mimeType.includes('pdf')) {
+                                                content.innerHTML = `<iframe src="${url}" class="w-full h-[600px] rounded-lg"></iframe>`;
+                                            } else {
+                                                content.innerHTML = `<div class="text-center text-gray-500"><p>No se puede mostrar vista previa de este archivo.</p><a href="${url}" target="_blank" class="text-blue-600 hover:underline mt-4 inline-block">Descargar archivo</a></div>`;
+                                            }
+                                            
+                                            modal.classList.remove('hidden');
+                                        }
+
+                                        function cerrarPreview() {
+                                            document.getElementById('previewModal').classList.add('hidden');
+                                        }
+
+                                        document.getElementById('previewModal').addEventListener('click', (e) => {
+                                            if (e.target.id === 'previewModal') cerrarPreview();
+                                        });
+                                    </script>
 
                                 </div>
 
