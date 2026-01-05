@@ -13,7 +13,7 @@ class CalendarioEditorialController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['role:admin_ti|calendario']);
+        $this->middleware(['auth', 'role:admin_ti|gerencia|usuario|calendario']);
     }
 
     /* =========================
