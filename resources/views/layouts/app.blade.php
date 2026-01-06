@@ -152,7 +152,8 @@
                                 :class="{ 'justify-center px-3': !sidebarOpen }"
                                 :title="!sidebarOpen ? 'Resumen GOR' : ''">
                                 <i class="fas fa-chart-bar w-5 text-lg flex-shrink-0"></i>
-                                <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Resumen GOR</span>
+                                <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Resumen
+                                    GOR</span>
                                 @if (request()->routeIs('gor.resumen'))
                                     <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
                                         :class="{ 'hidden': !sidebarOpen }"></span>
@@ -180,19 +181,19 @@
                     <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
                         :class="{ 'hidden': !sidebarOpen }">Gestión</p>
 
+                    @role('admin_ti|gerencia|usuario|calendario')
 
-
-                    <a href="{{ route('calendario-editorial.index') }}"
-                        class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('calendario-editorial.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
-                        :class="{ 'justify-center px-3': !sidebarOpen }" :title="!sidebarOpen ? 'Calendario' : ''">
-                        <i class="fas fa-calendar-alt w-5 text-lg flex-shrink-0"></i>
-                        <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Calendario</span>
-                        @if (request()->routeIs('calendario-editorial.*'))
-                            <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
-                                :class="{ 'hidden': !sidebarOpen }"></span>
-                        @endif
-                    </a>
-
+                        <a href="{{ route('calendario-editorial.index') }}"
+                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('calendario-editorial.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
+                            :class="{ 'justify-center px-3': !sidebarOpen }" :title="!sidebarOpen ? 'Calendario' : ''">
+                            <i class="fas fa-calendar-alt w-5 text-lg flex-shrink-0"></i>
+                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Calendario</span>
+                            @if (request()->routeIs('calendario-editorial.*'))
+                                <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
+                                    :class="{ 'hidden': !sidebarOpen }"></span>
+                            @endif
+                        </a>
+                    @endrole
                     @role('GOR|admin_ti|gerencia')
 
                         <!-- Gerencia de Operaciones Registrales -->
