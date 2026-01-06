@@ -142,8 +142,7 @@ class CalendarioEditorialController extends Controller
             'etiquetas'         => 'nullable|string',
             'comentario'        => 'nullable|string',
             'estado'            => 'required|in:pendiente,publicado,reprogramado,cancelado',
-
-            // 🔴 CLAVE: validar adjuntos también en editar
+            'enlace'            => 'nullable|string',
             'adjuntos'   => 'nullable|array',
             'adjuntos.*' => 'file|max:20480',
         ]);
