@@ -129,7 +129,7 @@
                                 class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('tipo_falla') ? 'border-red-300' : 'border-gray-200' }} rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors"
                                 required>
                             <option value="">Seleccionar tipo</option>
-                            @foreach(['Hardware', 'Software', 'Red', 'Impresora', 'Energía', 'Correo', 'Usuario / Permisos', 'Servidor', 'Internet', 'Aplicación Interna'] as $item)
+                            @foreach(['Hardware', 'Software', 'Red', 'Impresora', 'Energía', 'Correo', 'Usuario / Permisos', 'Servidor', 'Internet', 'Aplicación Interna', 'Actividad Diaria', 'Pagina Web'] as $item)
                                 <option value="{{ $item }}" {{ old('tipo_falla', $actividad->tipo_falla) == $item ? 'selected' : '' }}>
                                     {{ $item }}
                                 </option>
@@ -155,7 +155,7 @@
                                 class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('equipo_afectado') ? 'border-red-300' : 'border-gray-200' }} rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors"
                                 required>
                             <option value="">Seleccionar equipo</option>
-                            @foreach(['PC Escritorio', 'Laptop', 'Switch', 'Router', 'Access Point', 'Servidor', 'Impresora', 'UPS', 'Sistema Interno', 'Otro'] as $item)
+                            @foreach(['PC Escritorio', 'Laptop', 'Switch', 'Router', 'Access Point', 'Servidor', 'Impresora', 'UPS', 'Sistema Interno', 'Otro','Actividad Diaria'] as $item)
                                 <option value="{{ $item }}" {{ old('equipo_afectado', $actividad->equipo_afectado) == $item ? 'selected' : '' }}>
                                     {{ $item }}
                                 </option>
@@ -182,7 +182,7 @@
                                 class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('ubicacion') ? 'border-red-300' : 'border-gray-200' }} rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors"
                                 required>
                             <option value="">Seleccionar ubicación</option>
-                            @foreach(['DE' => 'Dirección Ejecutiva', 'GOR' => 'Gerencia de Operaciones Registrales', 'GAF' => 'Gerencia Administrativa y Financiera', 'GSEA' => 'Gerencia de Servicios Empresariales y Afiliaciones'] as $key => $label)
+                            @foreach(['DE' => 'Dirección Ejecutiva', 'GOR' => 'Gerencia de Operaciones Registrales', 'GAF' => 'Gerencia Administrativa y Financiera', 'GSEA' => 'Gerencia de Servicios Empresariales y Afiliaciones', 'CCISUR' => 'CCISUR', 'CAS' => 'CAS'] as $key => $label)
                                 <option value="{{ $key }}" {{ old('ubicacion', $actividad->ubicacion) == $key ? 'selected' : '' }}>
                                     {{ $label }}
                                 </option>

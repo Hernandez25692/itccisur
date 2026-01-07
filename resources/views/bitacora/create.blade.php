@@ -321,6 +321,9 @@
                                 <option value="Internet">Internet</option>
                                 <option value="Aplicación Interna">Aplicación Interna</option>
                                 <option value="Limpieza Física">Limpieza Física</option>
+                                 <option value="Pagina Web">Pagina Web</option>
+                                <option value="Actividad Diaria">Actividad Diaria</option>
+                               
                             </select>
                         </div>
 
@@ -338,6 +341,7 @@
                                 <option value="Sistema Interno">Sistema Interno</option>
                                 <option value="Infraestructura">Infraestructura</option>
                                 <option value="Otro">Otro</option>
+                                <option value="Actividad Diaria">Actividad Diaria</option>
                             </select>
                         </div>
                     </div>
@@ -349,6 +353,8 @@
                             <option value="GOR">Gerencia de Operaciones Registrales</option>
                             <option value="GAF">Gerencia Administrativa y Financiera</option>
                             <option value="GSEA">Gerencia de Servicios Empresariales y Afiliaciones</option>
+                            <option value="CCISUR">CCISUR</option>
+                            <option value="CAS">CAS</option>
                         </select>
                     </div>
 

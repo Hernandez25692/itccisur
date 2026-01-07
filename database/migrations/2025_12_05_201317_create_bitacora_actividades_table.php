@@ -22,9 +22,9 @@ return new class extends Migration
             $table->text('descripcion')->nullable(); // Detalle de la incidencia / actividad
 
             // Datos de la falla
-            $table->string('equipo_afectado')->nullable(); // Ej: "PC Caja 1", "Servidor", etc.
-            $table->string('tipo_falla')->nullable();      // Ej: "Hardware", "Software", "Red", etc.
-            $table->string('ubicacion')->nullable();       // Ej: "Recepción", "Gerencia", "Sucursal X"
+            $table->string('equipo_afectado')->nullable(); 
+            $table->string('tipo_falla')->nullable();   
+            $table->string('ubicacion')->nullable();    
 
             // Estado de la actividad
             $table->enum('estado', ['pendiente', 'en_proceso', 'resuelto'])->default('pendiente');
