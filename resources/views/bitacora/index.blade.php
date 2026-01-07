@@ -301,7 +301,8 @@
                     @if ($a->evidencia)
                         <div class="mb-6">
                             <p class="text-sm font-medium text-gray-700 mb-3">Evidencia Adjunta</p>
-                            <div class="inline-block relative group">
+                            <div class="inline-block relative group cursor-pointer"
+                                onclick="openPreview('{{ asset('storage/' . $a->evidencia) }}', '{{ strtolower(pathinfo($a->evidencia, PATHINFO_EXTENSION)) }}')">
                                 @php
                                     $evidenciaPath = 'storage/' . $a->evidencia;
                                     $extension = strtolower(pathinfo($a->evidencia, PATHINFO_EXTENSION));
@@ -313,8 +314,6 @@
                                         class="h-40 w-32 rounded-lg shadow-md border border-gray-200 bg-gray-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                                         <svg class="w-12 h-12 text-red-600" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M7 2H5a2 2 0 00-2 2v16a2 2 0 002 2h14a2 2 0 002-2V9l-5-5H7z" />
-                                            <text x="50%" y="50%" text-anchor="middle" dy=".3em"
-                                                class="text-xs font-bold fill-red-600">PDF</text>
                                         </svg>
                                     </div>
                                 @else
@@ -324,19 +323,71 @@
 
                                 <div
                                     class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                    <a href="{{ asset($evidenciaPath) }}" target="_blank"
-                                        class="bg-white/90 text-gray-900 p-2 rounded-full shadow-lg hover:bg-white transition-colors">
+                                    <span class="bg-white/90 text-gray-900 p-2 rounded-full shadow-lg">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4m-4-6l6-6m0 0l-6 6m6-6v12">
-                                            </path>
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                         </svg>
-                                    </a>
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     @endif
+
+                    <!-- Modal Preview -->
+                    <div id="previewModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+                        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+                            <div class="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white">
+                                <h3 class="text-lg font-bold text-gray-900">Vista Previa</h3>
+                                <button onclick="closePreview()"
+                                    class="text-gray-500 hover:text-gray-700 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <div id="previewContent" class="flex items-center justify-center min-h-96"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function openPreview(filePath, extension) {
+                            const modal = document.getElementById('previewModal');
+                            const content = document.getElementById('previewContent');
+                            content.innerHTML = '';
+
+                            if (extension === 'pdf') {
+                                content.innerHTML = `
+                                    <iframe src="${filePath}" class="w-full h-96 rounded-lg" frameborder="0"></iframe>
+                                `;
+                            } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
+                                content.innerHTML = `
+                                    <img src="${filePath}" alt="Vista previa" class="max-w-full max-h-96 rounded-lg shadow-lg">
+                                `;
+                            } else {
+                                content.innerHTML = `
+                                    <div class="text-center">
+                                        <p class="text-gray-600 mb-4">Archivo no soportado para vista previa</p>
+                                        <a href="${filePath}" target="_blank" class="text-[#C5A049] hover:text-[#D8B96E] font-medium">Descargar archivo</a>
+                                    </div>
+                                `;
+                            }
+
+                            modal.classList.remove('hidden');
+                        }
+
+                        function closePreview() {
+                            document.getElementById('previewModal').classList.add('hidden');
+                        }
+
+                        document.getElementById('previewModal')?.addEventListener('click', function(e) {
+                            if (e.target === this) closePreview();
+                        });
+                    </script>
 
                     <!-- Acciones -->
                     <div class="flex items-center justify-between pt-4 border-t border-gray-100">
