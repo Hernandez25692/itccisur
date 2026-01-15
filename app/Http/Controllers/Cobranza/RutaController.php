@@ -292,4 +292,59 @@ class RutaController extends Controller
 
         return back()->with('success', 'Gestores asignados correctamente.');
     }
+
+
+    public function misRutas()
+    {
+        $userId = Auth::id();
+
+        // Rutas donde el usuario aparece asignado en la pivote
+        $rutas = Ruta::query()
+            ->whereExists(function ($q) use ($userId) {
+                $q->select(DB::raw(1))
+                    ->from('cs_ruta_empresas')
+                    ->whereColumn('cs_ruta_empresas.ruta_id', 'cs_rutas.id')
+                    ->where('cs_ruta_empresas.gestor_id', $userId);
+            })
+            ->orderBy('fecha_ruta', 'desc')
+            ->paginate(12);
+
+        return view('cobranza_socios.rutas.mis', compact('rutas'));
+    }
+
+    public function miRuta(Ruta $ruta)
+    {
+        $userId = Auth::id();
+
+        // Traer solo empresas asignadas a este gestor dentro de esta ruta
+        $empresas = $ruta->empresas()
+            ->wherePivot('gestor_id', $userId)
+            ->orderBy('cs_ruta_empresas.orden')
+            ->get();
+
+        // Seguridad: si no tiene empresas asignadas, no debería ver nada
+        if ($empresas->isEmpty()) {
+            abort(403, 'No tienes empresas asignadas en esta ruta.');
+        }
+
+        return view('cobranza_socios.rutas.mi_ruta', compact('ruta', 'empresas'));
+    }
+
+    public function reasignarEmpresa(Request $request, Ruta $ruta)
+    {
+        $data = $request->validate([
+            'empresa_id' => 'required|exists:cs_empresas,id',
+            'gestor_id'  => 'nullable|exists:users,id',
+        ]);
+
+        DB::table('cs_ruta_empresas')
+            ->where('ruta_id', $ruta->id)
+            ->where('empresa_id', $data['empresa_id'])
+            ->update([
+                'gestor_id' => $data['gestor_id'],
+                'updated_at' => now(),
+            ]);
+
+        return back()->with('success', 'Empresa reasignada correctamente.');
+    }
 }

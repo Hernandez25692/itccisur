@@ -16,6 +16,7 @@
     use App\Http\Controllers\Cobranza\DashboardController;
     use App\Http\Controllers\Cobranza\RutaController;
 
+
     Route::get('/', function () {
         return view('welcome');
     });
@@ -285,6 +286,13 @@
 
             Route::post('/rutas/{ruta}/confirmar', [RutaController::class, 'confirmar'])
                 ->name('rutas.confirmar');
+
+            // Rutas del gestor
+            Route::get('/mis-rutas', [RutaController::class, 'misRutas'])
+                ->name('rutas.mis');
+
+            Route::get('/rutas/{ruta}/mi-ruta', [RutaController::class, 'miRuta'])
+                ->name('rutas.mi_ruta');
         });
 
     Route::post(
@@ -292,7 +300,10 @@
         [\App\Http\Controllers\Cobranza\RutaController::class, 'asignarGestores']
     )->name('cobranza.rutas.asignar');
 
-    
+    Route::post('/cobranza-socios/rutas/{ruta}/reasignar-empresa', [RutaController::class, 'reasignarEmpresa'])
+        ->name('cobranza.rutas.reasignar_empresa');
+
+
     Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
