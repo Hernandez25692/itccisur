@@ -239,7 +239,25 @@
 
 
                 </div>
+                <!-- Sección Cobranza -->
+                <div class="mb-6">
+                    <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
+                        :class="{ 'hidden': !sidebarOpen }">Cobranza</p>
 
+                    @role('admin_ti|cobranza')
+                        <a href="{{ route('cobranza.dashboard') }}"
+                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('cobranza.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
+                            :class="{ 'justify-center px-3': !sidebarOpen }"
+                            :title="!sidebarOpen ? 'Cobranza Socios' : ''">
+                            <i class="fas fa-money-bill-wave w-5 text-lg flex-shrink-0"></i>
+                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Cobranza Socios</span>
+                            @if (request()->routeIs('cobranza.*'))
+                                <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
+                                    :class="{ 'hidden': !sidebarOpen }"></span>
+                            @endif
+                        </a>
+                    @endrole
+                </div>
                 <!-- Sección Control -->
                 <div class="mb-6">
                     <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"

@@ -10,6 +10,11 @@
     use App\Http\Controllers\GorAntecedenteRegistralController;
     use App\Http\Controllers\ControlAudienciaController;
     use App\Http\Controllers\GorResumenController;
+    use App\Http\Controllers\Cobranza\EmpresaController;
+    use App\Http\Controllers\Cobranza\PagoController;
+    use App\Http\Controllers\Cobranza\CargoController;
+    use App\Http\Controllers\Cobranza\DashboardController;
+    use App\Http\Controllers\Cobranza\RutaController;
 
     Route::get('/', function () {
         return view('welcome');
@@ -233,6 +238,61 @@
         return view('dashboard');
     })->middleware(['auth', 'verified'])->name('dashboard');
 
+
+    Route::middleware(['auth', 'role:admin_ti|cobranza'])
+        ->prefix('cobranza-socios')
+        ->name('cobranza.')
+        ->group(function () {
+
+            Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+            Route::resource('/empresas', EmpresaController::class);
+
+            // Cargos (estado de cuenta)
+            Route::get('/cargos', [CargoController::class, 'index'])->name('cargos.index');
+            Route::post('/cargos/generar', [CargoController::class, 'generar'])->name('cargos.generar');
+            Route::post('/cargos/{cargo}/anular', [CargoController::class, 'anular'])->name('cargos.anular');
+
+            // Pagos
+            Route::get('/pagos', [PagoController::class, 'index'])->name('pagos.index');
+            Route::get('/pagos/crear/{empresa}', [PagoController::class, 'create'])->name('pagos.create');
+            Route::post('/pagos', [PagoController::class, 'store'])->name('pagos.store');
+
+            // Rutas de cobro (base)
+            Route::resource('/rutas', RutaController::class)->only(['index', 'create', 'store', 'show']);
+            Route::post('/rutas/{ruta}/ordenar', [RutaController::class, 'ordenarPorCercania'])->name('rutas.ordenar');
+            Route::post('/rutas/{ruta}/check/{empresa}', [RutaController::class, 'check'])->name('rutas.check');
+
+            // ============================
+            // CATÁLOGOS DE COBRANZA
+            // ============================
+
+            // Categorías
+            Route::resource('categorias', \App\Http\Controllers\Cobranza\CategoriaController::class)
+                ->only(['index', 'store', 'update']);
+
+            // Tipos de Empresa
+            Route::resource('tipos-empresa', \App\Http\Controllers\Cobranza\TipoEmpresaController::class)
+                ->only(['index', 'store', 'update']);
+
+            // Rangos de Capital
+            Route::resource('capital-rangos', \App\Http\Controllers\Cobranza\CapitalRangoController::class)
+                ->only(['index', 'store', 'update']);
+
+            // Rutas sugeridas por el sistema
+            Route::post('/rutas/sugerir', [RutaController::class, 'sugerir'])
+                ->name('rutas.sugerir');
+
+            Route::post('/rutas/{ruta}/confirmar', [RutaController::class, 'confirmar'])
+                ->name('rutas.confirmar');
+        });
+
+    Route::post(
+        'cobranza-socios/rutas/{ruta}/asignar-gestores',
+        [\App\Http\Controllers\Cobranza\RutaController::class, 'asignarGestores']
+    )->name('cobranza.rutas.asignar');
+
+    
     Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
