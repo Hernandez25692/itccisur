@@ -66,6 +66,27 @@
                                     {{ $e->pivot->gestor_nombre ?? '— SIN ASIGNAR —' }}
                                 </span>
                             </p>
+                            @role('admin_ti|gerencia')
+                                <div class="mt-2">
+                                    <label class="text-xs text-gray-500 block mb-1">Reasignar gestor (flash)</label>
+
+                                    <form method="POST" action="{{ route('cobranza.rutas.reasignar_empresa', $ruta) }}">
+                                        @csrf
+                                        <input type="hidden" name="empresa_id" value="{{ $e->id }}">
+
+                                        <select name="gestor_id" class="rounded-xl border-gray-300 text-sm w-full md:w-72"
+                                            onchange="this.form.submit()">
+                                            <option value="">— SIN ASIGNAR —</option>
+
+                                            @foreach ($gestores as $g)
+                                                <option value="{{ $g->id }}" @selected(($e->pivot->gestor_id ?? null) == $g->id)>
+                                                    {{ $g->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </form>
+                                </div>
+                            @endrole
 
                             <p class="text-sm text-gray-500">
                                 {{ $e->direccion }} · {{ $e->ciudad }} · {{ $e->barrio_colonia }}

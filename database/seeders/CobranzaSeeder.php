@@ -10,8 +10,7 @@ class CobranzaSeeder extends Seeder
 {
     public function run(): void
     {
-        // Rol cobranza (si ya existe, no revienta)
-        Role::firstOrCreate(['name' => 'cobranza']);
+        
 
         // Cortes fijos (5, 12, 20, 28)
         $cortes = [5, 12, 20, 28];

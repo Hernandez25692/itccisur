@@ -298,6 +298,9 @@
                 '/rutas/{ruta}/pdf',
                 [RutaController::class, 'pdf']
             )->name('rutas.pdf');
+
+            Route::post('/rutas/{ruta}/reasignar-empresa', [RutaController::class, 'reasignarEmpresa'])
+                ->name('rutas.reasignar_empresa');
         });
 
     Route::post(

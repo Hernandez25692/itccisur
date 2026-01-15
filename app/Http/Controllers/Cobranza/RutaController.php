@@ -13,19 +13,19 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class RutaController extends Controller
 {
     public function index()
-{
-    $rutas = Ruta::withCount('empresas')
-        ->with([
-            'empresas' => function ($q) {
-                $q->select('cs_empresas.id')
-                  ->withPivot('gestor_id');
-            }
-        ])
-        ->orderBy('fecha_ruta', 'desc')
-        ->paginate(12);
+    {
+        $rutas = Ruta::withCount('empresas')
+            ->with([
+                'empresas' => function ($q) {
+                    $q->select('cs_empresas.id')
+                        ->withPivot('gestor_id');
+                }
+            ])
+            ->orderBy('fecha_ruta', 'desc')
+            ->paginate(12);
 
-    return view('cobranza_socios.rutas.index', compact('rutas'));
-}
+        return view('cobranza_socios.rutas.index', compact('rutas'));
+    }
 
 
     public function create()
@@ -92,8 +92,11 @@ class RutaController extends Controller
         foreach ($ruta->empresas as $e) {
             $e->pivot->gestor_nombre = $e->pivot->gestor_id ? ($gestores[$e->pivot->gestor_id] ?? '—') : null;
         }
+        $gestores = \App\Models\User::role('cobranza')
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
-        return view('cobranza_socios.rutas.show', compact('ruta'));
+        return view('cobranza_socios.rutas.show', compact('ruta', 'gestores'));
     }
 
 
@@ -344,21 +347,45 @@ class RutaController extends Controller
 
     public function reasignarEmpresa(Request $request, Ruta $ruta)
     {
+        $user = auth()->user();
+
+        // 🔐 Solo admin/gerencia pueden reasignar
+        if (!$user->hasRole(['admin_ti', 'gerencia'])) {
+            abort(403, 'No autorizado.');
+        }
+
+        // Solo permitir cambios mientras NO esté en ruta/finalizada (regla sana)
+        if (!in_array($ruta->estado, ['sugerida', 'asignada'])) {
+            return back()->with('error', 'No se puede reasignar: la ruta ya está en proceso o finalizada.');
+        }
+
         $data = $request->validate([
             'empresa_id' => 'required|exists:cs_empresas,id',
             'gestor_id'  => 'nullable|exists:users,id',
         ]);
 
+        // Si viene un gestor_id, validar que sea rol cobranza
+        if (!empty($data['gestor_id'])) {
+            $esCobranza = \App\Models\User::where('id', $data['gestor_id'])
+                ->whereHas('roles', fn($q) => $q->where('name', 'cobranza'))
+                ->exists();
+
+            if (!$esCobranza) {
+                return back()->with('error', 'El usuario seleccionado no es un gestor de cobranza.');
+            }
+        }
+
         DB::table('cs_ruta_empresas')
             ->where('ruta_id', $ruta->id)
             ->where('empresa_id', $data['empresa_id'])
             ->update([
-                'gestor_id' => $data['gestor_id'],
+                'gestor_id' => $data['gestor_id'] ?: null,
                 'updated_at' => now(),
             ]);
 
-        return back()->with('success', 'Empresa reasignada correctamente.');
+        return back()->with('success', 'Reasignación aplicada.');
     }
+
 
     public function pdf(Ruta $ruta)
     {
