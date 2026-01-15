@@ -246,26 +246,29 @@
 
                     @role('admin_ti|cobranza')
                         <a href="{{ route('cobranza.dashboard') }}"
-                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('cobranza.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
+                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('cobranza.dashboard') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
                             :class="{ 'justify-center px-3': !sidebarOpen }"
-                            :title="!sidebarOpen ? 'Cobranza Socios' : ''">
-                            <i class="fas fa-money-bill-wave w-5 text-lg flex-shrink-0"></i>
-                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Cobranza
-                                Socios</span>
-                            @if (request()->routeIs('cobranza.*'))
+                            :title="!sidebarOpen ? 'Panel Cobranza' : ''">
+                            <i class="fas fa-chart-pie w-5 text-lg flex-shrink-0"></i>
+                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Panel Cobranza</span>
+                            @if (request()->routeIs('cobranza.dashboard'))
                                 <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
                                     :class="{ 'hidden': !sidebarOpen }"></span>
                             @endif
                         </a>
-                        <x-nav-link href="{{ route('cobranza.rutas.mis') }}" :active="request()->routeIs('cobranza.rutas.mis*')">
-                            🧭 Mis rutas
-                        </x-nav-link>
+
+                        <a href="{{ route('cobranza.rutas.mis') }}"
+                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('cobranza.rutas.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
+                            :class="{ 'justify-center px-3': !sidebarOpen }"
+                            :title="!sidebarOpen ? 'Mis Rutas' : ''">
+                            <i class="fas fa-map-marked-alt w-5 text-lg flex-shrink-0"></i>
+                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Mis Rutas</span>
+                            @if (request()->routeIs('cobranza.rutas.*'))
+                                <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
+                                    :class="{ 'hidden': !sidebarOpen }"></span>
+                            @endif
+                        </a>
                     @endrole
-
-                    
-                       
-                    
-
                 </div>
 
 

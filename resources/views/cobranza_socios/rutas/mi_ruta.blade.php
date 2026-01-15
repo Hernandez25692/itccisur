@@ -5,6 +5,10 @@
                 <h1 class="text-2xl font-bold text-gray-900">{{ $ruta->nombre }}</h1>
                 <p class="text-sm text-gray-500">{{ $ruta->fecha_ruta->format('d/m/Y') }} · Mi ruta</p>
             </div>
+            <a href="{{ route('cobranza.rutas.pdf', $ruta) }}"
+                class="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700">
+                📄 Descargar PDF
+            </a>
 
             <div class="flex gap-2 flex-wrap">
                 <a href="{{ route('cobranza.rutas.mis') }}" class="px-4 py-2 rounded-xl border hover:bg-gray-50">

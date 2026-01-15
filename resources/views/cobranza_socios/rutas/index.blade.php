@@ -80,11 +80,30 @@
                             </td>
 
                             <td class="px-4 py-3">
-                                {{ $ruta->gestor?->name ?? '—' }}
+                                @php
+                                    $gestorIds = $ruta->empresas->pluck('pivot.gestor_id')->filter()->unique();
+
+                                    $gestores = \App\Models\User::whereIn('id', $gestorIds)->pluck('name');
+                                @endphp
+
+                                @if ($ruta->estado === 'sugerida')
+                                    <span class="text-gray-400">— SIN ASIGNAR —</span>
+                                @elseif ($gestores->count() === 1)
+                                    {{ $gestores->first() }}
+                                @elseif ($gestores->count() > 1)
+                                    <span class="text-blue-600 font-semibold">
+                                        {{ $gestores->join(', ') }}
+                                    </span>
+                                @else
+                                    —
+                                @endif
                             </td>
 
+
+
                             <td class="px-4 py-3 text-center">
-                                {{ $ruta->total_empresas }}
+                                {{ $ruta->empresas_count }}
+
                             </td>
 
                             <td class="px-4 py-3 text-right space-x-2">

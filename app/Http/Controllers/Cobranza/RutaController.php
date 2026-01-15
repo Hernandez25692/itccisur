@@ -7,14 +7,26 @@ use App\Models\Cobranza\{Ruta, Empresa};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class RutaController extends Controller
 {
     public function index()
-    {
-        $rutas = Ruta::query()->orderBy('fecha_ruta', 'desc')->paginate(12);
-        return view('cobranza_socios.rutas.index', compact('rutas'));
-    }
+{
+    $rutas = Ruta::withCount('empresas')
+        ->with([
+            'empresas' => function ($q) {
+                $q->select('cs_empresas.id')
+                  ->withPivot('gestor_id');
+            }
+        ])
+        ->orderBy('fecha_ruta', 'desc')
+        ->paginate(12);
+
+    return view('cobranza_socios.rutas.index', compact('rutas'));
+}
+
 
     public function create()
     {
@@ -346,5 +358,49 @@ class RutaController extends Controller
             ]);
 
         return back()->with('success', 'Empresa reasignada correctamente.');
+    }
+
+    public function pdf(Ruta $ruta)
+    {
+        $user = auth()->user();
+
+        // Cargar empresas con pivote
+        $ruta->load(['empresas' => function ($q) {
+            $q->orderBy('cs_ruta_empresas.orden')
+                ->withPivot('gestor_id', 'estado_visita', 'nota_visita');
+        }]);
+
+        // 🔐 SEGURIDAD CORRECTA
+        if ($user->hasRole(['admin_ti', 'gerencia'])) {
+            // acceso total
+        } elseif ($user->hasRole('cobranza')) {
+
+            // Verificar que el gestor tenga AL MENOS UNA empresa en la ruta
+            $tieneEmpresas = $ruta->empresas->contains(
+                fn($e) => (int) $e->pivot->gestor_id === (int) $user->id
+            );
+
+            if (!$tieneEmpresas) {
+                abort(403, 'No tienes empresas asignadas en esta ruta.');
+            }
+
+            // 👉 Opcional (recomendado):
+            // Filtrar el PDF solo con SUS empresas
+            $ruta->setRelation(
+                'empresas',
+                $ruta->empresas->filter(
+                    fn($e) => (int) $e->pivot->gestor_id === (int) $user->id
+                )
+            );
+        } else {
+            abort(403);
+        }
+
+        $pdf = Pdf::loadView('cobranza_socios.rutas.pdf', compact('ruta'))
+            ->setPaper('A4', 'portrait');
+
+        return $pdf->download(
+            'Ruta_' . $ruta->fecha_ruta->format('Ymd') . '_Gestor_' . $user->id . '.pdf'
+        );
     }
 }

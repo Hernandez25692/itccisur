@@ -293,6 +293,11 @@
 
             Route::get('/rutas/{ruta}/mi-ruta', [RutaController::class, 'miRuta'])
                 ->name('rutas.mi_ruta');
+
+            Route::get(
+                '/rutas/{ruta}/pdf',
+                [RutaController::class, 'pdf']
+            )->name('rutas.pdf');
         });
 
     Route::post(
@@ -309,5 +314,8 @@
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
+
+
+
 
     require __DIR__ . '/auth.php';
