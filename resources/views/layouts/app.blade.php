@@ -651,6 +651,7 @@
                 <div class="text-xs sm:text-sm text-gray-500">
                     &copy; {{ date('Y') }} CCISUR-TI. Todos los derechos reservados.
                     <span class="hidden sm:inline">| Sistema de Gestión Tecnológica</span>
+                    <span class="hidden sm:inline">| Desarrollado por José Hernandez</span>
                 </div>
             </footer>
         </div>

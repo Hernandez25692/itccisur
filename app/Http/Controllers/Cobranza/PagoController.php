@@ -57,7 +57,9 @@ class PagoController extends Controller
                 'metodo' => $data['metodo'],
                 'referencia' => $data['referencia'] ?? null,
                 'comentario' => $data['comentario'] ?? null,
-                'gestor_id' => $data['gestor_id'] ?? null,
+                'gestor_id' => $data['gestor_id']
+                    ?? (Auth::user()->hasRole('cobranza') ? Auth::id() : null),
+
                 'created_by' => Auth::id(),
             ]);
 
@@ -92,7 +94,7 @@ class PagoController extends Controller
             // recalcular empresa
             $calc->recalcularEmpresa($empresa);
 
-            return redirect()->route('cobranza.empresas.show', $empresa)->with('success', 'Pago registrado y aplicado correctamente.');
+            return back()->with('success', 'Pago registrado correctamente.');
         });
     }
 }

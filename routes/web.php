@@ -301,6 +301,11 @@
 
             Route::post('/rutas/{ruta}/reasignar-empresa', [RutaController::class, 'reasignarEmpresa'])
                 ->name('rutas.reasignar_empresa');
+
+            Route::post(
+                '/rutas/{ruta}/agregar-empresa',
+                [RutaController::class, 'agregarEmpresa']
+            )->name('rutas.agregar_empresa');
         });
 
     Route::post(

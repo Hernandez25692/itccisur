@@ -95,8 +95,20 @@ class RutaController extends Controller
         $gestores = \App\Models\User::role('cobranza')
             ->orderBy('name')
             ->get(['id', 'name']);
+        $empresasDisponibles = Empresa::where('estado_empresa', 'activo')
+            ->whereNotIn('id', function ($q) use ($ruta) {
+                $q->select('empresa_id')
+                    ->from('cs_ruta_empresas')
+                    ->where('ruta_id', $ruta->id);
+            })
+            ->orderBy('nombre_empresa')
+            ->get();
 
-        return view('cobranza_socios.rutas.show', compact('ruta', 'gestores'));
+        return view('cobranza_socios.rutas.show', compact(
+            'ruta',
+            'gestores',
+            'empresasDisponibles'
+        ));
     }
 
 
@@ -334,8 +346,15 @@ class RutaController extends Controller
         // Traer solo empresas asignadas a este gestor dentro de esta ruta
         $empresas = $ruta->empresas()
             ->wherePivot('gestor_id', $userId)
+            ->withCount([
+                'pagos as pagos_hoy_count' => function ($q) use ($userId) {
+                    $q->whereDate('fecha_pago', now()->toDateString())
+                        ->where('gestor_id', $userId);
+                }
+            ])
             ->orderBy('cs_ruta_empresas.orden')
             ->get();
+
 
         // Seguridad: si no tiene empresas asignadas, no debería ver nada
         if ($empresas->isEmpty()) {
@@ -384,6 +403,50 @@ class RutaController extends Controller
             ]);
 
         return back()->with('success', 'Reasignación aplicada.');
+    }
+    public function agregarEmpresa(Request $request, Ruta $ruta)
+    {
+        $user = auth()->user();
+
+        if (!$user->hasRole(['admin_ti', 'gerencia'])) {
+            abort(403);
+        }
+
+        if (!in_array($ruta->estado, ['sugerida', 'asignada'])) {
+            return back()->with('error', 'No se pueden agregar empresas a esta ruta.');
+        }
+
+        $data = $request->validate([
+            'empresa_id' => 'required|exists:cs_empresas,id',
+            'gestor_id'  => 'nullable|exists:users,id',
+        ]);
+
+        // Evitar duplicados
+        $yaExiste = DB::table('cs_ruta_empresas')
+            ->where('ruta_id', $ruta->id)
+            ->where('empresa_id', $data['empresa_id'])
+            ->exists();
+
+        if ($yaExiste) {
+            return back()->with('error', 'La empresa ya está en esta ruta.');
+        }
+
+        // Orden al final
+        $orden = DB::table('cs_ruta_empresas')
+            ->where('ruta_id', $ruta->id)
+            ->max('orden') + 1;
+
+        DB::table('cs_ruta_empresas')->insert([
+            'ruta_id'    => $ruta->id,
+            'empresa_id' => $data['empresa_id'],
+            'gestor_id'  => $data['gestor_id'],
+            'orden'      => $orden,
+            'estado_visita' => 'pendiente',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('success', 'Empresa agregada a la ruta.');
     }
 
 

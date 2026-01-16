@@ -31,6 +31,12 @@
                         Ordenar por cercanía
                     </button>
                 </form>
+                @role('admin_ti|gerencia')
+                    <button onclick="document.getElementById('modalAgregarEmpresa').showModal()"
+                        class="px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
+                        ➕ Agregar empresa a la ruta
+                    </button>
+                @endrole
 
                 <a href="{{ route('cobranza.rutas.index') }}" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
                     Volver
@@ -55,38 +61,42 @@
 
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                         <div>
+
+                            {{-- ✅ AQUÍ SE VE A QUIÉN LE TOCA --}}
                             <p class="font-bold text-gray-900">
                                 {{ $e->pivot->orden }}. {{ $e->nombre_empresa }}
                             </p>
 
-                            {{-- ✅ AQUÍ SE VE A QUIÉN LE TOCA --}}
                             <p class="text-sm text-gray-700 mt-1">
                                 Gestor asignado:
                                 <span class="font-semibold">
                                     {{ $e->pivot->gestor_nombre ?? '— SIN ASIGNAR —' }}
                                 </span>
                             </p>
+
                             @role('admin_ti|gerencia')
-                                <div class="mt-2">
-                                    <label class="text-xs text-gray-500 block mb-1">Reasignar gestor (flash)</label>
+                                <form method="POST" action="{{ route('cobranza.rutas.reasignar_empresa', $ruta) }}"
+                                    class="mt-2 inline-block">
+                                    @csrf
+                                    <input type="hidden" name="empresa_id" value="{{ $e->id }}">
 
-                                    <form method="POST" action="{{ route('cobranza.rutas.reasignar_empresa', $ruta) }}">
-                                        @csrf
-                                        <input type="hidden" name="empresa_id" value="{{ $e->id }}">
+                                    <label class="text-xs text-gray-500 block mb-1">
+                                        Reasignar gestor (flash)
+                                    </label>
 
-                                        <select name="gestor_id" class="rounded-xl border-gray-300 text-sm w-full md:w-72"
-                                            onchange="this.form.submit()">
-                                            <option value="">— SIN ASIGNAR —</option>
-
-                                            @foreach ($gestores as $g)
-                                                <option value="{{ $g->id }}" @selected(($e->pivot->gestor_id ?? null) == $g->id)>
-                                                    {{ $g->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </form>
-                                </div>
+                                    <select name="gestor_id" onchange="this.form.submit()"
+                                        class="rounded-xl border-gray-300 text-sm px-3 py-1">
+                                        <option value="">— SIN ASIGNAR —</option>
+                                        @foreach ($gestores as $g)
+                                            <option value="{{ $g->id }}" @selected($e->pivot->gestor_id == $g->id)>
+                                                {{ $g->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </form>
                             @endrole
+
+
 
                             <p class="text-sm text-gray-500">
                                 {{ $e->direccion }} · {{ $e->ciudad }} · {{ $e->barrio_colonia }}
@@ -141,6 +151,55 @@
                     Esta ruta no tiene empresas asignadas.
                 </div>
             @endforelse
+            @role('admin_ti|gerencia')
+                <dialog id="modalAgregarEmpresa" class="rounded-2xl p-0 w-full max-w-lg">
+                    <form method="POST" action="{{ route('cobranza.rutas.agregar_empresa', $ruta) }}"
+                        class="bg-white p-6 space-y-4">
+                        @csrf
+
+                        <h2 class="text-lg font-bold">Agregar empresa a la ruta</h2>
+
+                        {{-- Empresa --}}
+                        <div>
+                            <label class="text-sm text-gray-600">Empresa</label>
+                            <select name="empresa_id" class="w-full rounded-xl border-gray-300" required>
+                                <option value="">Seleccione una empresa</option>
+                                @foreach ($empresasDisponibles as $emp)
+                                    <option value="{{ $emp->id }}">
+                                        {{ $emp->nombre_empresa }}
+                                        @if ($emp->estatus_cobranza !== 'en_mora')
+                                            (NO mora)
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Gestor --}}
+                        <div>
+                            <label class="text-sm text-gray-600">Asignar a gestor</label>
+                            <select name="gestor_id" class="w-full rounded-xl border-gray-300">
+                                <option value="">— SIN ASIGNAR —</option>
+                                @foreach ($gestores as $g)
+                                    <option value="{{ $g->id }}">{{ $g->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-4">
+                            <button type="button" onclick="document.getElementById('modalAgregarEmpresa').close()"
+                                class="px-4 py-2 rounded-xl border">
+                                Cancelar
+                            </button>
+
+                            <button class="px-4 py-2 rounded-xl bg-blue-600 text-white">
+                                Agregar
+                            </button>
+                        </div>
+                    </form>
+                </dialog>
+            @endrole
+
         </div>
 
     </div>
