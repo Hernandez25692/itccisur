@@ -1,32 +1,80 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 space-y-6">
 
-        {{-- HEADER --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        {{-- ================= HEADER ================= --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Rutas de Cobranza</h1>
                 <p class="text-sm text-gray-500">
-                    Rutas manuales y sugeridas por el sistema.
+                    Planificación, ejecución y control de rutas.
                 </p>
             </div>
-
-            {{-- GENERAR RUTA SUGERIDA --}}
-            <form method="POST" action="{{ route('cobranza.rutas.sugerir') }}"
-                class="flex items-center gap-2 bg-white border rounded-xl p-2">
-                @csrf
-
-                <input type="date" name="fecha_ruta" class="rounded-lg border-gray-300 text-sm" required>
-
-                <input type="number" name="ventana_dias_cobro" class="rounded-lg border-gray-300 text-sm w-24"
-                    value="7" min="1" max="30" title="Días próximos a cobro">
-
-                <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-                    + Sugerir ruta
-                </button>
-            </form>
         </div>
 
-        {{-- MENSAJES --}}
+        {{-- ================= GENERADOR DE RUTA ================= --}}
+        @role('admin_ti|gerencia|cobranza')
+            <form method="POST" action="{{ route('cobranza.rutas.sugerir') }}"
+                class="bg-white border rounded-2xl p-5 grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                @csrf
+
+                <div>
+                    <label class="text-xs font-semibold text-gray-600">Fecha ruta</label>
+                    <input type="date" name="fecha_ruta" class="w-full rounded-xl border-gray-300" required>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-gray-600">Ventana (días)</label>
+                    <input type="number" name="ventana_dias_cobro" value="7" min="1" max="30"
+                        class="w-full rounded-xl border-gray-300">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600">
+                        Máx. empresas a visitar
+                    </label>
+                    <input type="number" name="max_empresas" value="10" min="4" max="100"
+                        class="w-full rounded-xl border-gray-300" required>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600">
+                        Agrupar por
+                    </label>
+                    <select name="criterio_agrupacion" class="w-full rounded-xl border-gray-300">
+                        <option value="cercania" selected>
+                            Cercanía geográfica (GPS)
+                        </option>
+                        <option value="zona">
+                            Zona / Sector
+                        </option>
+                        <option value="municipio">
+                            Municipio
+                        </option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="text-xs font-semibold text-gray-600">
+                        Punto de inicio de la ruta
+                    </label>
+                    <select name="punto_base" class="w-full rounded-xl border-gray-300">
+                        <option value="oficina">
+                            Oficina CCISUR
+                        </option>
+                        <option value="primer_cliente">
+                            Primer cliente asignado
+                        </option>
+                    </select>
+                </div>
+
+                
+
+                <div class="md:col-span-2 flex justify-end">
+                    <button class="px-6 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">
+                        + Generar ruta sugerida
+                    </button>
+                </div>
+            </form>
+        @endrole
+
+        {{-- ================= MENSAJES ================= --}}
         @if (session('success'))
             <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">
                 {{ session('success') }}
@@ -39,20 +87,21 @@
             </div>
         @endif
 
-        {{-- LISTADO --}}
-        <div class="bg-white rounded-2xl border overflow-hidden">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-gray-700">
+        {{-- ================= TABLA DE RUTAS ================= --}}
+        <div class="bg-white rounded-2xl border overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                     <tr>
-                        <th class="px-4 py-3 text-left">Fecha</th>
-                        <th class="px-4 py-3 text-left">Nombre</th>
-                        <th class="px-4 py-3 text-left">Estado</th>
-                        <th class="px-4 py-3 text-left">Gestor</th>
-                        <th class="px-4 py-3 text-center">Empresas</th>
-                        <th class="px-4 py-3 text-right">Acciones</th>
+                        <th class="px-3 py-2 text-left">Fecha</th>
+                        <th>Ruta</th>
+                        <th>Estado</th>
+                        <th>Gestores</th>
+                        <th class="text-center">Empresas</th>
+                        <th class="text-right">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+
+                <tbody class="divide-y">
                     @forelse ($rutas as $ruta)
                         @php
                             $badge = match ($ruta->estado) {
@@ -62,36 +111,38 @@
                                 'finalizada' => 'bg-gray-100 text-gray-700 border-gray-200',
                                 default => 'bg-gray-50 text-gray-600 border-gray-200',
                             };
+
+                            $gestorIds = $ruta->empresas->pluck('pivot.gestor_id')->filter()->unique();
+                            $gestores = \App\Models\User::whereIn('id', $gestorIds)->pluck('name');
                         @endphp
 
-                        <tr class="border-t hover:bg-gray-50">
-                            <td class="px-4 py-3">
-                                {{ \Carbon\Carbon::parse($ruta->fecha_ruta)->format('d/m/Y') }}
+                        <tr class="hover:bg-gray-50">
+
+                            {{-- Fecha --}}
+                            <td class="px-3 py-2">
+                                {{ $ruta->fecha_ruta->format('d/m/Y') }}
                             </td>
 
-                            <td class="px-4 py-3 font-semibold">
+                            {{-- Nombre --}}
+                            <td class="font-semibold text-gray-900">
                                 {{ $ruta->nombre ?? '—' }}
                             </td>
 
-                            <td class="px-4 py-3">
+                            {{-- Estado --}}
+                            <td>
                                 <span class="px-3 py-1 text-xs rounded-full border {{ $badge }}">
                                     {{ strtoupper(str_replace('_', ' ', $ruta->estado)) }}
                                 </span>
                             </td>
 
-                            <td class="px-4 py-3">
-                                @php
-                                    $gestorIds = $ruta->empresas->pluck('pivot.gestor_id')->filter()->unique();
-
-                                    $gestores = \App\Models\User::whereIn('id', $gestorIds)->pluck('name');
-                                @endphp
-
+                            {{-- Gestores --}}
+                            <td>
                                 @if ($ruta->estado === 'sugerida')
                                     <span class="text-gray-400">— SIN ASIGNAR —</span>
                                 @elseif ($gestores->count() === 1)
                                     {{ $gestores->first() }}
                                 @elseif ($gestores->count() > 1)
-                                    <span class="text-blue-600 font-semibold">
+                                    <span class="text-blue-700 font-semibold">
                                         {{ $gestores->join(', ') }}
                                     </span>
                                 @else
@@ -99,14 +150,13 @@
                                 @endif
                             </td>
 
-
-
-                            <td class="px-4 py-3 text-center">
+                            {{-- Empresas --}}
+                            <td class="text-center font-semibold">
                                 {{ $ruta->empresas_count }}
-
                             </td>
 
-                            <td class="px-4 py-3 text-right space-x-2">
+                            {{-- Acciones --}}
+                            <td class="text-right space-x-3">
                                 <a href="{{ route('cobranza.rutas.show', $ruta) }}"
                                     class="text-blue-600 hover:underline">
                                     Ver
@@ -123,9 +173,10 @@
                                 @endif
                             </td>
                         </tr>
+
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-gray-500">
+                            <td colspan="6" class="py-6 text-center text-gray-400">
                                 No hay rutas registradas.
                             </td>
                         </tr>
@@ -134,7 +185,7 @@
             </table>
         </div>
 
-        {{-- PAGINACIÓN --}}
+        {{-- ================= PAGINACIÓN ================= --}}
         <div>
             {{ $rutas->links() }}
         </div>

@@ -197,6 +197,10 @@ class RutaController extends Controller
             'ventana_dias_cobro' => 'required|integer|min:1|max:30',
             'solo_con_coordenadas' => 'boolean',
             'incluir_en_mora' => 'boolean',
+            'max_empresas' => 'required|integer|min:4|max:100',
+            'criterio_agrupacion' => 'required|in:cercania,zona,municipio',
+            'punto_base' => 'required|in:oficina,primer_cliente',
+
         ]);
 
         return DB::transaction(function () use ($data) {
@@ -232,8 +236,26 @@ class RutaController extends Controller
                             ->orWhereBetween('proxima_fecha_cobro', [$desde, $hasta]);
                     });
                 })
-                ->orderBy('nombre_empresa')
-                ->get();
+                ->get()
+                ->filter(fn($e) => $e->latitud && $e->longitud);
+
+            $max = (int) $data['max_empresas'];
+
+            // punto base (oficina CCISUR o primera empresa)
+            if ($data['punto_base'] === 'oficina') {
+                $baseLat = config('app.ccisur_lat'); // define esto en config/app.php
+                $baseLng = config('app.ccisur_lng');
+            } else {
+                $primera = $empresas->first();
+                $baseLat = $primera->latitud;
+                $baseLng = $primera->longitud;
+            }
+
+            // ordenar por distancia al punto base
+            $empresas = $empresas->sortBy(
+                fn($e) =>
+                $this->dist($baseLat, $baseLng, $e->latitud, $e->longitud)
+            )->take($max);
 
             // 4️⃣ Insertar empresas en la ruta
             $orden = 1;
@@ -296,18 +318,37 @@ class RutaController extends Controller
         $i = 0;
 
         DB::transaction(function () use ($ruta, $empresas, $gestores, $totalGestores, &$i) {
+            $empresas = $empresas->filter(fn($e) => $e->latitud && $e->longitud)->values();
+
             foreach ($empresas as $empresa) {
-                $gestor = $gestores[$i % $totalGestores];
+                $porGestor = ceil($empresas->count() / $gestores->count());
 
-                DB::table('cs_ruta_empresas')
-                    ->where('ruta_id', $ruta->id)
-                    ->where('empresa_id', $empresa->id)
-                    ->update([
-                        'gestor_id' => $gestor->id,
-                        'updated_at' => now(),
+                $chunks = $empresas->chunk($porGestor);
+
+
+                DB::transaction(function () use ($ruta, $chunks, $gestores) {
+
+                    foreach ($chunks as $i => $grupo) {
+                        $gestor = $gestores[$i] ?? null;
+                        if (!$gestor) continue;
+
+                        foreach ($grupo as $empresa) {
+                            DB::table('cs_ruta_empresas')
+                                ->where('ruta_id', $ruta->id)
+                                ->where('empresa_id', $empresa->id)
+                                ->update([
+                                    'gestor_id' => $gestor->id,
+                                    'updated_at' => now(),
+                                ]);
+                        }
+                    }
+
+                    $ruta->update([
+                        'estado' => 'asignada',
+                        'confirmado_por' => Auth::id(),
+                        'confirmado_en' => now(),
                     ]);
-
-                $i++;
+                });
             }
 
             $ruta->update([
