@@ -23,7 +23,52 @@ class CobranzaSeeder extends Seeder
         }
 
         // Catálogos básicos (opcionales)
-        DB::table('cs_tipos_empresa')->updateOrInsert(['nombre' => 'Jurídica'], ['activo' => true, 'created_at' => now(), 'updated_at' => now()]);
-        DB::table('cs_tipos_empresa')->updateOrInsert(['nombre' => 'Natural'], ['activo' => true, 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('cs_tipos_empresa')->updateOrInsert(['nombre' => 'Comerciante Individual'], ['activo' => true, 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('cs_tipos_empresa')->updateOrInsert(['nombre' => 'Sociedad'], ['activo' => true, 'created_at' => now(), 'updated_at' => now()]);
+
+        // Categorías de rubros
+        $categorias = [
+            ['nombre' => 'ACUACULTURA', 'descripcion' => null],
+            ['nombre' => 'ADUANAS', 'descripcion' => null],
+            ['nombre' => 'AGRICULTURA', 'descripcion' => null],
+            ['nombre' => 'ASESORIA/ LEGAL', 'descripcion' => null],
+            ['nombre' => 'AVICULTURA', 'descripcion' => null],
+            ['nombre' => 'COMERCIO Y VENTAS', 'descripcion' => null],
+            ['nombre' => 'COMUNICACIÓN Y PERIODISMO', 'descripcion' => null],
+            ['nombre' => 'CONSTRUCCION', 'descripcion' => null],
+            ['nombre' => 'CONTABILIDAD', 'descripcion' => null],
+            ['nombre' => 'DEPORTES', 'descripcion' => null],
+            ['nombre' => 'EDUCACION', 'descripcion' => null],
+            ['nombre' => 'ELECTRONICA', 'descripcion' => null],
+            ['nombre' => 'EXTRACCION DE MINERALES', 'descripcion' => null],
+            ['nombre' => 'FERRETERIA', 'descripcion' => null],
+            ['nombre' => 'FINANCIERA', 'descripcion' => null],
+            ['nombre' => 'GANADERIA', 'descripcion' => null],
+            ['nombre' => 'HOSTELERIA Y TURISMO', 'descripcion' => null],
+            ['nombre' => 'INDUSTRIAL', 'descripcion' => null],
+            ['nombre' => 'INFORMATICA', 'descripcion' => null],
+            ['nombre' => 'INMOBILIARIA', 'descripcion' => null],
+            ['nombre' => 'MECANICA', 'descripcion' => null],
+            ['nombre' => 'MEDICINA Y SALUD', 'descripcion' => null],
+            ['nombre' => 'RECURSOS HUMANOS', 'descripcion' => null],
+            ['nombre' => 'RESTAURANTE', 'descripcion' => null],
+            ['nombre' => 'SEGURIDAD', 'descripcion' => null],
+            ['nombre' => 'SERVICIOS VARIOS', 'descripcion' => null],
+            ['nombre' => 'TRANSPORTE', 'descripcion' => null],
+            ['nombre' => 'ENERGETICA', 'descripcion' => null],
+            ['nombre' => 'FUNERARIA', 'descripcion' => null],
+            ['nombre' => 'REPOSTERIA', 'descripcion' => null],
+            ['nombre' => 'GIMNASIO', 'descripcion' => null],
+            ['nombre' => 'CONSULTORIAS', 'descripcion' => null],
+            ['nombre' => 'MINERIA', 'descripcion' => null],
+            ['nombre' => 'PRODUCTOS LACTEOS', 'descripcion' => null],
+        ];
+
+        foreach ($categorias as $categoria) {
+            DB::table('cs_categorias')->updateOrInsert(
+                ['nombre' => $categoria['nombre']],
+                ['descripcion' => $categoria['descripcion'], 'activo' => true, 'created_at' => now(), 'updated_at' => now()]
+            );
+        }
     }
 }

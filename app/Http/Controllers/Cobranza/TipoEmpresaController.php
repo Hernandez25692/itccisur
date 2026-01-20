@@ -31,10 +31,9 @@ class TipoEmpresaController extends Controller
 
     public function update(Request $request, TipoEmpresa $tipos_empresa)
     {
-        $tipos_empresa->update([
-            'activo' => $request->activo,
-        ]);
+        $tipos_empresa->activo = !$tipos_empresa->activo;
+        $tipos_empresa->save();
 
-        return back()->with('success', 'Estado actualizado');
+        return back()->with('success', 'Estado actualizado correctamente');
     }
 }

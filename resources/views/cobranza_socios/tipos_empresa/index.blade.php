@@ -40,12 +40,13 @@
                             <td class="p-3 text-center">{{ $t->activo ? 'Activo' : 'Inactivo' }}</td>
                             <td class="p-3 text-right">
                                 <form method="POST" action="{{ route('cobranza.tipos-empresa.update', $t) }}">
-                                    @csrf @method('PUT')
-                                    <input type="hidden" name="activo" value="{{ !$t->activo }}">
+                                    @csrf
+                                    @method('PUT')
                                     <button class="px-3 py-1 rounded-xl border hover:bg-gray-50">
                                         {{ $t->activo ? 'Desactivar' : 'Activar' }}
                                     </button>
                                 </form>
+
                             </td>
                         </tr>
                     @endforeach

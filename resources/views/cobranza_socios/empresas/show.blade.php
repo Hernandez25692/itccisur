@@ -1,114 +1,207 @@
 <x-app-layout>
-    <div class="max-w-7xl mx-auto py-8 px-4 space-y-6">
+    <div class="max-w-7xl mx-auto py-8 px-4 space-y-8">
 
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        {{-- ================= HEADER ================= --}}
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ $empresa->nombre_empresa }}</h1>
-                <p class="text-sm text-gray-500">RTN: {{ $empresa->rtn_empresa }} · Corte
-                    {{ $empresa->corte?->dia_corte }} · {{ strtoupper($empresa->tipo_pago) }}</p>
+                <h1 class="text-2xl font-bold text-gray-900">
+                    {{ $empresa->nombre_empresa }}
+                </h1>
+                <p class="text-sm text-gray-500 mt-1">
+                    RTN: {{ $empresa->rtn_empresa }} ·
+                    {{ $empresa->tipoEmpresa?->nombre ?? '—' }} ·
+                    {{ strtoupper($empresa->tipo_pago) }}
+                </p>
+                <p class="text-xs text-gray-400">
+                    Categoría: {{ $empresa->categoria?->nombre ?? '—' }} ·
+                    Rubro: {{ $empresa->rubro_actividad ?? '—' }}
+                </p>
             </div>
+
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('cobranza.empresas.edit', $empresa) }}"
-                    class="px-4 py-2 rounded-xl border hover:bg-gray-50">Editar</a>
+                    class="px-4 py-2 rounded-xl border hover:bg-gray-50">
+                    Editar
+                </a>
+
                 <a href="{{ route('cobranza.pagos.create', $empresa) }}"
-                    class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">Registrar pago</a>
-                <a href="{{ route('cobranza.empresas.index') }}"
-                    class="px-4 py-2 rounded-xl border hover:bg-gray-50">Volver</a>
+                    class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">
+                    Registrar pago
+                </a>
+
+                <a href="{{ route('cobranza.empresas.index') }}" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
+                    Volver
+                </a>
             </div>
         </div>
 
+        {{-- ================= ALERTAS ================= --}}
         @if (session('success'))
-            <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">{{ session('success') }}
+            <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">
+                {{ session('success') }}
             </div>
         @endif
         @if (session('error'))
-            <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800">{{ session('error') }}</div>
+            <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800">
+                {{ session('error') }}
+            </div>
         @endif
 
+        {{-- ================= BLOQUE COBRANZA ================= --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white rounded-2xl border p-5">
-                <p class="text-sm text-gray-500">Estatus</p>
+                <p class="text-sm text-gray-500">Estatus de cobranza</p>
                 <p
-                    class="text-xl font-bold {{ $empresa->estatus_cobranza === 'en_mora' ? 'text-red-700' : 'text-green-700' }}">
+                    class="text-xl font-bold mt-1
+                    {{ $empresa->estatus_cobranza === 'en_mora' ? 'text-red-700' : 'text-green-700' }}">
                     {{ $empresa->estatus_cobranza === 'en_mora' ? 'EN MORA' : 'AL DÍA' }}
                 </p>
-                <p class="text-sm text-gray-500 mt-2">Próximo cobro: <span
-                        class="font-semibold text-gray-900">{{ $empresa->proxima_fecha_cobro?->format('d/m/Y') ?? '—' }}</span>
+                <p class="text-sm text-gray-500 mt-2">
+                    Próximo cobro:
+                    <span class="font-semibold text-gray-900">
+                        {{ $empresa->proxima_fecha_cobro?->format('d/m/Y') ?? '—' }}
+                    </span>
                 </p>
             </div>
+
             <div class="bg-white rounded-2xl border p-5">
-                <p class="text-sm text-gray-500">Mora</p>
-                <p class="text-2xl font-bold text-gray-900">L. {{ number_format($empresa->valor_mora, 2) }}</p>
-                <p class="text-sm text-gray-500 mt-2">Mora ({{ strtoupper($empresa->tipo_pago) }}):  <span
-                        class="font-semibold text-gray-900">{{ $empresa->meses_mora }}</span></p>
+                <p class="text-sm text-gray-500">Mora acumulada</p>
+                <p class="text-2xl font-bold text-gray-900 mt-1">
+                    L. {{ number_format($empresa->valor_mora, 2) }}
+                </p>
+                <p class="text-sm text-gray-500 mt-2">
+                    Períodos vencidos
+                    <span class="text-xs text-gray-400">
+                        ({{ strtoupper($empresa->tipo_pago) }})
+                    </span>:
+                    <span class="font-semibold text-gray-900">
+                        {{ $empresa->meses_mora }}
+                    </span>
+                </p>
+
             </div>
+
             <div class="bg-white rounded-2xl border p-5">
                 <p class="text-sm text-gray-500">Observación</p>
                 <p
-                    class="text-xl font-bold {{ $empresa->observacion_cobro === 'incobrable' ? 'text-amber-700' : 'text-gray-900' }}">
+                    class="text-xl font-bold mt-1
+                    {{ $empresa->observacion_cobro === 'incobrable' ? 'text-amber-700' : 'text-gray-900' }}">
                     {{ strtoupper($empresa->observacion_cobro) }}
                 </p>
-                <p class="text-sm text-gray-500 mt-2">Cuota aplicada: <span class="font-semibold text-gray-900">L.
-                        {{ number_format($empresa->cuota_aplicada, 2) }}</span></p>
+                <p class="text-sm text-gray-500 mt-2">
+                    Cuota aplicada:
+                    <span class="font-semibold text-gray-900">
+                        L. {{ number_format($empresa->cuota_aplicada, 2) }}
+                    </span>
+                </p>
             </div>
         </div>
 
+        {{-- ================= INFORMACIÓN ADMINISTRATIVA ================= --}}
         <div class="bg-white rounded-2xl border p-6">
-            <h2 class="font-bold text-gray-900 mb-4">Ubicación</h2>
-            <p class="text-sm text-gray-700">{{ $empresa->direccion ?? '—' }}</p>
-            <p class="text-sm text-gray-500">{{ $empresa->ciudad ?? '—' }} · {{ $empresa->barrio_colonia ?? '—' }}</p>
+            <h2 class="font-bold text-gray-900 mb-4">Información administrativa</h2>
 
-            @if ($empresa->latitud && $empresa->longitud)
-                <div class="mt-3">
-                    <a target="_blank" class="text-blue-600 hover:underline"
-                        href="https://www.google.com/maps?q={{ $empresa->latitud }},{{ $empresa->longitud }}">
-                        Abrir en Google Maps ({{ $empresa->latitud }}, {{ $empresa->longitud }})
-                    </a>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                    <p class="text-gray-500">Capital declarado</p>
+                    <p class="font-semibold text-gray-900">
+                        L. {{ number_format($empresa->capital_declarado ?? 0, 2) }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Cuota base</p>
+                    <p class="font-semibold text-gray-900">
+                        L. {{ number_format($empresa->cuota_base, 2) }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Inscripción base</p>
+                    <p class="font-semibold text-gray-900">
+                        L. {{ number_format($empresa->inscripcion_base, 2) }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-gray-500">Gerente administrativo</p>
+                    <p class="font-semibold text-gray-900">{{ $empresa->gerente_adm ?? '—' }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Gerente RRHH</p>
+                    <p class="font-semibold text-gray-900">{{ $empresa->gerente_rrhh ?? '—' }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Gerente contabilidad</p>
+                    <p class="font-semibold text-gray-900">{{ $empresa->gerente_contabilidad ?? '—' }}</p>
+                </div>
+            </div>
+
+            @if ($empresa->comentario)
+                <div class="mt-4 text-sm">
+                    <p class="text-gray-500">Comentario interno</p>
+                    <p class="text-gray-900">{{ $empresa->comentario }}</p>
                 </div>
             @endif
         </div>
 
+        {{-- ================= UBICACIÓN ================= --}}
+        <div class="bg-white rounded-2xl border p-6">
+            <h2 class="font-bold text-gray-900 mb-3">Ubicación</h2>
+            <p class="text-sm text-gray-700">{{ $empresa->direccion ?? '—' }}</p>
+            <p class="text-sm text-gray-500">
+                {{ $empresa->ciudad ?? '—' }} · {{ $empresa->barrio_colonia ?? '—' }}
+            </p>
+
+            @if ($empresa->latitud && $empresa->longitud)
+                <a target="_blank"
+                    href="https://www.google.com/maps?q={{ $empresa->latitud }},{{ $empresa->longitud }}"
+                    class="inline-block mt-2 text-blue-600 hover:underline text-sm">
+                    Abrir en Google Maps
+                </a>
+            @endif
+        </div>
+
+        {{-- ================= CONTACTOS Y PROPIETARIOS ================= --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-white rounded-2xl border p-6">
                 <h2 class="font-bold text-gray-900 mb-3">Contactos</h2>
 
-                <div class="text-sm text-gray-700">
-                    <p class="font-semibold text-gray-900">Teléfonos fijos</p>
-                    <ul class="list-disc pl-5">
-                        @forelse($empresa->telefonosFijos as $t)
-                            <li>{{ $t->telefono }}</li>
-                        @empty
-                            <li class="text-gray-400">—</li>
-                        @endforelse
-                    </ul>
+                <p class="font-semibold text-gray-700">Teléfonos fijos</p>
+                <ul class="list-disc pl-5 text-sm mb-3">
+                    @forelse($empresa->telefonosFijos as $t)
+                        <li>{{ $t->telefono }}</li>
+                    @empty
+                        <li class="text-gray-400">—</li>
+                    @endforelse
+                </ul>
 
-                    <p class="font-semibold text-gray-900 mt-3">Celulares</p>
-                    <ul class="list-disc pl-5">
-                        @forelse($empresa->celulares as $c)
-                            <li>{{ $c->celular }}</li>
-                        @empty
-                            <li class="text-gray-400">—</li>
-                        @endforelse
-                    </ul>
+                <p class="font-semibold text-gray-700">Celulares</p>
+                <ul class="list-disc pl-5 text-sm mb-3">
+                    @forelse($empresa->celulares as $c)
+                        <li>{{ $c->celular }}</li>
+                    @empty
+                        <li class="text-gray-400">—</li>
+                    @endforelse
+                </ul>
 
-                    <p class="font-semibold text-gray-900 mt-3">Correos</p>
-                    <ul class="list-disc pl-5">
-                        @forelse($empresa->correos as $e)
-                            <li>{{ $e->correo }}</li>
-                        @empty
-                            <li class="text-gray-400">—</li>
-                        @endforelse
-                    </ul>
-                </div>
+                <p class="font-semibold text-gray-700">Correos</p>
+                <ul class="list-disc pl-5 text-sm">
+                    @forelse($empresa->correos as $e)
+                        <li>{{ $e->correo }}</li>
+                    @empty
+                        <li class="text-gray-400">—</li>
+                    @endforelse
+                </ul>
             </div>
 
             <div class="bg-white rounded-2xl border p-6">
                 <h2 class="font-bold text-gray-900 mb-3">Propietarios</h2>
                 <div class="space-y-2">
                     @forelse($empresa->propietarios as $p)
-                        <div class="p-3 rounded-xl border">
+                        <div class="border rounded-xl p-3">
                             <p class="font-semibold text-gray-900">{{ $p->nombre }}</p>
-                            <p class="text-sm text-gray-500">Identidad: {{ $p->identidad }} @if ($p->rtn)
+                            <p class="text-sm text-gray-500">
+                                Identidad: {{ $p->identidad }}
+                                @if ($p->rtn)
                                     · RTN: {{ $p->rtn }}
                                 @endif
                             </p>
@@ -165,7 +258,8 @@
                                     <td class="text-right">
                                         <form method="POST" action="{{ route('cobranza.cargos.anular', $c) }}">
                                             @csrf
-                                            <button class="px-3 py-1 rounded-xl border hover:bg-gray-50">Anular</button>
+                                            <button
+                                                class="px-3 py-1 rounded-xl border hover:bg-gray-50">Anular</button>
                                         </form>
                                     </td>
                                 </tr>
