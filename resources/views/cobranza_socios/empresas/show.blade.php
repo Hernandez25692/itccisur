@@ -39,7 +39,7 @@
             <div class="bg-white rounded-2xl border p-5">
                 <p class="text-sm text-gray-500">Mora</p>
                 <p class="text-2xl font-bold text-gray-900">L. {{ number_format($empresa->valor_mora, 2) }}</p>
-                <p class="text-sm text-gray-500 mt-2">Meses mora: <span
+                <p class="text-sm text-gray-500 mt-2">Mora ({{ strtoupper($empresa->tipo_pago) }}):  <span
                         class="font-semibold text-gray-900">{{ $empresa->meses_mora }}</span></p>
             </div>
             <div class="bg-white rounded-2xl border p-5">
