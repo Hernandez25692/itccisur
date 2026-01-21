@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+
 class EmpresaController extends Controller
 {
     public function index(Request $request)
@@ -106,10 +107,23 @@ class EmpresaController extends Controller
              * 1️⃣ DETERMINAR RANGO DE CAPITAL AUTOMÁTICAMENTE
              * =====================================================
              */
-            $rango = CapitalRango::where('activo', true)
-                ->where('capital_min', '<=', $data['capital_declarado'])
-                ->where('capital_max', '>=', $data['capital_declarado'])
-                ->first();
+            $rango = null;
+
+            if (!empty($data['tipo_empresa_id']) && isset($data['capital_declarado'])) {
+                $rango = $this->calcularRangoCapital(
+                    (int) $data['tipo_empresa_id'],
+                    (float) $data['capital_declarado']
+                );
+            }
+
+            if (!$rango) {
+                return back()
+                    ->withErrors([
+                        'capital_declarado' =>
+                        'No existe un rango de capital válido para este tipo de empresa.'
+                    ])
+                    ->withInput();
+            }
 
             if (!$rango) {
                 return back()
@@ -223,6 +237,15 @@ class EmpresaController extends Controller
         });
     }
 
+    private function calcularRangoCapital(int $tipoEmpresaId, float $capital): ?CapitalRango
+    {
+        return CapitalRango::where('activo', true)
+            ->where('tipo_empresa_id', $tipoEmpresaId)
+            ->where('capital_min', '<=', $capital)
+            ->where('capital_max', '>=', $capital)
+            ->orderBy('capital_min')
+            ->first();
+    }
 
     public function show(Empresa $empresa, CobranzaCalculoService $calc)
     {
@@ -271,7 +294,6 @@ class EmpresaController extends Controller
             'categoria_id' => 'nullable|exists:cs_categorias,id',
             'tipo_empresa_id' => 'nullable|exists:cs_tipos_empresa,id',
             'capital_declarado' => 'nullable|numeric|min:0',
-            'capital_rango_id' => 'nullable|exists:cs_capital_rangos,id',
             'cuota_especial' => 'nullable|numeric|min:0',
             'corte_id' => 'required|exists:cs_cortes,id',
             'tipo_pago' => 'required|in:mensual,bimensual,trimestral,semestral,anual',
@@ -312,19 +334,34 @@ class EmpresaController extends Controller
         return DB::transaction(function () use ($data, $empresa, $calc) {
 
             // recalcular cuota_base/inscripcion si cambió rango
-            $cuotaBase = $empresa->cuota_base;
-            $insBase = $empresa->inscripcion_base;
+            $rango = null;
 
-            if (!empty($data['capital_rango_id'])) {
-                $rango = CapitalRango::find($data['capital_rango_id']);
-                $cuotaBase = (float) $rango->cuota_mensual;
-                $insBase = (float) $rango->inscripcion;
+            if (!empty($data['tipo_empresa_id']) && isset($data['capital_declarado'])) {
+                $rango = $this->calcularRangoCapital(
+                    (int) $data['tipo_empresa_id'],
+                    (float) $data['capital_declarado']
+                );
             }
 
+            if (!$rango) {
+                return back()
+                    ->withErrors([
+                        'capital_declarado' =>
+                        'No existe un rango de capital válido para este tipo de empresa.'
+                    ])
+                    ->withInput();
+            }
+
+            $cuotaBase = (float) $rango->cuota_mensual;
+            $insBase   = (float) $rango->inscripcion;
+
+
             $empresa->update(array_merge($data, [
+                'capital_rango_id' => $rango->id,
                 'cuota_base' => $cuotaBase,
                 'inscripcion_base' => $insBase,
             ]));
+
 
             // reset relaciones múltiples (simple y exacto)
             $empresa->propietarios()->delete();

@@ -103,7 +103,7 @@
                         @endforeach
                     </select>
                 </div>
-                
+
                 <div>
                     <label class="text-sm font-semibold text-gray-700">
                         Fecha último pago (antes del sistema)
@@ -279,17 +279,21 @@
     <script>
         const rangos = @json($rangos);
 
+        const tipoEmpresaSelect = document.querySelector('[name="tipo_empresa_id"]');
         const capitalInput = document.querySelector('[name="capital_declarado"]');
         const rangoInfo = document.getElementById('rango_info');
 
-        capitalInput.addEventListener('input', () => {
+        function calcularRango() {
             const capital = parseFloat(capitalInput.value);
-            if (isNaN(capital)) {
+            const tipoEmpresaId = tipoEmpresaSelect.value;
+
+            if (!tipoEmpresaId || isNaN(capital)) {
                 rangoInfo.value = '';
                 return;
             }
 
             const rango = rangos.find(r =>
+                r.tipo_empresa_id == tipoEmpresaId &&
                 capital >= parseFloat(r.capital_min) &&
                 capital <= parseFloat(r.capital_max)
             );
@@ -298,10 +302,14 @@
                 rangoInfo.value =
                     `${rango.capital_min} - ${rango.capital_max} | Cuota L. ${rango.cuota_mensual}`;
             } else {
-                rangoInfo.value = '⚠ No existe rango definido';
+                rangoInfo.value = '⚠ No existe rango definido para este tipo';
             }
-        });
+        }
+
+        capitalInput.addEventListener('input', calcularRango);
+        tipoEmpresaSelect.addEventListener('change', calcularRango);
     </script>
+
 
     <script>
         function addItem(name) {

@@ -71,16 +71,16 @@
                 </div>
 
                 <div>
-                    <label class="text-sm font-semibold text-gray-700">Rango de capital</label>
-                    <select name="capital_rango_id" class="w-full rounded-xl border-gray-300">
-                        <option value="">—</option>
-                        @foreach ($rangos as $r)
-                            <option value="{{ $r->id }}" @selected(old('capital_rango_id', $empresa->capital_rango_id) == $r->id)>
-                                {{ $r->capital_min }} - {{ $r->capital_max }} | L. {{ $r->cuota_mensual }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <label class="text-sm font-semibold text-gray-700">
+                        Rango de capital (según tipo y capital)
+                    </label>
+
+                    <input id="rango_info" readonly class="w-full rounded-xl border-gray-300 bg-gray-50"
+                        placeholder="Se asigna automáticamente">
                 </div>
+
+                <input type="hidden" name="capital_rango_id" id="capital_rango_id">
+
 
                 <div>
                     <label class="text-sm font-semibold text-gray-700">Cuota especial (opcional)</label>
@@ -146,9 +146,9 @@
                         <label class="text-sm font-semibold text-gray-700">
                             Coordenadas (Google Maps)
                         </label>
-                        <input name="coordenadas" value="{{ old('coordenadas', ($empresa->latitud && $empresa->longitud) ? $empresa->latitud . ', ' . $empresa->longitud : '') }}"
-                            class="w-full rounded-xl border-gray-300"
-                            placeholder="Ej: 13.29094649, -87.15233707">
+                        <input name="coordenadas"
+                            value="{{ old('coordenadas', $empresa->latitud && $empresa->longitud ? $empresa->latitud . ', ' . $empresa->longitud : '') }}"
+                            class="w-full rounded-xl border-gray-300" placeholder="Ej: 13.29094649, -87.15233707">
                     </div>
 
                     <input type="hidden" name="latitud" value="{{ old('latitud', $empresa->latitud) }}">
@@ -430,6 +430,46 @@
             </div>
         </div>
     </div>
+    <script>
+        const rangos = @json($rangos);
+
+        const tipoEmpresaSelect = document.querySelector('[name="tipo_empresa_id"]');
+        const capitalInput = document.querySelector('[name="capital_declarado"]');
+        const rangoInfo = document.getElementById('rango_info');
+        const rangoHidden = document.getElementById('capital_rango_id');
+
+        function calcularRango() {
+            const capital = parseFloat(capitalInput.value);
+            const tipoEmpresaId = tipoEmpresaSelect.value;
+
+            if (!tipoEmpresaId || isNaN(capital)) {
+                rangoInfo.value = '';
+                rangoHidden.value = '';
+                return;
+            }
+
+            const rango = rangos.find(r =>
+                r.tipo_empresa_id == tipoEmpresaId &&
+                capital >= parseFloat(r.capital_min) &&
+                capital <= parseFloat(r.capital_max)
+            );
+
+            if (rango) {
+                rangoInfo.value =
+                    `${rango.capital_min} - ${rango.capital_max} | Cuota L. ${rango.cuota_mensual}`;
+                rangoHidden.value = rango.id;
+            } else {
+                rangoInfo.value = '⚠ No existe rango definido para este tipo';
+                rangoHidden.value = '';
+            }
+        }
+
+        // Inicializar al cargar
+        document.addEventListener('DOMContentLoaded', calcularRango);
+
+        capitalInput.addEventListener('input', calcularRango);
+        tipoEmpresaSelect.addEventListener('change', calcularRango);
+    </script>
 
     <script>
         const form = document.getElementById('empresaForm');
