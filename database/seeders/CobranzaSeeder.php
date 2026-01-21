@@ -26,7 +26,7 @@ class CobranzaSeeder extends Seeder
         DB::table('cs_tipos_empresa')->updateOrInsert(['nombre' => 'Comerciante Individual'], ['activo' => true, 'created_at' => now(), 'updated_at' => now()]);
         DB::table('cs_tipos_empresa')->updateOrInsert(['nombre' => 'Sociedad'], ['activo' => true, 'created_at' => now(), 'updated_at' => now()]);
 
-        // Categorías de rubros
+        // Categorías de rubros 
         $categorias = [
             ['nombre' => 'ACUACULTURA', 'descripcion' => null],
             ['nombre' => 'ADUANAS', 'descripcion' => null],

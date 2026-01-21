@@ -145,7 +145,7 @@
                         @endif
                     @endrole
 
-                    @role('GOR|admin_ti|gerencia')
+                    @role('GOR|admin_ti|gerencia|GOR_Gerencia')
                         @if (Route::has('gor.resumen'))
                             <a href="{{ route('gor.resumen') }}"
                                 class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('gor.resumen') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
@@ -178,11 +178,11 @@
 
                 <!-- Sección Gestión -->
                 <div class="mb-6">
-                    <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
-                        :class="{ 'hidden': !sidebarOpen }">Gestión</p>
+
 
                     @role('admin_ti|gerencia|usuario|calendario')
-
+                        <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
+                            :class="{ 'hidden': !sidebarOpen }">Gestión</p>
                         <a href="{{ route('calendario-editorial.index') }}"
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('calendario-editorial.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
                             :class="{ 'justify-center px-3': !sidebarOpen }" :title="!sidebarOpen ? 'Calendario' : ''">
@@ -194,7 +194,7 @@
                             @endif
                         </a>
                     @endrole
-                    @role('GOR|admin_ti|gerencia')
+                    @role('GOR|admin_ti|gerencia|GOR_Gerencia')
 
                         <!-- Gerencia de Operaciones Registrales -->
                         <div class="mb-2">
@@ -214,7 +214,8 @@
                                 @endif
                             </a>
                         </div>
-
+                    @endrole
+                    @role('GOR_Gerencia|admin_ti|gerencia')
                         <!-- Control de Audiencias -->
                         <a href="{{ route('audiencias.index') }}"
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
@@ -233,24 +234,23 @@
                                     :class="{ 'hidden': !sidebarOpen }"></span>
                             @endif
                         </a>
-
                     @endrole
-
-
 
                 </div>
                 <!-- Sección Cobranza -->
                 <div class="mb-6">
-                    <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
-                        :class="{ 'hidden': !sidebarOpen }">Cobranza</p>
+
 
                     @role('admin_ti|cobranza')
+                        <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
+                            :class="{ 'hidden': !sidebarOpen }">Cobranza</p>
                         <a href="{{ route('cobranza.dashboard') }}"
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('cobranza.dashboard') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
                             :class="{ 'justify-center px-3': !sidebarOpen }"
                             :title="!sidebarOpen ? 'Panel Cobranza' : ''">
                             <i class="fas fa-chart-pie w-5 text-lg flex-shrink-0"></i>
-                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Panel Cobranza</span>
+                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Panel
+                                Cobranza</span>
                             @if (request()->routeIs('cobranza.dashboard'))
                                 <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
                                     :class="{ 'hidden': !sidebarOpen }"></span>
@@ -259,8 +259,7 @@
 
                         <a href="{{ route('cobranza.rutas.mis') }}"
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('cobranza.rutas.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
-                            :class="{ 'justify-center px-3': !sidebarOpen }"
-                            :title="!sidebarOpen ? 'Mis Rutas' : ''">
+                            :class="{ 'justify-center px-3': !sidebarOpen }" :title="!sidebarOpen ? 'Mis Rutas' : ''">
                             <i class="fas fa-map-marked-alt w-5 text-lg flex-shrink-0"></i>
                             <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Mis Rutas</span>
                             @if (request()->routeIs('cobranza.rutas.*'))
@@ -275,9 +274,9 @@
 
                 <!-- Sección Control -->
                 <div class="mb-6">
-                    <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
-                        :class="{ 'hidden': !sidebarOpen }">Control IT</p>
                     @role('admin_ti|gerencia')
+                        <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
+                            :class="{ 'hidden': !sidebarOpen }">Control IT</p>
                         <a href="{{ route('control.index') }}"
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('control.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
                             :class="{ 'justify-center px-3': !sidebarOpen }" :title="!sidebarOpen ? 'Control TI' : ''">

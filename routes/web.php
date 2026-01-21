@@ -76,7 +76,7 @@
                 ->name('dashboard');
         });
 
-    Route::middleware(['auth', 'role:GOR|admin_ti|gerencia'])
+    Route::middleware(['auth', 'role:GOR|admin_ti|gerencia|GOR_Gerencia'])
         ->prefix('gor')
         ->name('gor.')
         ->group(function () {
@@ -209,7 +209,7 @@
             ->name('plan-trabajo.rechazar');
     });
 
-    Route::middleware(['auth', 'role:GOR|admin_ti|gerencia'])
+    Route::middleware(['auth', 'role:GOR|admin_ti|gerencia|GOR_Gerencia'])
         ->prefix('audiencias')
         ->name('audiencias.')
         ->group(function () {
