@@ -39,62 +39,64 @@ class PagoController extends Controller
         $data = $request->validate([
             'empresa_id' => 'required|exists:cs_empresas,id',
             'fecha_pago' => 'required|date',
-            'monto' => 'required|numeric|min:0.01',
             'metodo' => 'required|in:efectivo,transferencia,deposito,cheque,otro',
             'referencia' => 'nullable|string|max:255',
             'comentario' => 'nullable|string',
-            'gestor_id' => 'nullable|exists:users,id',
+            'cargos' => 'required|array|min:1',
+            'cargos.*' => 'exists:cs_cargos,id',
         ]);
 
-        $empresa = Empresa::with(['corte'])->findOrFail($data['empresa_id']);
+        $empresa = Empresa::with('corte')->findOrFail($data['empresa_id']);
 
         return DB::transaction(function () use ($data, $empresa, $calc) {
 
-            $pago = Pago::create([
-                'empresa_id' => $empresa->id,
-                'fecha_pago' => $data['fecha_pago'],
-                'monto' => $data['monto'],
-                'metodo' => $data['metodo'],
-                'referencia' => $data['referencia'] ?? null,
-                'comentario' => $data['comentario'] ?? null,
-                'gestor_id' => $data['gestor_id']
-                    ?? (Auth::user()->hasRole('cobranza') ? Auth::id() : null),
-
-                'created_by' => Auth::id(),
-            ]);
-
-            // Aplicación FIFO a cargos pendientes
-            $restante = (float)$pago->monto;
-
-            $cargos = Cargo::where('empresa_id', $empresa->id)
+            // 🔒 Tomar y bloquear cargos seleccionados
+            $cargos = Cargo::whereIn('id', $data['cargos'])
+                ->where('empresa_id', $empresa->id)
                 ->where('estado', 'pendiente')
                 ->orderBy('fecha_vencimiento', 'asc')
                 ->lockForUpdate()
                 ->get();
 
-            foreach ($cargos as $cargo) {
-                if ($restante <= 0) break;
-
-                $saldoCargo = (float)$cargo->total; // si luego guardas pagos parciales, cambias esto
-                $aplicar = min($restante, $saldoCargo);
-
-                // ligar pago-cargo
-                $pago->cargos()->attach($cargo->id, ['monto_aplicado' => $aplicar]);
-
-                $restante -= $aplicar;
-
-                // Si cubrió el cargo completo, marcar pagado
-                if ($aplicar >= $saldoCargo) {
-                    $cargo->estado = 'pagado';
-                    $cargo->pagado_en = now();
-                    $cargo->save();
-                }
+            if ($cargos->isEmpty()) {
+                return back()->withErrors('No hay cargos válidos para aplicar el pago.');
             }
 
-            // recalcular empresa
+            // ✅ Monto REAL del pago (suma exacta de cargos)
+            $montoTotal = (float) $cargos->sum('total');
+
+            // 🔹 Crear pago
+            $pago = Pago::create([
+                'empresa_id' => $empresa->id,
+                'fecha_pago' => $data['fecha_pago'],
+                'monto' => $montoTotal,
+                'metodo' => $data['metodo'],
+                'referencia' => $data['referencia'] ?? null,
+                'comentario' => $data['comentario'] ?? null,
+
+                // gestor REAL
+                'gestor_id' => Auth::id(),
+                'created_by' => Auth::id(),
+            ]);
+
+            // 🔹 Aplicar pago a cargos (FIFO garantizado)
+            foreach ($cargos as $cargo) {
+
+                $pago->cargos()->attach($cargo->id, [
+                    'monto_aplicado' => $cargo->total,
+                ]);
+
+                $cargo->estado = 'pagado';
+                $cargo->pagado_en = now();
+                $cargo->save();
+            }
+
+            // 🔹 Recalcular empresa (estatus, próxima fecha, etc.)
             $calc->recalcularEmpresa($empresa);
 
-            return back()->with('success', 'Pago registrado correctamente.');
+            return redirect()
+                ->route('cobranza.empresas.show', $empresa)
+                ->with('success', 'Pago registrado correctamente.');
         });
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cobranza;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cobranza\Empresa;
+use App\Models\Cobranza\Cargo;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -13,26 +14,70 @@ class DashboardController extends Controller
         $hoy = Carbon::today();
         $limite7 = $hoy->copy()->addDays(7);
 
-        // ✅ Empresas en mora (ya viene de recalcularEmpresa sin cargos)
-        $enMora = Empresa::where('estatus_cobranza', 'en_mora')->count();
+        /**
+         * ===============================
+         * EMPRESAS EN MORA
+         * ===============================
+         * Al menos un cargo pendiente
+         */
+        $enMora = Empresa::whereHas(
+            'cargos',
+            fn($q) =>
+            $q->where('estado', 'pendiente')
+        )->count();
 
-        // ✅ Incobrables (>=18 meses) según tu regla actual
-        $incobrables = Empresa::where('meses_mora', '>=', 18)->count();
-
-        // ✅ Por vencer (próxima fecha cobro en los próximos 7 días, y aún no vencida)
-        $porVencer7 = Empresa::whereNotNull('proxima_fecha_cobro')
-            ->whereDate('proxima_fecha_cobro', '>=', $hoy)
-            ->whereDate('proxima_fecha_cobro', '<=', $limite7)
+        /**
+         * ===============================
+         * INCOBRABLES (>= 18 cargos pendientes)
+         * ===============================
+         */
+        $incobrables = Empresa::withCount([
+            'cargos as pendientes_count' => fn($q) =>
+            $q->where('estado', 'pendiente')
+        ])
+            ->having('pendientes_count', '>=', 18)
             ->count();
 
-        // ✅ Monto pendiente estimado: suma de la mora calculada por fechas (NO cargos)
-        $montoPendiente = (float) Empresa::where('estatus_cobranza', 'en_mora')
-            ->sum('valor_mora');
+        /**
+         * ===============================
+         * POR VENCER EN 7 DÍAS
+         * ===============================
+         * Empresas con cargos que vencen pronto
+         */
+        $porVencer7 = Cargo::where('estado', 'pendiente')
+            ->whereBetween('fecha_vencimiento', [$hoy, $limite7])
+            ->distinct('empresa_id')
+            ->count('empresa_id');
 
-        // ✅ Top 10 por mayor mora (NO cargos)
-        $topMora = Empresa::orderByDesc('valor_mora')
+        /**
+         * ===============================
+         * MONTO PENDIENTE REAL
+         * ===============================
+         */
+        $montoPendiente = (float) Cargo::where('estado', 'pendiente')
+            ->sum('total');
+
+        /**
+         * ===============================
+         * TOP 10 EMPRESAS CON MAYOR MORA REAL
+         * ===============================
+         */
+        $topMora = Empresa::withSum([
+            'cargos as mora_real' => fn($q) =>
+            $q->where('estado', 'pendiente')
+        ], 'total')
+            ->withCount([
+                'cargos as pendientes_count' => fn($q) =>
+                $q->where('estado', 'pendiente')
+            ])
+            ->having('mora_real', '>', 0)
+            ->orderByDesc('mora_real')
             ->limit(10)
-            ->get(['id', 'nombre_empresa', 'rtn_empresa', 'valor_mora', 'meses_mora']);
+            ->get([
+                'id',
+                'nombre_empresa',
+                'rtn_empresa'
+            ]);
 
         return view('cobranza_socios.dashboard', compact(
             'enMora',
