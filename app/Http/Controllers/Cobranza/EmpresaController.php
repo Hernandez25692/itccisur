@@ -8,6 +8,8 @@ use App\Services\Cobranza\CobranzaCalculoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 
 class EmpresaController extends Controller
@@ -431,5 +433,95 @@ class EmpresaController extends Controller
     {
         $empresa->delete();
         return redirect()->route('cobranza.empresas.index')->with('success', 'Empresa eliminada.');
+    }
+
+    /**
+     * Estado de cuenta (vista HTML)
+     */
+    public function estadoCuenta(Empresa $empresa)
+    {
+        // 🔄 Asegurar cargos actualizados
+        app(\App\Services\Cobranza\CobranzaCalculoService::class)
+            ->recalcularEmpresa($empresa);
+
+        $cargos = $empresa->cargos()
+            ->whereIn('estado', ['pendiente', 'pagado'])
+            ->orderBy('periodo_inicio')
+            ->get();
+
+        $filas = $cargos->map(function ($cargo) {
+            $inicio = \Carbon\Carbon::parse($cargo->periodo_inicio);
+            $fin    = \Carbon\Carbon::parse($cargo->periodo_fin);
+
+            return [
+                'periodo_texto' => ucfirst(
+                    $inicio->translatedFormat('F Y')
+                        . ' – ' .
+                        $fin->translatedFormat('F Y')
+                ),
+                'anio'   => $inicio->year,
+                'mes'    => $inicio->month,
+                'dias'   => $inicio->diffInDays($fin) + 1,
+                'monto'  => (float) $cargo->total,
+                'estado' => $cargo->estado, // pendiente | pagado
+            ];
+        });
+
+
+        $totalAdeuda = $cargos
+            ->where('estado', 'pendiente')
+            ->sum('total');
+
+        return view(
+            'cobranza_socios.empresas.estado_cuenta',
+            compact('empresa', 'filas', 'totalAdeuda')
+        );
+    }
+
+    /**
+     * Estado de cuenta (PDF)
+     */
+    public function estadoCuentaPdf(Empresa $empresa)
+    {
+        // 🔄 Asegurar cargos actualizados
+        app(\App\Services\Cobranza\CobranzaCalculoService::class)
+            ->recalcularEmpresa($empresa);
+
+        $cargos = $empresa->cargos()
+            ->whereIn('estado', ['pendiente', 'pagado'])
+            ->orderBy('periodo_inicio')
+            ->get();
+
+        $filas = $cargos->map(function ($cargo) {
+            $inicio = \Carbon\Carbon::parse($cargo->periodo_inicio);
+            $fin    = \Carbon\Carbon::parse($cargo->periodo_fin);
+
+            return [
+                'periodo_texto' => ucfirst(
+                    $inicio->translatedFormat('F Y')
+                        . ' – ' .
+                        $fin->translatedFormat('F Y')
+                ),
+                'anio'   => $inicio->year,
+                'mes'    => $inicio->month,
+                'dias'   => $inicio->diffInDays($fin) + 1,
+                'monto'  => (float) $cargo->total,
+                'estado' => $cargo->estado, // pendiente | pagado
+            ];
+        });
+
+
+        $totalAdeuda = $cargos
+            ->where('estado', 'pendiente')
+            ->sum('total');
+
+        $pdf = Pdf::loadView(
+            'cobranza_socios.empresas.estado_cuenta_pdf',
+            compact('empresa', 'filas', 'totalAdeuda')
+        )->setPaper('letter', 'landscape');
+
+        return $pdf->download(
+            'Estado_Cuenta_' . preg_replace('/\s+/', '_', $empresa->nombre_empresa) . '.pdf'
+        );
     }
 }

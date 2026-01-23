@@ -19,9 +19,15 @@
             </div>
 
             <div class="flex flex-wrap gap-2">
+
                 <a href="{{ route('cobranza.empresas.edit', $empresa) }}"
                     class="px-4 py-2 rounded-xl border hover:bg-gray-50">
                     Editar
+                </a>
+
+                <a href="{{ route('cobranza.empresas.estado_cuenta', $empresa) }}"
+                    class="px-4 py-2 rounded-xl bg-gray-800 text-white hover:bg-gray-900">
+                    Estado de cuenta
                 </a>
 
                 <a href="{{ route('cobranza.pagos.create', $empresa) }}"
@@ -32,7 +38,9 @@
                 <a href="{{ route('cobranza.empresas.index') }}" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
                     Volver
                 </a>
+
             </div>
+
         </div>
 
         {{-- ================= ALERTAS ================= --}}

@@ -308,6 +308,14 @@
             )->name('rutas.agregar_empresa');
         });
 
+    // Estado de cuenta por empresa
+    Route::get('/cobranza-socios/empresas/{empresa}/estado-cuenta', [\App\Http\Controllers\Cobranza\EmpresaController::class, 'estadoCuenta'])
+        ->name('cobranza.empresas.estado_cuenta');
+
+    Route::get('/cobranza-socios/empresas/{empresa}/estado-cuenta/pdf', [\App\Http\Controllers\Cobranza\EmpresaController::class, 'estadoCuentaPdf'])
+        ->name('cobranza.empresas.estado_cuenta_pdf');
+
+        
     Route::post(
         'cobranza-socios/rutas/{ruta}/asignar-gestores',
         [\App\Http\Controllers\Cobranza\RutaController::class, 'asignarGestores']
