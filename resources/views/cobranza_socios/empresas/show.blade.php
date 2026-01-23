@@ -54,6 +54,11 @@
                 {{ session('error') }}
             </div>
         @endif
+        @php
+            $cargosPendientes = $empresa->cargos->where('estado', 'pendiente');
+            $moraReal = $cargosPendientes->sum('total');
+            $periodosVencidos = $cargosPendientes->count();
+        @endphp
 
         {{-- ================= BLOQUE COBRANZA ================= --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -75,7 +80,7 @@
             <div class="bg-white rounded-2xl border p-5">
                 <p class="text-sm text-gray-500">Mora acumulada</p>
                 <p class="text-2xl font-bold text-gray-900 mt-1">
-                    L. {{ number_format($empresa->valor_mora, 2) }}
+                    L. {{ number_format($moraReal, 2) }}
                 </p>
                 <p class="text-sm text-gray-500 mt-2">
                     Períodos vencidos
@@ -83,11 +88,11 @@
                         ({{ strtoupper($empresa->tipo_pago) }})
                     </span>:
                     <span class="font-semibold text-gray-900">
-                        {{ $empresa->meses_mora }}
+                        {{ $periodosVencidos }}
                     </span>
                 </p>
-
             </div>
+
 
             <div class="bg-white rounded-2xl border p-5">
                 <p class="text-sm text-gray-500">Observación</p>

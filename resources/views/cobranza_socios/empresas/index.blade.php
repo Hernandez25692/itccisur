@@ -4,54 +4,55 @@
         {{-- ================= HEADER ================= --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-            <h1 class="text-3xl font-bold text-gray-900">Empresas · Cobranza</h1>
-            
+                <h1 class="text-3xl font-bold text-gray-900">Empresas · Cobranza</h1>
+
             </div>
 
             <div class="flex flex-wrap gap-2">
-            @role('admin_ti|cobranza')
-                <a href="{{ route('cobranza.empresas.create') }}"
-                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition">
-                ➕ Nueva Empresa
+                @role('admin_ti|cobranza')
+                    <a href="{{ route('cobranza.empresas.create') }}"
+                        class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition">
+                        ➕ Nueva Empresa
+                    </a>
+                @endrole
+
+                <a href="{{ route('cobranza.dashboard') }}"
+                    class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition">
+                    📊 Dashboard
                 </a>
-            @endrole
 
-            <a href="{{ route('cobranza.dashboard') }}" 
-                class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition">
-                📊 Dashboard
-            </a>
+                <a href="{{ route('cobranza.rutas.index') }}"
+                    class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-medium transition">
+                    🗺️ Rutas
+                </a>
 
-            <a href="{{ route('cobranza.rutas.index') }}"
-                class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-medium transition">
-                🗺️ Rutas
-            </a>
-
-            @role('admin_ti|cobranza')
-                <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open"
-                    class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition flex items-center gap-2">
-                    ⚙️ Configuración
-                    <svg class="w-4 h-4 transition" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div x-show="open" @click.outside="open=false"
-                    class="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 divide-y">
-                    <a href="{{ route('cobranza.categorias.index') }}"
-                    class="block px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 font-medium transition">
-                    📁 Categorías de Empresa
-                    </a>
-                    <a href="{{ route('cobranza.tipos-empresa.index') }}"
-                    class="block px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 font-medium transition">
-                    🏷️ Tipos de Empresa
-                    </a>
-                    <a href="{{ route('cobranza.capital-rangos.index') }}"
-                    class="block px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 font-medium transition">
-                    💰 Rangos de Capital / Cuotas
-                    </a>
-                </div>
-                </div>
-            @endrole
+                @role('admin_ti|cobranza')
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open"
+                            class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition flex items-center gap-2">
+                            ⚙️ Configuración
+                            <svg class="w-4 h-4 transition" :class="open && 'rotate-180'" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.outside="open=false"
+                            class="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 divide-y">
+                            <a href="{{ route('cobranza.categorias.index') }}"
+                                class="block px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 font-medium transition">
+                                📁 Categorías de Empresa
+                            </a>
+                            <a href="{{ route('cobranza.tipos-empresa.index') }}"
+                                class="block px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 font-medium transition">
+                                🏷️ Tipos de Empresa
+                            </a>
+                            <a href="{{ route('cobranza.capital-rangos.index') }}"
+                                class="block px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 font-medium transition">
+                                💰 Rangos de Capital / Cuotas
+                            </a>
+                        </div>
+                    </div>
+                @endrole
             </div>
         </div>
 
@@ -141,19 +142,27 @@
                             </td>
 
                             {{-- Mora --}}
+                            @php
+                                $moraReal = $e->cargos->where('estado', 'pendiente')->sum('total');
+                            @endphp
+
                             <td class="text-right font-semibold">
-                                L. {{ number_format($e->valor_mora, 2) }}
+                                L. {{ number_format($moraReal, 2) }}
                             </td>
+
 
                             {{-- Estatus --}}
                             <td>
+                                @php
+                                    $enMora = $e->cargos->where('estado', 'pendiente')->count() > 0;
+                                @endphp
+
                                 <span
                                     class="px-2 py-1 text-xs rounded-full border
-                                    {{ $e->estatus_cobranza === 'en_mora'
-                                        ? 'bg-red-50 text-red-700 border-red-200'
-                                        : 'bg-green-50 text-green-700 border-green-200' }}">
-                                    {{ $e->estatus_cobranza === 'en_mora' ? 'EN MORA' : 'AL DÍA' }}
+    {{ $enMora ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200' }}">
+                                    {{ $enMora ? 'EN MORA' : 'AL DÍA' }}
                                 </span>
+
                             </td>
 
                             {{-- Categoría (solo admin) --}}
