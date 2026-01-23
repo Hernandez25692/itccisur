@@ -315,7 +315,7 @@
     Route::get('/cobranza-socios/empresas/{empresa}/estado-cuenta/pdf', [\App\Http\Controllers\Cobranza\EmpresaController::class, 'estadoCuentaPdf'])
         ->name('cobranza.empresas.estado_cuenta_pdf');
 
-        
+
     Route::post(
         'cobranza-socios/rutas/{ruta}/asignar-gestores',
         [\App\Http\Controllers\Cobranza\RutaController::class, 'asignarGestores']
@@ -324,6 +324,15 @@
     Route::post('/cobranza-socios/rutas/{ruta}/reasignar-empresa', [RutaController::class, 'reasignarEmpresa'])
         ->name('cobranza.rutas.reasignar_empresa');
 
+
+
+    Route::middleware(['auth', 'role:admin_ti|gerencia'])
+        ->prefix('cobranza-socios/reportes')
+        ->name('cobranza.reportes.')
+        ->group(function () {
+            Route::get('pagos', [\App\Http\Controllers\Cobranza\ReportePagosController::class, 'index'])
+                ->name('pagos');
+        });
 
     Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -35,4 +35,11 @@ class Pago extends Model
             ->withPivot('monto_aplicado')
             ->withTimestamps();
     }
+
+    
+
+    public function usuario()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
+    }
 }

@@ -163,17 +163,42 @@
                     @endrole
 
                     @role('admin_ti|gerencia')
+                        {{-- DASHBOARD TI --}}
                         <a href="{{ route('dashboard.ti') }}"
-                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('dashboard.ti') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
+                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
+        {{ request()->routeIs('dashboard.ti') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
                             :class="{ 'justify-center px-3': !sidebarOpen }" :title="!sidebarOpen ? 'Dashboard TI' : ''">
+
                             <i class="fas fa-chart-line w-5 text-lg flex-shrink-0"></i>
-                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Dashboard TI</span>
+                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">
+                                Dashboard TI
+                            </span>
+
                             @if (request()->routeIs('dashboard.ti'))
                                 <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
                                     :class="{ 'hidden': !sidebarOpen }"></span>
                             @endif
                         </a>
+
+                        {{-- REPORTE DE PAGOS --}}
+                        <a href="{{ route('cobranza.reportes.pagos') }}"
+                            class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
+        {{ request()->routeIs('cobranza.reportes.pagos') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
+                            :class="{ 'justify-center px-3': !sidebarOpen }"
+                            :title="!sidebarOpen ? 'Reporte de Pagos' : ''">
+
+                            <i class="fas fa-file-invoice-dollar w-5 text-lg flex-shrink-0"></i>
+                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">
+                                Reporte de Pagos
+                            </span>
+
+                            @if (request()->routeIs('cobranza.reportes.pagos'))
+                                <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
+                                    :class="{ 'hidden': !sidebarOpen }"></span>
+                            @endif
+                        </a>
                     @endrole
+
                 </div>
 
                 <!-- Sección Gestión -->
