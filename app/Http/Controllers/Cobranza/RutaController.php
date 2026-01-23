@@ -387,6 +387,11 @@ class RutaController extends Controller
         // Traer solo empresas asignadas a este gestor dentro de esta ruta
         $empresas = $ruta->empresas()
             ->wherePivot('gestor_id', $userId)
+            ->with([
+                'cargos' => fn($q) =>
+                $q->where('estado', 'pendiente')
+                    ->orderBy('fecha_vencimiento')
+            ])
             ->withCount([
                 'pagos as pagos_hoy_count' => function ($q) use ($userId) {
                     $q->whereDate('fecha_pago', now()->toDateString())
@@ -395,6 +400,7 @@ class RutaController extends Controller
             ])
             ->orderBy('cs_ruta_empresas.orden')
             ->get();
+
 
 
         // Seguridad: si no tiene empresas asignadas, no debería ver nada

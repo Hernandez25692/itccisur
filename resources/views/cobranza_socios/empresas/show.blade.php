@@ -63,11 +63,14 @@
         {{-- ================= BLOQUE COBRANZA ================= --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white rounded-2xl border p-5">
+                @php
+                    $moraReal = $empresa->cargos->where('estado', 'pendiente')->sum('total');
+                @endphp
                 <p class="text-sm text-gray-500">Estatus de cobranza</p>
                 <p
                     class="text-xl font-bold mt-1
-                    {{ $empresa->estatus_cobranza === 'en_mora' ? 'text-red-700' : 'text-green-700' }}">
-                    {{ $empresa->estatus_cobranza === 'en_mora' ? 'EN MORA' : 'AL DÍA' }}
+                    {{ $moraReal > 0 ? 'text-red-700' : 'text-green-700' }}">
+                    {{ $moraReal > 0 ? 'EN MORA' : 'AL DÍA' }}
                 </p>
                 <p class="text-sm text-gray-500 mt-2">
                     Próximo cobro:

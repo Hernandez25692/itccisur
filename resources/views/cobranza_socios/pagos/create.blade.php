@@ -91,11 +91,13 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y">
-                            @forelse($empresa->cargos as $c)
+                            @forelse($empresa->cargos->where('estado', 'pendiente') as $c)
                                 <tr>
                                     <td class="py-2">
-                                        <input type="checkbox" class="cargo-check rounded border-gray-300"
+                                        <input type="checkbox" name="cargos[]" value="{{ $c->id }}"
+                                            class="cargo-check rounded border-gray-300"
                                             data-total="{{ $c->total }}" checked>
+
                                     </td>
                                     <td>
                                         {{ $c->periodo_inicio->format('d/m/Y') }} -

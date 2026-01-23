@@ -39,12 +39,14 @@ class PagoController extends Controller
         $data = $request->validate([
             'empresa_id' => 'required|exists:cs_empresas,id',
             'fecha_pago' => 'required|date',
+            'monto' => 'required|numeric|min:0.01',
             'metodo' => 'required|in:efectivo,transferencia,deposito,cheque,otro',
-            'referencia' => 'nullable|string|max:255',
-            'comentario' => 'nullable|string',
             'cargos' => 'required|array|min:1',
             'cargos.*' => 'exists:cs_cargos,id',
+            'referencia' => 'nullable|string|max:255',
+            'comentario' => 'nullable|string',
         ]);
+
 
         $empresa = Empresa::with('corte')->findOrFail($data['empresa_id']);
 
