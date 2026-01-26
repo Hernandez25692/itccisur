@@ -70,18 +70,58 @@
         @endif
 
         {{-- ================= FILTROS ================= --}}
-        <form method="GET" class="bg-white rounded-2xl border p-4 grid grid-cols-1 md:grid-cols-5 gap-3">
+        <form method="GET" class="bg-white rounded-2xl border p-4 grid grid-cols-1 md:grid-cols-7 gap-3">
 
             <input name="buscar" value="{{ request('buscar') }}" class="rounded-xl border-gray-300"
                 placeholder="Empresa o RTN">
 
-            <input name="ciudad" value="{{ request('ciudad') }}" class="rounded-xl border-gray-300"
-                placeholder="Ciudad">
+            {{-- <input name="ciudad" value="{{ request('ciudad') }}" class="rounded-xl border-gray-300"
+                placeholder="Ciudad"> --}}
 
             <select name="estatus" class="rounded-xl border-gray-300">
-                <option value="">Estatus (todos)</option>
+                <option value="">Estatus</option>
                 <option value="al_dia" @selected(request('estatus') === 'al_dia')>Al día</option>
                 <option value="en_mora" @selected(request('estatus') === 'en_mora')>En mora</option>
+            </select>
+
+            {{-- CORTE --}}
+            <select name="corte_id" class="rounded-xl border-gray-300">
+                <option value="">Corte</option>
+                @foreach ($cortes as $corte)
+                    <option value="{{ $corte->id }}" @selected(request('corte_id') == $corte->id)>
+                        Día {{ $corte->dia_corte }}
+                    </option>
+                @endforeach
+            </select>
+            
+            {{-- Tipo de pago --}}
+            <select name="tipo_pago" class="rounded-xl border-gray-300">
+                <option value="">Tipo de pago</option>
+                @foreach (['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'] as $tp)
+                    <option value="{{ $tp }}" @selected(request('tipo_pago') === $tp)>
+                        {{ ucfirst($tp) }}
+                    </option>
+                @endforeach
+            </select>
+
+            {{-- Tipo de empresa --}}
+            <select name="tipo_empresa_id" class="rounded-xl border-gray-300">
+                <option value="">Tipo empresa</option>
+                @foreach ($tiposEmpresa as $t)
+                    <option value="{{ $t->id }}" @selected(request('tipo_empresa_id') == $t->id)>
+                        {{ $t->nombre }}
+                    </option>
+                @endforeach
+            </select>
+
+            {{-- Categoría --}}
+            <select name="categoria_id" class="rounded-xl border-gray-300">
+                <option value="">Categoría</option>
+                @foreach ($categorias as $c)
+                    <option value="{{ $c->id }}" @selected(request('categoria_id') == $c->id)>
+                        {{ $c->nombre }}
+                    </option>
+                @endforeach
             </select>
 
             <button class="rounded-xl bg-gray-900 text-white px-4 py-2 hover:bg-black">
@@ -94,50 +134,49 @@
             </a>
         </form>
 
+
         {{-- ================= TABLA RMS ================= --}}
         <div class="bg-white rounded-2xl border overflow-x-auto">
             <table class="min-w-full text-sm">
-                <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+                <thead class="bg-gradient-to-r from-gray-900 to-gray-800 text-white">
                     <tr>
-                        <th class="px-3 py-2 text-left">Empresa</th>
-                        <th>Ciudad</th>
-                        <th class="text-center">Corte</th>
-                        <th>Tipo</th>
-                        <th>Próx. cobro</th>
-                        <th class="text-right">Mora</th>
-                        <th>Estatus</th>
+                        <th class="px-4 py-3 text-left font-semibold">Empresa</th>
+                        <th class="px-4 py-3 text-left font-semibold">Ciudad</th>
+                        <th class="px-4 py-3 text-center font-semibold">Corte</th>
+                        <th class="px-4 py-3 text-left font-semibold">Tipo</th>
+                        <th class="px-4 py-3 text-left font-semibold">Próx. Cobro</th>
+                        <th class="px-4 py-3 text-right font-semibold">Mora</th>
+                        <th class="px-4 py-3 text-center font-semibold">Estatus</th>
                         @role('admin_ti|gerencia')
-                            <th>Categoría</th>
+                            <th class="px-4 py-3 text-left font-semibold">Categoría</th>
                         @endrole
-                        <th class="text-center">Acción</th>
+                        <th class="px-4 py-3 text-center font-semibold">Acción</th>
                     </tr>
                 </thead>
 
-                <tbody class="divide-y">
+                <tbody class="divide-y divide-gray-100">
                     @forelse ($empresas as $e)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-blue-50 transition duration-150">
 
                             {{-- Empresa --}}
-                            <td class="px-3 py-2 font-semibold text-gray-900">
-                                {{ $e->nombre_empresa }}
-                                <div class="text-xs text-gray-500">
-                                    RTN: {{ $e->rtn_empresa }}
-                                </div>
+                            <td class="px-4 py-3">
+                                <div class="font-semibold text-gray-900">{{ $e->nombre_empresa }}</div>
+                                <div class="text-xs text-gray-500 mt-1">RTN: {{ $e->rtn_empresa }}</div>
                             </td>
 
                             {{-- Ciudad --}}
-                            <td>{{ $e->ciudad ?? '—' }}</td>
+                            <td class="px-4 py-3 text-gray-700">{{ $e->ciudad ?? '—' }}</td>
 
                             {{-- Corte --}}
-                            <td class="text-center">
+                            <td class="px-4 py-3 text-center text-gray-700">
                                 {{ $e->corte?->dia_corte ?? '-' }}
                             </td>
 
                             {{-- Tipo --}}
-                            <td>{{ strtoupper($e->tipo_pago) }}</td>
+                            <td class="px-4 py-3 text-gray-700">{{ strtoupper($e->tipo_pago) }}</td>
 
                             {{-- Próximo cobro --}}
-                            <td>
+                            <td class="px-4 py-3 text-gray-700">
                                 {{ $e->proxima_fecha_cobro?->format('d/m/Y') ?? '—' }}
                             </td>
 
@@ -145,43 +184,48 @@
                             @php
                                 $moraReal = $e->cargos->where('estado', 'pendiente')->sum('total');
                             @endphp
-
-                            <td class="text-right font-semibold">
-                                L. {{ number_format($moraReal, 2) }}
+                            <td class="px-4 py-3 text-right">
+                                <span class="font-semibold {{ $moraReal > 0 ? 'text-red-600' : 'text-green-600' }}">
+                                    L. {{ number_format($moraReal, 2) }}
+                                </span>
                             </td>
 
-
                             {{-- Estatus --}}
-                            <td>
+                            <td class="px-4 py-3 text-center">
                                 @php
                                     $enMora = $e->cargos->where('estado', 'pendiente')->count() > 0;
                                 @endphp
-
                                 <span
-                                    class="px-2 py-1 text-xs rounded-full border
-    {{ $enMora ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200' }}">
-                                    {{ $enMora ? 'EN MORA' : 'AL DÍA' }}
+                                    class="inline-flex px-3 py-1 text-xs font-semibold rounded-full 
+                                    {{ $enMora ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' }}">
+                                    {{ $enMora ? '⚠️ EN MORA' : '✓ AL DÍA' }}
                                 </span>
-
                             </td>
 
-                            {{-- Categoría (solo admin) --}}
+                            {{-- Categoría --}}
                             @role('admin_ti|gerencia')
-                                <td>{{ $e->categoria?->nombre ?? '—' }}</td>
+                                <td class="px-4 py-3 text-gray-700">{{ $e->categoria?->nombre ?? '—' }}</td>
                             @endrole
 
                             {{-- Acción --}}
-                            <td class="text-center">
+                            <td class="px-4 py-3 text-center">
                                 <a href="{{ route('cobranza.empresas.show', $e) }}"
-                                    class="px-3 py-1 rounded-lg border hover:bg-gray-100 text-xs">
-                                    Ver
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg border border-blue-300 bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-medium transition">
+                                    👁️ Ver
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="py-6 text-center text-gray-400">
-                                No se encontraron empresas con los filtros aplicados.
+                            <td colspan="9" class="py-8 text-center">
+                                <div class="text-gray-400 text-sm">
+                                    <svg class="w-12 h-12 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    No se encontraron empresas con los filtros aplicados.
+                                </div>
                             </td>
                         </tr>
                     @endforelse

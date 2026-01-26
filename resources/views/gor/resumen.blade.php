@@ -265,7 +265,7 @@
                                         </div>
                                         <div class="text-xs text-gray-600 mt-1">Tasa de atención</div>
                                     </div>
-                                    
+
                                 </div>
                             </div>
                         </div>
@@ -351,27 +351,29 @@
                             </div>
                             Documentos Más Consultados
                         </h2>
-                        <span class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                        <span
+                            class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-1 rounded-full whitespace-nowrap">
                             Top 5
                         </span>
                     </div>
                     <div class="space-y-4">
                         @forelse($topAsientos as $index => $row)
                             <div
-                                class="flex items-center justify-between p-3 rounded-lg hover:bg-blue-50 transition duration-200">
-                                <div class="flex items-center gap-3">
+                                class="flex items-center justify-between p-3 rounded-lg hover:bg-blue-50 transition duration-200 gap-3">
+                                <div class="flex items-center gap-3 min-w-0">
                                     <div
                                         class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                                         <span class="text-sm font-bold text-blue-700">{{ $index + 1 }}</span>
                                     </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-900 truncate max-w-xs">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
                                             {{ $row->asiento_tomo_matricula }}
                                         </p>
-                                        <p class="text-xs text-gray-500">Documento registral</p>
+                                        <p class="text-xs text-gray-500 truncate">Documento registral</p>
                                     </div>
                                 </div>
-                                <span class="text-lg font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
+                                <span
+                                    class="flex-shrink-0 text-lg font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full whitespace-nowrap">
                                     {{ $row->total }}
                                 </span>
                             </div>

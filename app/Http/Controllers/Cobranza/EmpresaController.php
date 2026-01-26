@@ -16,8 +16,10 @@ class EmpresaController extends Controller
 {
     public function index(Request $request)
     {
-        $q = Empresa::query()->with(['corte', 'categoria', 'tipoEmpresa']);
+        $q = Empresa::query()
+            ->with(['corte', 'categoria', 'tipoEmpresa']);
 
+        // 🔎 Buscar por nombre o RTN
         if ($request->filled('buscar')) {
             $buscar = $request->buscar;
             $q->where(function ($x) use ($buscar) {
@@ -26,18 +28,53 @@ class EmpresaController extends Controller
             });
         }
 
+        // 📌 Estatus cobranza
         if ($request->filled('estatus')) {
             $q->where('estatus_cobranza', $request->estatus);
         }
 
+        // 🌍 Ciudad
         if ($request->filled('ciudad')) {
             $q->where('ciudad', 'like', "%{$request->ciudad}%");
         }
 
-        $empresas = $q->orderBy('nombre_empresa', 'asc')->paginate(12)->withQueryString();
+        // 💳 Tipo de pago
+        if ($request->filled('tipo_pago')) {
+            $q->where('tipo_pago', $request->tipo_pago);
+        }
 
-        return view('cobranza_socios.empresas.index', compact('empresas'));
+        // 🏢 Tipo de empresa
+        if ($request->filled('tipo_empresa_id')) {
+            $q->where('tipo_empresa_id', $request->tipo_empresa_id);
+        }
+
+        // 🗂️ Categoría
+        if ($request->filled('categoria_id')) {
+            $q->where('categoria_id', $request->categoria_id);
+        }
+
+        // 📅 CORTE (NUEVO)
+        if ($request->filled('corte_id')) {
+            $q->where('corte_id', $request->corte_id);
+        }
+
+        $empresas = $q
+            ->orderBy('nombre_empresa')
+            ->paginate(12)
+            ->withQueryString();
+
+        // 🔽 Catálogos para filtros
+        $tiposEmpresa = TipoEmpresa::where('activo', true)->orderBy('nombre')->get();
+        $categorias   = Categoria::where('activo', true)->orderBy('nombre')->get();
+        $cortes       = Corte::where('activo', true)->orderBy('dia_corte')->get();
+
+        return view(
+            'cobranza_socios.empresas.index',
+            compact('empresas', 'tiposEmpresa', 'categorias', 'cortes')
+        );
     }
+
+
 
     public function create()
     {

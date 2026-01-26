@@ -29,8 +29,8 @@ class ReportePagosController extends Controller
             $query->where('empresa_id', $request->empresa_id);
         }
 
-        if ($request->filled('usuario_id')) {
-            $query->where('created_by', $request->usuario_id);
+        if ($request->filled('gestor')) {
+            $query->where('created_by', $request->gestor);
         }
 
         if ($request->filled('metodo')) {
@@ -39,14 +39,21 @@ class ReportePagosController extends Controller
 
         $pagos = $query->paginate(15)->withQueryString();
 
-        // 🔢 Totales
+        // 🔢 KPIs
+        $totalPagos = $query->clone()->count();
         $totalMonto = $query->clone()->sum('monto');
 
+        $pagosHoy = Pago::whereDate('fecha_pago', today())->count();
+        $montoHoy = Pago::whereDate('fecha_pago', today())->sum('monto');
+
         return view('cobranza_socios.reportes.pagos_diarios', [
-            'pagos' => $pagos,
-            'totalMonto' => $totalMonto,
-            'empresas' => Empresa::orderBy('nombre_empresa')->get(),
-            'usuarios' => User::role('cobranza')->orderBy('name')->get(),
+            'pagos'       => $pagos,
+            'totalPagos'  => $totalPagos,
+            'montoTotal'  => $totalMonto,
+            'pagosHoy'    => $pagosHoy,
+            'montoHoy'    => $montoHoy,
+            'empresas'    => Empresa::orderBy('nombre_empresa')->get(),
+            'gestores'    => User::role('cobranza')->orderBy('name')->get(),
         ]);
     }
 }
