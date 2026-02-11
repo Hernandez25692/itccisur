@@ -6,28 +6,23 @@
     <title>Estado de Cuenta - {{ $empresa->nombre_empresa }}</title>
 
     <style>
-        /* Configuración carta vertical */
         @page {
             size: letter portrait;
-            margin: 20mm 15mm;
+            margin: 18mm 15mm;
         }
 
         body {
-            font-family: 'Calibri', 'Arial', sans-serif;
-            font-size: 10pt;
-            line-height: 1.1;
-            color: #1a365d;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9.5pt;
+            color: #000;
             margin: 0;
             padding: 0;
-            background: white;
         }
 
-        /* Header mejorado */
+        /* ================= HEADER ================= */
         .header {
             width: 100%;
-            border-bottom: 2.5pt solid #1e40af;
-            padding-bottom: 10pt;
-            margin-bottom: 12pt;
+            margin-bottom: 10px;
         }
 
         .header-table {
@@ -35,100 +30,65 @@
             border-collapse: collapse;
         }
 
-        .logo-cell {
-            width: 160pt;
-            vertical-align: middle;
-        }
-
         .logo {
-            max-width: 160pt;
-            height: auto;
+            width: 150px;
         }
 
-        .title-cell {
+        .header-right {
             text-align: right;
-            vertical-align: middle;
-        }
-
-        .title {
-            font-size: 16pt;
-            font-weight: 700;
-            color: #1e40af;
-            margin: 0 0 3pt 0;
-            letter-spacing: -0.5pt;
-        }
-
-        .date {
             font-size: 9pt;
-            color: #64748b;
-            font-weight: 500;
-            margin: 0;
+            line-height: 1.4;
         }
 
-        /* Información empresa - diseño compacto */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 4pt 15pt;
-            margin: 0 0 10pt 0;
-            padding: 8pt;
-            background: #f8fafc;
-            border-radius: 4pt;
-            border-left: 3pt solid #d97706;
+        .header-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 12pt;
+            margin: 10px 0;
+            text-transform: uppercase;
         }
 
-        .info-item {
-            display: flex;
-            margin: 0;
-            font-size: 9pt;
+        /* ================= INFO EMPRESA ================= */
+        .info-box {
+            width: 100%;
+            border: 1px solid #000;
+            padding: 6px;
+            margin-bottom: 10px;
         }
 
-        .info-label {
-            font-weight: 600;
-            color: #1e40af;
-            min-width: 90pt;
-            flex-shrink: 0;
-        }
-
-        .info-value {
-            color: #2d3748;
-            font-weight: 500;
-        }
-
-        /* Tabla mejorada */
-        .data-table {
+        .info-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 8pt 0;
-            font-size: 8.5pt;
+            font-size: 9pt;
         }
 
-        .data-table thead {
-            background: #1e40af;
-            color: white;
-        }
-
-        .data-table th {
-            padding: 6pt 4pt;
-            font-weight: 600;
-            text-align: center;
-            border: 1pt solid #2d5a8c;
-            text-transform: uppercase;
-            letter-spacing: 0.3pt;
-        }
-
-        .data-table td {
-            padding: 5pt 4pt;
-            border: 1pt solid #e2e8f0;
+        .info-table td {
+            padding: 4px;
             vertical-align: top;
         }
 
-        .data-table tbody tr:nth-child(even) {
-            background-color: #f8fafc;
+        .label {
+            font-weight: bold;
+            width: 140px;
         }
 
-        .text-left {
-            text-align: left;
+        /* ================= TABLA ================= */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+            margin-top: 8px;
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid #000;
+            padding: 5px;
+        }
+
+        .data-table th {
+            text-align: center;
+            font-weight: bold;
         }
 
         .text-center {
@@ -139,177 +99,167 @@
             text-align: right;
         }
 
-        /* Estados con colores */
         .estado-pagado {
-            color: #065f46;
-            font-weight: 600;
+            font-weight: bold;
+            color: #006400;
         }
 
         .estado-pendiente {
-            color: #92400e;
-            font-weight: 600;
+            font-weight: bold;
+            color: #8B4513;
         }
 
         .estado-vencido {
-            color: #991b1b;
-            font-weight: 600;
+            font-weight: bold;
+            color: #8B0000;
         }
 
-        /* Total destacado */
-        .total-row td {
-            font-weight: 700;
-            background: linear-gradient(to right, #1e40af, #2d5a8c);
-            color: white;
-            padding: 7pt 4pt;
-            border: 1pt solid #1e40af;
-        }
-
-        .total-row .text-right {
+        /* ================= TOTALES ================= */
+        .totales-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
             font-size: 9pt;
         }
 
-        /* Footer institucional */
+        .totales-table td {
+            border: 1px solid #000;
+            padding: 5px;
+        }
+
+        .totales-label {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        /* ================= FOOTER ================= */
         .footer {
-            margin-top: 12pt;
-            padding-top: 8pt;
-            border-top: 1pt solid #cbd5e0;
+            margin-top: 15px;
             font-size: 8pt;
-            color: #64748b;
             text-align: center;
-            line-height: 1.3;
         }
 
-        .institution-name {
-            font-weight: 600;
-            color: #1e40af;
+        .firmas {
+            width: 100%;
+            margin-top: 35px;
         }
 
-        .disclaimer {
-            font-size: 7.5pt;
-            color: #94a3b8;
-            margin-top: 3pt;
+        .firma-box {
+            width: 45%;
+            text-align: center;
+            display: inline-block;
         }
 
-        /* Utilitarios para impresión */
-        @media print {
-            body {
-                font-size: 10pt !important;
-            }
-
-            .header {
-                page-break-after: avoid;
-            }
-
-            .data-table {
-                page-break-inside: avoid;
-            }
+        .linea-firma {
+            border-top: 1px solid #000;
+            margin-top: 40px;
         }
     </style>
 </head>
 
 <body>
 
-    {{-- ===================== HEADER ===================== --}}
-    <table class="header-table">
-        <tr>
-            <td class="logo-cell">
-                <img src="{{ public_path('storage/logos/logop.png') }}" class="logo" alt="CCISUR">
-            </td>
-            <td class="title-cell">
-                <h2 class="title">Estado de Cuenta</h2>
-                <p class="date">{{ now()->format('d/m/Y') }}</p>
-            </td>
-        </tr>
-    </table>
-
-    {{-- ===================== INFO EMPRESA ===================== --}}
-    <div class="info-grid">
-        <div class="info-item">
-            <span class="info-label">Empresa:</span>
-            <span class="info-value">{{ $empresa->nombre_empresa }}</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">RTN:</span>
-            <span class="info-value">{{ $empresa->rtn_empresa }}</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Tipo Escritura:</span>
-            <span class="info-value">{{ $empresa->tipoEmpresa->nombre ?? '—' }}</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Tipo de Pago:</span>
-            <span class="info-value">{{ strtoupper($empresa->tipo_pago) }}</span>
-        </div>
+    {{-- ================= HEADER ================= --}}
+    <div class="header">
+        <table class="header-table">
+            <tr>
+                <td>
+                    <img src="{{ public_path('storage/logos/logop.png') }}" class="logo">
+                </td>
+                <td class="header-right">
+                    <strong>CÁMARA DE COMERCIO E INDUSTRIAS DEL SUR</strong><br>
+                    Ciudad Balcanes, Parque Industrial, Choluteca<br>
+                    Tel: 3315-0844<br>
+                    RTN: 06019008150622<br>
+                    info@ccisur.org
+                </td>
+            </tr>
+        </table>
     </div>
 
-    {{-- ===================== TABLA ===================== --}}
+    <div class="header-title">
+        ESTADO DE CUENTA
+    </div>
+
+    {{-- ================= INFO EMPRESA ================= --}}
+    <div class="info-box">
+        <table class="info-table">
+            <tr>
+                <td class="label">Nombre de la Empresa:</td>
+                <td>{{ $empresa->nombre_empresa }}</td>
+            </tr>
+            <tr>
+                <td class="label">RTN:</td>
+                <td>{{ $empresa->rtn_empresa }}</td>
+            </tr>
+            <tr>
+                <td class="label">Tipo de Escritura:</td>
+                <td>{{ $empresa->tipoEmpresa->nombre ?? '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Tipo de Pago:</td>
+                <td>{{ strtoupper($empresa->tipo_pago) }}</td>
+            </tr>
+            <tr>
+                <td class="label">Fecha de Emisión:</td>
+                <td>{{ now()->format('d/m/Y') }}</td>
+            </tr>
+        </table>
+    </div>
+
+    {{-- ================= TABLA DETALLE ================= --}}
     <table class="data-table">
         <thead>
             <tr>
-                <th width="14%">Tipo Escritura</th>
-                <th width="20%">Nombre Social</th>
-                <th width="12%">Período</th>
-                <th width="6%">Días</th>
-                <th width="6%">Año</th>
-                <th width="6%">Mes</th>
-                <th width="10%">Estado</th>
-                <th width="16%">Adeuda (L)</th>
+                <th>Período</th>
+                <th>Año</th>
+                <th>Mes</th>
+                <th>Días</th>
+                <th>Estado</th>
+                <th>Monto (L)</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($filas as $f)
                 <tr>
-                    <td class="text-left">
-                        {{ $empresa->tipoEmpresa->nombre ?? '—' }}
-                    </td>
-
-                    <td class="text-left">
-                        {{ $empresa->nombre_empresa }}
-                    </td>
-
-                    <td class="text-left">
-                        {{ $f['periodo_texto'] }}
-                    </td>
-
-                    <td class="text-center">
-                        {{ $f['dias'] ?? '—' }}
-                    </td>
-
-                    <td class="text-center">
-                        {{ $f['anio'] }}
-                    </td>
-
-                    <td class="text-center">
-                        {{ str_pad($f['mes'], 2, '0', STR_PAD_LEFT) }}
-                    </td>
-
+                    <td>{{ $f['periodo_texto'] }}</td>
+                    <td class="text-center">{{ $f['anio'] }}</td>
+                    <td class="text-center">{{ str_pad($f['mes'], 2, '0', STR_PAD_LEFT) }}</td>
+                    <td class="text-center">{{ $f['dias'] ?? '—' }}</td>
                     <td class="text-center estado-{{ strtolower($f['estado']) }}">
                         {{ strtoupper($f['estado']) }}
                     </td>
-
-                    <td class="text-right">
-                        {{ number_format($f['monto'], 2) }}
-                    </td>
+                    <td class="text-right">{{ number_format($f['monto'], 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
-
-        <tfoot>
-            <tr class="total-row">
-                <td colspan="7" class="text-right" style="color: black; font-weight: bold;">TOTAL ADEUDA</td>
-                <td class="text-right" style="color: black; font-weight: bold;">
-                    L. {{ number_format($totalAdeuda, 2) }}
-                </td>
-            </tr>
-        </tfoot>
     </table>
 
-    {{-- ===================== FOOTER ===================== --}}
-    <div class="footer">
-        <div class="institution-name">Cámara de Comercio e Industrias del Sur (CCISUR)</div>
-        <div class="disclaimer">
-            Documento generado automáticamente – válido sin firma
+    {{-- ================= TOTALES ================= --}}
+    <table class="totales-table">
+        <tr>
+            <td class="totales-label" width="80%">TOTAL ADEUDA (L)</td>
+            <td class="text-right"><strong>{{ number_format($totalAdeuda, 2) }}</strong></td>
+        </tr>
+    </table>
+
+    {{-- ================= FIRMAS ================= --}}
+    <div class="firmas">
+        <div class="firma-box">
+            <div class="linea-firma"></div>
+            Elaborado por
         </div>
+
+        <div class="firma-box" style="float:right;">
+            <div class="linea-firma"></div>
+            Firma del Cliente
+        </div>
+    </div>
+
+    {{-- ================= FOOTER ================= --}}
+    <div class="footer">
+        Documento generado automáticamente por el sistema CCISUR<br>
+        Válido sin firma ni sello
     </div>
 
 </body>

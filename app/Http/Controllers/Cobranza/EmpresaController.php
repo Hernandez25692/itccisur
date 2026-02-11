@@ -490,12 +490,19 @@ class EmpresaController extends Controller
             $inicio = \Carbon\Carbon::parse($cargo->periodo_inicio);
             $fin    = \Carbon\Carbon::parse($cargo->periodo_fin);
 
+            Carbon::setLocale('es');
+
             return [
-                'periodo_texto' => ucfirst(
-                    $inicio->translatedFormat('F Y')
-                        . ' – ' .
-                        $fin->translatedFormat('F Y')
+                'periodo_texto' => mb_convert_case(
+                    $inicio->translatedFormat('F Y'),
+                    MB_CASE_TITLE,
+                    'UTF-8'
+                ) . ' – ' . mb_convert_case(
+                    $fin->translatedFormat('F Y'),
+                    MB_CASE_TITLE,
+                    'UTF-8'
                 ),
+
                 'anio'   => $inicio->year,
                 'mes'    => $inicio->month,
                 'dias'   => $inicio->diffInDays($fin) + 1,

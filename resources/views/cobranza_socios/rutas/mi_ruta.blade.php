@@ -9,6 +9,12 @@
                     {{ $ruta->fecha_ruta->format('d/m/Y') }} · Mi ruta
                 </p>
             </div>
+            @role('admin_ti|gerencia|cobranza')
+                <a href="{{ route('cobranza.rutas.pdf', $ruta) }}" target="_blank"
+                    class="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 flex items-center gap-2">
+                    📄 Descargar ruta
+                </a>
+            @endrole
 
             <a href="{{ route('cobranza.rutas.mis') }}" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
                 Volver
@@ -41,7 +47,8 @@
                     </div>
 
                     {{-- FORM ESTADO VISITA --}}
-                    <form method="POST" action="{{ !$yaPagadoHoy ? route('cobranza.rutas.check', [$ruta, $e]) : '#' }}"
+                    <form method="POST"
+                        action="{{ !$yaPagadoHoy ? route('cobranza.rutas.check', [$ruta, $e]) : '#' }}"
                         class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         @csrf
 

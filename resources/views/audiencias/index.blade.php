@@ -409,7 +409,8 @@
                         </div>
 
                         <div class="flex items-center space-x-1">
-                            {{ $audiencias->links('vendor.pagination.tailwind-modern') }}
+                            {{ $audiencias->links() }}
+
                         </div>
                     </div>
                 </div>
