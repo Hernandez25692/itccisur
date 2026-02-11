@@ -369,7 +369,7 @@
                         </svg>
                         <input type="file" 
                                name="evidencia" 
-                               accept="image/*"
+                               accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
                                class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#0C1C3C] file:text-white hover:file:bg-[#1A2A4F]">
                         <p class="text-xs text-gray-500 mt-2">Formatos: JPG, PNG, GIF • Máx. 5MB</p>
                     </div>
