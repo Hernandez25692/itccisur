@@ -387,11 +387,11 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label form-label-required">Hora inicio</label>
-                            <input type="time" name="hora_inicio" class="form-input" id="horaInicio" required>
+                            <input type="time" name="hora_inicio" class="form-input" id="horaInicio" >
                         </div>
                         <div class="form-group">
                             <label class="form-label form-label-required">Hora fin</label>
-                            <input type="time" name="hora_fin" class="form-input" id="horaFin" required>
+                            <input type="time" name="hora_fin" class="form-input" id="horaFin" >
                         </div>
                     </div>
 
