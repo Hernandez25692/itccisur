@@ -24,18 +24,25 @@ class CalendarioEditorialDashboardController extends Controller
          | KPIs
          ========================= */
 
-        $totalMes = (clone $base)->count();
+        $excluirEstados = ['reprogramado', 'reprogramada', 'cancelado', 'cancelada'];
 
-        $porEstado = (clone $base)
+        // ✅ KPIs SOLO con los que “cuentan” (sin reprogramados/cancelados)
+        $baseKpi = (clone $base)->whereNotIn('estado', $excluirEstados);
+
+        $totalMes = (clone $baseKpi)->count();
+
+        $porEstado = (clone $baseKpi)
             ->select('estado')
             ->selectRaw('COUNT(*) as total')
             ->groupBy('estado')
             ->pluck('total', 'estado');
 
         $publicadas = $porEstado->get('publicado', 0);
+
         $cumplimiento = $totalMes > 0
             ? round(($publicadas / $totalMes) * 100, 1)
             : 0;
+
 
         /* =========================
          | GRÁFICAS
