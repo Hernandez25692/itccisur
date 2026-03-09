@@ -21,7 +21,12 @@
         return view('welcome');
     });
 
-
+    Route::get(
+        '/calendario-editorial/calendar',
+        [CalendarioEditorialController::class, 'calendar']
+    )
+        ->name('calendario-editorial.calendar');
+        
     Route::middleware(['auth', 'role:admin_ti'])
         ->prefix('admin')
         ->name('admin.')
@@ -79,12 +84,8 @@
         });
 
 
-    Route::get(
-        '/calendario-editorial/calendar',
-        [CalendarioEditorialController::class, 'calendar']
-    )
-        ->name('calendario-editorial.calendar');
-        
+
+
     Route::middleware(['auth', 'role:GOR|admin_ti|gerencia|GOR_Gerencia'])
         ->prefix('gor')
         ->name('gor.')
