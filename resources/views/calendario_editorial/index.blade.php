@@ -56,6 +56,17 @@
                                     </svg>
                                     <span>Nueva Publicación</span>
                                 </a>
+                                <a href="{{ route('calendario-editorial.calendar') }}"
+                                    class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+
+                                    <span>Vista Calendario</span>
+
+                                </a>
                             </div>
                         @endrole
                     </div>
@@ -142,7 +153,8 @@
                                         <div class="flex items-center justify-between gap-2 cursor-pointer group"
                                             onclick="toggleSort('semana')">
                                             <span>Semana</span>
-                                            <div class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                                            <div
+                                                class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                                                     <path d="M7 14l5-5 5 5z"></path>
                                                 </svg>
@@ -157,7 +169,8 @@
                                         <div class="flex items-center justify-between gap-2 cursor-pointer group"
                                             onclick="toggleSort('fecha')">
                                             <span>Fecha y Hora</span>
-                                            <div class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                                            <div
+                                                class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                                                     <path d="M7 14l5-5 5 5z"></path>
                                                 </svg>
@@ -172,7 +185,8 @@
                                         <div class="flex items-center justify-between gap-2 cursor-pointer group"
                                             onclick="toggleSort('contenido')">
                                             <span>Contenido</span>
-                                            <div class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                                            <div
+                                                class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                                                     <path d="M7 14l5-5 5 5z"></path>
                                                 </svg>
@@ -187,7 +201,8 @@
                                         <div class="flex items-center justify-between gap-2 cursor-pointer group"
                                             onclick="toggleSort('estado')">
                                             <span>Estado</span>
-                                            <div class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                                            <div
+                                                class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                                                     <path d="M7 14l5-5 5 5z"></path>
                                                 </svg>
@@ -518,7 +533,7 @@
                                 rows.sort((a, b) => {
                                     let aVal, bVal;
 
-                                    switch(column) {
+                                    switch (column) {
                                         case 'semana':
                                             aVal = parseInt(a.dataset.semana);
                                             bVal = parseInt(b.dataset.semana);
@@ -553,7 +568,9 @@
                     <div class="bg-white px-8 py-6 border-t border-gray-200">
                         <div class="flex items-center justify-between">
                             <div class="text-sm text-gray-600">
-                                Mostrando <span class="font-medium">{{ $registros->firstItem() ?? 0 }}</span> a <span class="font-medium">{{ $registros->lastItem() ?? 0 }}</span> de <span class="font-medium">{{ $registros->total() }}</span> registros
+                                Mostrando <span class="font-medium">{{ $registros->firstItem() ?? 0 }}</span> a <span
+                                    class="font-medium">{{ $registros->lastItem() ?? 0 }}</span> de <span
+                                    class="font-medium">{{ $registros->total() }}</span> registros
                             </div>
                             <div class="flex gap-2">
                                 {{ $registros->links('pagination::tailwind') }}
@@ -795,7 +812,9 @@
                     <div class="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
                         <div class="flex flex-col items-center gap-4">
                             <div class="text-sm text-gray-600 text-center">
-                                Mostrando <span class="font-medium">{{ $registros->firstItem() ?? 0 }}</span> a <span class="font-medium">{{ $registros->lastItem() ?? 0 }}</span> de <span class="font-medium">{{ $registros->total() }}</span> registros
+                                Mostrando <span class="font-medium">{{ $registros->firstItem() ?? 0 }}</span> a <span
+                                    class="font-medium">{{ $registros->lastItem() ?? 0 }}</span> de <span
+                                    class="font-medium">{{ $registros->total() }}</span> registros
                             </div>
                             <div class="w-full">
                                 {{ $registros->links('pagination::tailwind') }}

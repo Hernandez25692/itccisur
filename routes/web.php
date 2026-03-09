@@ -29,6 +29,8 @@
             Route::resource('users', UserController::class);
         });
 
+
+
     Route::middleware(['auth'])->group(function () {
         Route::get('/gor/resumen', [GorResumenController::class, 'index'])->name('gor.resumen');
     });
@@ -76,6 +78,13 @@
                 ->name('dashboard');
         });
 
+
+    Route::get(
+        '/calendario-editorial/calendar',
+        [CalendarioEditorialController::class, 'calendar']
+    )
+        ->name('calendario-editorial.calendar');
+        
     Route::middleware(['auth', 'role:GOR|admin_ti|gerencia|GOR_Gerencia'])
         ->prefix('gor')
         ->name('gor.')

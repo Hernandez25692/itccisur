@@ -227,4 +227,11 @@ class CalendarioEditorialController extends Controller
     {
         return view('calendario_editorial.show', compact('calendarioEditorial'));
     }
+
+    public function calendar()
+    {
+        $eventos = CalendarioEditorial::all();
+
+        return view('calendario_editorial.calendar', compact('eventos'));
+    }
 }
