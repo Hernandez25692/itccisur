@@ -56,7 +56,17 @@
                                     </svg>
                                     <span>Nueva Publicación</span>
                                 </a>
-                                
+                                <a href="{{ route('calendario-editorial.calendar') }}"
+                                    class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+
+                                    <span>Vista Calendario</span>
+
+                                </a>
                             </div>
                         @endrole
                     </div>

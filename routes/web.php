@@ -21,12 +21,8 @@
         return view('welcome');
     });
 
-    Route::get(
-        '/calendario-editorial/calendar',
-        [CalendarioEditorialController::class, 'calendar']
-    )
-        ->name('calendario-editorial.calendar');
-        
+
+
     Route::middleware(['auth', 'role:admin_ti'])
         ->prefix('admin')
         ->name('admin.')
@@ -133,6 +129,10 @@
 
             Route::put('/{calendarioEditorial}', [CalendarioEditorialController::class, 'update'])
                 ->name('update');
+                
+            // ✅ CALENDARIO
+            Route::get('/calendar', [CalendarioEditorialController::class, 'calendar'])
+                ->name('calendar');
 
             // Acción exclusiva admin_ti
             Route::post('/{calendarioEditorial}/publicar', [CalendarioEditorialController::class, 'marcarPublicado'])
