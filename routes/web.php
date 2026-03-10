@@ -107,7 +107,7 @@
                 [GorAntecedenteRegistralController::class, 'show']
             )->name('antecedentes.show');
         });
-
+    // Vista calendario editorial
     Route::middleware(['auth', 'role:admin_ti|gerencia|usuario|calendario'])
         ->get('/calendario-editorial/vista-calendario', [CalendarioEditorialController::class, 'calendar']);
 
@@ -124,10 +124,6 @@
 
             Route::post('/', [CalendarioEditorialController::class, 'store'])
                 ->name('store');
-
-            // ✅ CALENDARIO (ANTES de rutas con {calendarioEditorial})
-            Route::get('/calendar', [CalendarioEditorialController::class, 'calendar'])
-                ->name('calendar');
 
             Route::get('/{calendarioEditorial}/editar', [CalendarioEditorialController::class, 'edit'])
                 ->name('edit');
