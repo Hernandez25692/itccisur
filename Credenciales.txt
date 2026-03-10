@@ -9,3 +9,7 @@ Contraseña: C
 ------Colores 
 el azul institucional (blue-900, #0f172a, #1e293b)
 dorado/ámbar institucional #C5A049.
+
+Archivo de configuracion sudo cat /etc/nginx/sites-available/itccisur
+
+Reiniciar Nginx  sudo systemctl reload nginx
