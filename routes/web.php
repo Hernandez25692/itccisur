@@ -124,25 +124,22 @@
             Route::post('/', [CalendarioEditorialController::class, 'store'])
                 ->name('store');
 
+            // ✅ CALENDARIO (ANTES de rutas con {calendarioEditorial})
+            Route::get('/calendar', [CalendarioEditorialController::class, 'calendar'])
+                ->name('calendar');
+
             Route::get('/{calendarioEditorial}/editar', [CalendarioEditorialController::class, 'edit'])
                 ->name('edit');
 
             Route::put('/{calendarioEditorial}', [CalendarioEditorialController::class, 'update'])
                 ->name('update');
-                
-            // ✅ CALENDARIO
-            Route::get('/calendar', [CalendarioEditorialController::class, 'calendar'])
-                ->name('calendar');
 
-            // Acción exclusiva admin_ti
             Route::post('/{calendarioEditorial}/publicar', [CalendarioEditorialController::class, 'marcarPublicado'])
                 ->middleware('role:admin_ti')
                 ->name('publicar');
 
-            Route::get(
-                '/{calendarioEditorial}',
-                [CalendarioEditorialController::class, 'show']
-            )->name('show');
+            Route::get('/{calendarioEditorial}', [CalendarioEditorialController::class, 'show'])
+                ->name('show');
         });
 
     Route::delete(
