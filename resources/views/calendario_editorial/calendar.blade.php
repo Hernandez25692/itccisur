@@ -5,24 +5,26 @@
          Colores institucionales: Azul #0B1F3A / Dorado #C5A049
     ════════════════════════════════════════════════ --}}
 
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
 
     <style>
         :root {
-            --azul-profundo:   #0B1F3A;
-            --azul-medio:      #112849;
-            --azul-panel:      #0D2040;
-            --azul-borde:      #1A3358;
-            --azul-hover:      #1C3D6A;
-            --dorado:          #C5A049;
-            --dorado-claro:    #D4B46A;
-            --dorado-suave:    rgba(197,160,73,.15);
-            --dorado-borde:    rgba(197,160,73,.35);
-            --blanco:          #F0EDE6;
-            --gris-texto:      #8FA5C0;
-            --radius:          14px;
+            --azul-profundo: #0B1F3A;
+            --azul-medio: #112849;
+            --azul-panel: #0D2040;
+            --azul-borde: #1A3358;
+            --azul-hover: #1C3D6A;
+            --dorado: #C5A049;
+            --dorado-claro: #D4B46A;
+            --dorado-suave: rgba(197, 160, 73, .15);
+            --dorado-borde: rgba(197, 160, 73, .35);
+            --blanco: #F0EDE6;
+            --gris-texto: #8FA5C0;
+            --radius: 14px;
         }
 
         /* ── Página ── */
@@ -30,8 +32,8 @@
             min-height: 100vh;
             background: var(--azul-profundo);
             background-image:
-                radial-gradient(ellipse 80% 50% at 10% 0%,   rgba(197,160,73,.08) 0%, transparent 55%),
-                radial-gradient(ellipse 60% 40% at 90% 100%, rgba(197,160,73,.06) 0%, transparent 50%),
+                radial-gradient(ellipse 80% 50% at 10% 0%, rgba(197, 160, 73, .08) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 40% at 90% 100%, rgba(197, 160, 73, .06) 0%, transparent 50%),
                 url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C5A049' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             padding: 2.5rem 1.5rem;
             font-family: 'DM Sans', sans-serif;
@@ -53,6 +55,7 @@
             border-bottom: 1px solid var(--azul-borde);
             position: relative;
         }
+
         .ccisur-header::after {
             content: '';
             position: absolute;
@@ -72,9 +75,11 @@
             margin: 0;
             letter-spacing: -.5px;
         }
+
         .ccisur-header-left h1 span {
             color: var(--dorado);
         }
+
         .ccisur-header-left p {
             margin: .35rem 0 0;
             font-size: .85rem;
@@ -97,6 +102,7 @@
             color: var(--dorado-claro);
             letter-spacing: .3px;
         }
+
         .ccisur-badge-dot {
             width: 7px;
             height: 7px;
@@ -104,9 +110,19 @@
             background: var(--dorado);
             animation: pulse-dot 2s ease-in-out infinite;
         }
+
         @keyframes pulse-dot {
-            0%,100% { opacity:1; transform:scale(1); }
-            50%      { opacity:.5; transform:scale(.7); }
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: .5;
+                transform: scale(.7);
+            }
         }
 
         /* ── Tarjeta principal ── */
@@ -116,16 +132,19 @@
             border-radius: var(--radius);
             padding: 2rem;
             box-shadow:
-                0 0 0 1px rgba(197,160,73,.05),
-                0 20px 60px rgba(0,0,0,.4),
-                inset 0 1px 0 rgba(197,160,73,.07);
+                0 0 0 1px rgba(197, 160, 73, .05),
+                0 20px 60px rgba(0, 0, 0, .4),
+                inset 0 1px 0 rgba(197, 160, 73, .07);
             position: relative;
             overflow: hidden;
         }
+
         .ccisur-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 3px;
             background: linear-gradient(90deg, var(--dorado) 0%, var(--dorado-claro) 50%, transparent 100%);
             border-radius: var(--radius) var(--radius) 0 0;
@@ -141,6 +160,7 @@
             flex-wrap: wrap;
             gap: .75rem;
         }
+
         .fc .fc-toolbar-title {
             font-family: 'Playfair Display', serif !important;
             font-size: 1.6rem !important;
@@ -164,22 +184,26 @@
             box-shadow: none !important;
             transition: all .2s ease !important;
         }
+
         .fc .fc-button:hover {
             background: var(--azul-hover) !important;
             border-color: var(--dorado-borde) !important;
             color: var(--dorado-claro) !important;
         }
+
         .fc .fc-button-primary:not(:disabled).fc-button-active,
         .fc .fc-button-primary:not(:disabled):active {
             background: var(--dorado) !important;
             border-color: var(--dorado) !important;
             color: var(--azul-profundo) !important;
         }
+
         .fc .fc-today-button {
             background: var(--dorado-suave) !important;
             border-color: var(--dorado-borde) !important;
             color: var(--dorado-claro) !important;
         }
+
         .fc .fc-today-button:hover {
             background: var(--dorado) !important;
             color: var(--azul-profundo) !important;
@@ -189,10 +213,12 @@
         .fc .fc-col-header {
             background: var(--azul-profundo) !important;
         }
+
         .fc .fc-col-header-cell {
             padding: .75rem 0 !important;
             border-color: var(--azul-borde) !important;
         }
+
         .fc .fc-col-header-cell-cushion {
             font-family: 'DM Sans', sans-serif !important;
             font-size: .7rem !important;
@@ -209,12 +235,15 @@
             border-color: var(--azul-borde) !important;
             transition: background .15s ease;
         }
+
         .fc .fc-daygrid-day:hover {
-            background: rgba(197,160,73,.04) !important;
+            background: rgba(197, 160, 73, .04) !important;
         }
+
         .fc .fc-daygrid-day.fc-day-today {
-            background: rgba(197,160,73,.08) !important;
+            background: rgba(197, 160, 73, .08) !important;
         }
+
         .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
             background: var(--dorado) !important;
             color: var(--azul-profundo) !important;
@@ -227,6 +256,7 @@
             margin: 4px;
             font-weight: 700;
         }
+
         .fc .fc-daygrid-day-number {
             font-family: 'DM Sans', sans-serif !important;
             font-size: .8rem !important;
@@ -236,11 +266,13 @@
             padding: 6px 8px !important;
             transition: color .15s;
         }
+
         .fc .fc-daygrid-day:hover .fc-daygrid-day-number {
             color: var(--blanco) !important;
         }
+
         .fc .fc-day-other .fc-daygrid-day-number {
-            color: rgba(143,165,192,.3) !important;
+            color: rgba(143, 165, 192, .3) !important;
         }
 
         /* Tabla bordes */
@@ -248,6 +280,7 @@
         .fc-theme-standard th {
             border-color: var(--azul-borde) !important;
         }
+
         .fc-theme-standard .fc-scrollgrid {
             border-color: var(--azul-borde) !important;
             border-radius: 10px;
@@ -260,6 +293,7 @@
             border: none !important;
             margin: 1px 4px !important;
         }
+
         .fc .fc-daygrid-event-harness {
             margin-bottom: 2px;
         }
@@ -279,7 +313,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            background: linear-gradient(135deg, rgba(197,160,73,.2) 0%, rgba(197,160,73,.1) 100%);
+            background: linear-gradient(135deg, rgba(197, 160, 73, .2) 0%, rgba(197, 160, 73, .1) 100%);
             border: 1px solid var(--dorado-borde);
             color: var(--dorado-claro);
             padding: 3px 8px;
@@ -295,6 +329,7 @@
             cursor: pointer;
             letter-spacing: .2px;
         }
+
         .event-pill::before {
             content: '';
             flex-shrink: 0;
@@ -303,13 +338,15 @@
             border-radius: 50%;
             background: var(--dorado);
         }
+
         .event-pill:hover {
             background: var(--dorado) !important;
             border-color: var(--dorado) !important;
             color: var(--azul-profundo) !important;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(197,160,73,.3);
+            box-shadow: 0 4px 12px rgba(197, 160, 73, .3);
         }
+
         .event-pill:hover::before {
             background: var(--azul-profundo);
         }
@@ -319,11 +356,13 @@
             border-color: var(--azul-borde) !important;
             height: 40px;
         }
+
         .fc .fc-timegrid-slot-label {
             font-size: .7rem !important;
             color: var(--gris-texto) !important;
             font-family: 'DM Sans', sans-serif !important;
         }
+
         .fc .fc-timegrid-axis {
             border-color: var(--azul-borde) !important;
         }
@@ -333,13 +372,15 @@
             background: var(--azul-medio) !important;
             border: 1px solid var(--azul-borde) !important;
             border-radius: 10px !important;
-            box-shadow: 0 16px 40px rgba(0,0,0,.5) !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, .5) !important;
         }
+
         .fc .fc-popover-header {
             background: var(--azul-profundo) !important;
             border-radius: 10px 10px 0 0 !important;
             padding: .6rem .9rem !important;
         }
+
         .fc .fc-popover-title {
             font-family: 'DM Sans', sans-serif !important;
             font-size: .8rem !important;
@@ -348,6 +389,7 @@
             text-transform: uppercase;
             letter-spacing: .5px;
         }
+
         .fc .fc-popover-close {
             color: var(--gris-texto) !important;
         }
@@ -362,6 +404,7 @@
             border-top: 1px solid var(--azul-borde);
             flex-wrap: wrap;
         }
+
         .legend-item {
             display: flex;
             align-items: center;
@@ -371,28 +414,62 @@
             color: var(--gris-texto);
             letter-spacing: .3px;
         }
+
         .legend-dot {
             width: 8px;
             height: 8px;
             border-radius: 2px;
         }
-        .legend-dot.gold  { background: var(--dorado); }
-        .legend-dot.today { background: var(--dorado); border-radius: 50%; }
+
+        .legend-dot.gold {
+            background: var(--dorado);
+        }
+
+        .legend-dot.today {
+            background: var(--dorado);
+            border-radius: 50%;
+        }
 
         /* ── Fade-in ── */
         @keyframes fadeUp {
-            from { opacity:0; transform:translateY(16px); }
-            to   { opacity:1; transform:translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .ccisur-card { animation: fadeUp .5s ease both; }
-        .ccisur-header { animation: fadeUp .4s ease both; }
+
+        .ccisur-card {
+            animation: fadeUp .5s ease both;
+        }
+
+        .ccisur-header {
+            animation: fadeUp .4s ease both;
+        }
 
         /* Responsive */
         @media (max-width: 640px) {
-            .ccisur-header { flex-direction: column; align-items: flex-start; gap: .75rem; }
-            .ccisur-card  { padding: 1.25rem; }
-            .fc .fc-toolbar { justify-content: center; }
-            .fc .fc-toolbar-title { font-size: 1.2rem !important; }
+            .ccisur-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: .75rem;
+            }
+
+            .ccisur-card {
+                padding: 1.25rem;
+            }
+
+            .fc .fc-toolbar {
+                justify-content: center;
+            }
+
+            .fc .fc-toolbar-title {
+                font-size: 1.2rem !important;
+            }
         }
     </style>
 
@@ -432,7 +509,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
 
             const calendarEl = document.getElementById('calendar');
 
@@ -446,36 +523,36 @@
                 displayEventTime: false,
 
                 headerToolbar: {
-                    left:   'prev,next today',
+                    left: 'prev,next today',
                     center: 'title',
-                    right:  'dayGridMonth,timeGridWeek,timeGridDay'
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
 
                 buttonText: {
-                    today:  'Hoy',
-                    month:  'Mes',
-                    week:   'Semana',
-                    day:    'Día'
+                    today: 'Hoy',
+                    month: 'Mes',
+                    week: 'Semana',
+                    day: 'Día'
                 },
 
                 events: [
                     @foreach ($eventos as $evento)
-                    {
-                        id:    "{{ $evento->id }}",
-                        title: "{{ addslashes($evento->tema) }}",
-                        start: "{{ $evento->fecha_publicacion }}",
-                        url:   "{{ route('calendario-editorial.show', $evento) }}"
-                    },
+                        {
+                            id: "{{ $evento->id }}",
+                            title: "{{ addslashes($evento->tema) }}",
+                            start: "{{ $evento->fecha_publicacion }}",
+                            url: "{{ route('calendario-editorial.show', $evento) }}"
+                        },
                     @endforeach
                 ],
 
-                eventContent: function (info) {
+                eventContent: function(info) {
                     return {
                         html: `<a href="${info.event.url}" class="event-pill" title="${info.event.title}">${info.event.title}</a>`
                     };
                 },
 
-                eventClick: function (info) {
+                eventClick: function(info) {
                     info.jsEvent.preventDefault();
                     window.location.href = info.event.url;
                 }
