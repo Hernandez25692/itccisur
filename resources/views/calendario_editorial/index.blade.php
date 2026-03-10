@@ -65,6 +65,7 @@
                                     </svg>
 
                                     <span>Vista Calendario</span>
+
                                 </a>
                             </div>
                         @endrole
