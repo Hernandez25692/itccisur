@@ -125,8 +125,8 @@
                 ->name('store');
 
             // ⭐ ESTA DEBE IR ANTES DE LAS RUTAS CON {calendarioEditorial}
-            Route::get('/vista-calendario', [CalendarioEditorialController::class, 'vistacalendario'])
-                ->name('vista-calendario');
+            Route::get('/calendar', [CalendarioEditorialController::class, 'calendar'])
+                ->name('calendar');
 
             Route::get('/{calendarioEditorial}/editar', [CalendarioEditorialController::class, 'edit'])
                 ->name('edit');
