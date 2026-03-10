@@ -230,9 +230,7 @@ class CalendarioEditorialController extends Controller
 
     public function calendar()
     {
-        $eventos = CalendarioEditorial::orderBy('fecha_publicacion')
-            ->orderBy('hora')
-            ->get();
+        $eventos = CalendarioEditorial::all();
 
         return view('calendario_editorial.calendar', compact('eventos'));
     }
