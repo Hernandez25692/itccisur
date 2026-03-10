@@ -108,7 +108,7 @@
             )->name('antecedentes.show');
         });
 
- 
+
 
     Route::middleware(['auth', 'role:admin_ti|gerencia|usuario|calendario'])
         ->prefix('calendario-editorial')
@@ -124,7 +124,7 @@
             Route::post('/', [CalendarioEditorialController::class, 'store'])
                 ->name('store');
 
-            // ✅ CALENDARIO (ANTES de rutas con {calendarioEditorial})
+            // ⭐ ESTA DEBE IR ANTES DE LAS RUTAS CON {calendarioEditorial}
             Route::get('/calendar', [CalendarioEditorialController::class, 'calendar'])
                 ->name('calendar');
 
