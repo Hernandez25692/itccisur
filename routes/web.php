@@ -108,7 +108,8 @@
             )->name('antecedentes.show');
         });
 
-
+    Route::middleware(['auth', 'role:admin_ti|gerencia|usuario|calendario'])
+        ->get('/calendario-editorial/vista-calendario', [CalendarioEditorialController::class, 'calendar']);
 
     Route::middleware(['auth', 'role:admin_ti|gerencia|usuario|calendario'])
         ->prefix('calendario-editorial')

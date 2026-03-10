@@ -56,7 +56,7 @@
                                     </svg>
                                     <span>Nueva Publicación</span>
                                 </a>
-                                <a href="{{ route('calendario-editorial.calendar') }}"
+                                <a href="{{ url('/calendario-editorial/vista-calendario') }}"
                                     class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
 
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +65,6 @@
                                     </svg>
 
                                     <span>Vista Calendario</span>
-
                                 </a>
                             </div>
                         @endrole
