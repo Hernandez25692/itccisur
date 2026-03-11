@@ -230,7 +230,21 @@ class CalendarioEditorialController extends Controller
 
     public function calendar()
     {
-        $eventos = CalendarioEditorial::all();
+        $eventos = CalendarioEditorial::orderBy('fecha_publicacion')
+            ->orderBy('hora')
+            ->get()
+            ->map(function ($evento) {
+                return [
+                    'id'    => $evento->id,
+                    'title' => $evento->tema ?? 'Sin título',
+                    'start' => $evento->fecha_publicacion
+                        ? \Carbon\Carbon::parse($evento->fecha_publicacion)->format('Y-m-d')
+                        : null,
+                    'url'   => route('calendario-editorial.show', $evento->id),
+                ];
+            })
+            ->filter(fn($evento) => !empty($evento['start']))
+            ->values();
 
         return view('calendario_editorial.calendar', compact('eventos'));
     }
