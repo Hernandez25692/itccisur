@@ -13,3 +13,7 @@ dorado/ámbar institucional #C5A049.
 Archivo de configuracion sudo cat /etc/nginx/sites-available/itccisur
 
 Reiniciar Nginx  sudo systemctl reload nginx
+
+
+EJECUTAR ROLES php artisan db:seed --class=RoleSeeder
+

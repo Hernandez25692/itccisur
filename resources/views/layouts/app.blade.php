@@ -260,6 +260,47 @@
                             @endif
                         </a>
                     @endrole
+                    @role('admin_ti|rrhh')
+
+                        <!-- Recursos Humanos -->
+                        <div class="mb-2">
+
+                            <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
+                                :class="{ 'hidden': !sidebarOpen }">RRHH</p>
+
+                            <a href="{{ route('empleados.index') }}"
+                                class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
+        {{ request()->routeIs('empleados.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
+                                :class="{ 'justify-center px-3': !sidebarOpen }"
+                                :title="!sidebarOpen ? 'Control de Empleados' : ''">
+
+                                <i class="fas fa-user-tie w-5 text-lg flex-shrink-0"></i>
+
+                                <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">
+                                    Control de Empleados
+                                </span>
+
+                                @if (request()->routeIs('empleados.*'))
+                                    <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
+                                        :class="{ 'hidden': !sidebarOpen }"></span>
+                                @endif
+
+                            </a>
+                            <a href="{{ route('vacaciones.index') }}"
+                                class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
+{{ request()->routeIs('vacaciones.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+
+                                <i class="fas fa-calendar-alt w-5"></i>
+
+                                <span class="ml-3">
+                                    Control de Vacaciones
+                                </span>
+
+                            </a>
+
+                        </div>
+
+                    @endrole
 
                 </div>
                 <!-- Sección Cobranza -->
@@ -306,7 +347,8 @@
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 {{ request()->routeIs('control.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
                             :class="{ 'justify-center px-3': !sidebarOpen }" :title="!sidebarOpen ? 'Control TI' : ''">
                             <i class="fas fa-shield w-5 text-lg flex-shrink-0"></i>
-                            <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">Renovaciones</span>
+                            <span class="ml-3 font-medium truncate"
+                                :class="{ 'hidden': !sidebarOpen }">Renovaciones</span>
                             @if (request()->routeIs('control.*'))
                                 <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
                                     :class="{ 'hidden': !sidebarOpen }"></span>

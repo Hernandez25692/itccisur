@@ -15,7 +15,9 @@
     use App\Http\Controllers\Cobranza\CargoController;
     use App\Http\Controllers\Cobranza\DashboardController;
     use App\Http\Controllers\Cobranza\RutaController;
-
+    use App\Http\Controllers\RrhhEmpleadoController;
+    use App\Http\Controllers\RrhhVacacionesPeriodoController;
+    use App\Http\Controllers\RrhhVacacionesController;
 
     Route::get('/', function () {
         return view('welcome');
@@ -349,5 +351,46 @@
 
 
 
+
+    Route::prefix('rrhh')->group(function () {
+
+        Route::resource('empleados', RrhhEmpleadoController::class);
+
+        Route::get(
+            'generar-periodos/{anio?}',
+            [RrhhVacacionesPeriodoController::class, 'generarPeriodos']
+        )
+            ->name('rrhh.generar.periodos');
+
+        Route::get('vacaciones', [RrhhVacacionesController::class, 'index'])->name('vacaciones.index');
+
+        Route::get(
+            'vacaciones/solicitud/{empleado}',
+            [RrhhVacacionesController::class, 'crearSolicitud']
+        )
+            ->name('vacaciones.crear');
+
+        Route::post(
+            'vacaciones/guardar',
+            [RrhhVacacionesController::class, 'guardarSolicitud']
+        )
+            ->name('vacaciones.guardar');
+
+        Route::get(
+            '/rrhh/vacaciones/{empleado}/historial',
+            [RrhhVacacionesController::class, 'historial']
+        )->name('vacaciones.historial');
+    });
+    Route::get(
+        '/vacaciones/editar/{id}',
+        [RrhhVacacionesController::class, 'editarMovimiento']
+    )
+        ->name('vacaciones.editar');
+
+    Route::put(
+        '/vacaciones/actualizar/{id}',
+        [RrhhVacacionesController::class, 'actualizarMovimiento']
+    )
+        ->name('vacaciones.actualizar');
 
     require __DIR__ . '/auth.php';
