@@ -331,23 +331,22 @@ GUARDAR VALORES ANTERIORES PARA BITACORA
 
         $anio = now()->year;
 
-        /*
-    VALIDAR SI YA EXISTE PERIODO (CLAVE)
-    */
-
+        // 🔴 VALIDAR SI YA EXISTE
         $periodoExistente = RrhhVacacionesPeriodo::where('empleado_id', $empleado->id)
             ->where('anio', $anio)
             ->first();
 
         if ($periodoExistente) {
-            return $periodoExistente; // 🔴 YA EXISTE → NO HACER NADA
+            return $periodoExistente;
         }
 
-        /*
-    CALCULAR DIAS SEGUN LEY
-    */
-
+        // 🔥 CALCULAR DIAS SEGUN LEY
         $vacacionesLey = $empleado->vacacionesPorLey();
+
+        // 🚫 EVITAR CREAR PERIODOS SI NO LE CORRESPONDEN DIAS
+        if ($vacacionesLey <= 0) {
+            return null;
+        }
 
         $acumulado = $empleado->vacaciones_acumuladas ?? 0;
 
@@ -362,15 +361,12 @@ GUARDAR VALORES ANTERIORES PARA BITACORA
             'dias_pendientes' => $vacacionesLey + $acumulado
         ]);
 
-        /*
-    REGISTRAR BITACORA SOLO UNA VEZ
-    */
-
-        \App\Models\RrhhVacacionesBitacora::create([
+        // 🧾 BITÁCORA CLARA (MEJORADA)
+        RrhhVacacionesBitacora::create([
             'empleado_id' => $empleado->id,
             'movimiento_id' => null,
             'accion' => 'ACREDITACION_ANUAL',
-            'detalle' => "Se acreditaron {$vacacionesLey} días por antigüedad (Año {$anio})",
+            'detalle' => "ACREDITACIÓN AUTOMÁTICA: {$vacacionesLey} días asignados según antigüedad laboral para el año {$anio}",
             'usuario' => 'Sistema'
         ]);
 

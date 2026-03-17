@@ -106,7 +106,11 @@ class RrhhEmpleadoController extends Controller
             'vacaciones_acumuladas' => 'nullable|numeric|min:0',
         ]);
 
-        RrhhEmpleado::create($request->all());
+        $empleado = RrhhEmpleado::create($request->all());
+
+        // 🔥 CREAR PERIODO AUTOMATICO
+        app(\App\Http\Controllers\RrhhVacacionesController::class)
+            ->acreditarVacacionesPorAntiguedad($empleado->id);
 
         return redirect()
             ->route('empleados.index')
