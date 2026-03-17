@@ -185,7 +185,70 @@
             </a>
 
         </div>
+        <div class="mt-10">
 
+            <h3 class="text-xl font-bold mb-4">
+                Bitácora de cambios
+            </h3>
+
+            <div class="overflow-x-auto">
+
+                <table class="min-w-full bg-white border text-sm">
+
+                    <thead class="bg-gray-200">
+
+                        <tr>
+
+                            <th class="px-3 py-2">Fecha</th>
+                            <th class="px-3 py-2">Acción</th>
+                            <th class="px-3 py-2">Detalle</th>
+                            <th class="px-3 py-2">Usuario</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @forelse ($bitacora as $log)
+                            <tr class="border-b hover:bg-gray-50">
+
+                                <td class="px-3 py-2">
+                                    {{ \Carbon\Carbon::parse($log->fecha_evento)->format('d-m-Y H:i') }}
+                                </td>
+
+                                <td class="px-3 py-2 font-semibold text-blue-700">
+                                    {{ $log->accion }}
+                                </td>
+
+                                <td class="px-3 py-2">
+                                    {{ $log->detalle }}
+                                </td>
+
+                                <td class="px-3 py-2">
+                                    {{ $log->usuario }}
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+
+                                <td colspan="4" class="text-center py-4 text-gray-500">
+                                    No hay registros en la bitácora
+                                </td>
+
+                            </tr>
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
     </div>
 
 </x-app-layout>

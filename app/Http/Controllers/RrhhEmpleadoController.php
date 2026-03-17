@@ -8,9 +8,80 @@ use App\Models\RrhhEmpleado;
 class RrhhEmpleadoController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $empleados = RrhhEmpleado::orderBy('nombre_completo')->paginate(15);
+        $query = RrhhEmpleado::query();
+
+        // 🔍 BUSQUEDA (nombre o identidad)
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nombre_completo', 'like', '%' . $request->search . '%')
+                    ->orWhere('identidad', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // 📌 ESTADO
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // 📌 AREA
+        if ($request->filled('area')) {
+            $query->where('area', 'like', '%' . $request->area . '%');
+        }
+
+        // 🔥 CARGAR RELACION (para no hacer mil consultas)
+        $query->with('periodosVacaciones');
+
+        $empleados = $query->orderBy('nombre_completo')->paginate(15);
+
+        // ⚠️ FILTRO POR PENDIENTES (se hace en colección porque es cálculo dinámico)
+        if ($request->filled('pendiente')) {
+
+            $empleados->getCollection()->transform(function ($empleado) use ($request) {
+
+                $anio = date('Y');
+
+                $periodo = $empleado->periodosVacaciones->where('anio', $anio)->first();
+
+                $vacaciones = $periodo
+                    ? $periodo->dias_correspondientes
+                    : $empleado->vacacionesPorLey();
+
+                $acumulado = $periodo
+                    ? $periodo->acumulado_anterior
+                    : $empleado->vacaciones_acumuladas ?? 0;
+
+                $tomado = $periodo ? $periodo->total_tomado : 0;
+
+                $pendiente = $vacaciones + $acumulado - $tomado;
+
+                $empleado->pendiente_calculado = $pendiente;
+
+                return $empleado;
+            });
+
+            $empleados = $empleados->setCollection(
+                $empleados->getCollection()->filter(function ($empleado) use ($request) {
+
+                    $pendiente = $empleado->pendiente_calculado;
+
+                    if ($request->pendiente == 'con') {
+                        return $pendiente > 0;
+                    }
+
+                    if ($request->pendiente == 'sin') {
+                        return $pendiente <= 0;
+                    }
+
+                    if ($request->pendiente == 'critico') {
+                        return $pendiente > 15;
+                    }
+
+                    return true;
+                })
+            );
+        }
 
         return view('rrhh.empleados.index', compact('empleados'));
     }

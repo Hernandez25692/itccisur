@@ -7,24 +7,80 @@ use App\Models\RrhhEmpleado;
 use App\Models\RrhhVacacionesPeriodo;
 use App\Models\RrhhVacacionesMovimiento;
 use Carbon\Carbon;
+use App\Models\RrhhVacacionesBitacora;
+use Illuminate\Support\Facades\Auth;
 
 class RrhhVacacionesController extends Controller
 {
 
     public function index(Request $request)
     {
-
         $anio = $request->anio ?? date('Y');
 
-        $empleados = RrhhEmpleado::where('estado', 'activo')
+        $query = RrhhEmpleado::where('estado', 'activo')
             ->with(['periodosVacaciones' => function ($q) use ($anio) {
                 $q->where('anio', $anio)
                     ->with('movimientos');
-            }])
-            ->orderBy('nombre_completo')
-            ->get();
+            }]);
 
-        return view('rrhh.vacaciones.index', compact('empleados', 'anio'));
+        // 🔍 BUSQUEDA
+        if ($request->filled('search')) {
+            $query->where('nombre_completo', 'like', '%' . $request->search . '%');
+        }
+
+        // 📌 AREA
+        if ($request->filled('area')) {
+            $query->where('area', 'like', '%' . $request->area . '%');
+        }
+
+        $empleados = $query->orderBy('nombre_completo')->get();
+
+        // 🔥 CALCULOS + FILTRO DE PENDIENTES
+        $empleados = $empleados->map(function ($empleado) use ($anio) {
+
+            $periodo = $empleado->periodosVacaciones->where('anio', $anio)->first();
+
+            $vacaciones = $empleado->vacacionesPorLey();
+
+            $acumulado = $periodo
+                ? $periodo->acumulado_anterior
+                : $empleado->vacaciones_acumuladas ?? 0;
+
+            $tomado = $periodo ? $periodo->total_tomado : 0;
+
+            $pendiente = $vacaciones + $acumulado - $tomado;
+
+            $empleado->pendiente_calculado = $pendiente;
+            $empleado->periodo_actual = $periodo;
+
+            return $empleado;
+        });
+
+        // 🎯 FILTRO POR PENDIENTE
+        if ($request->filled('pendiente')) {
+
+            $empleados = $empleados->filter(function ($emp) use ($request) {
+
+                if ($request->pendiente == 'con') return $emp->pendiente_calculado > 0;
+                if ($request->pendiente == 'sin') return $emp->pendiente_calculado <= 0;
+                if ($request->pendiente == 'critico') return $emp->pendiente_calculado > 15;
+
+                return true;
+            });
+        }
+
+        // 📊 DASHBOARD
+        $totalEmpleados = $empleados->count();
+        $totalPendiente = $empleados->sum('pendiente_calculado');
+        $criticos = $empleados->where('pendiente_calculado', '>', 15)->count();
+
+        return view('rrhh.vacaciones.index', compact(
+            'empleados',
+            'anio',
+            'totalEmpleados',
+            'totalPendiente',
+            'criticos'
+        ));
     }
 
 
@@ -194,9 +250,13 @@ ACTUALIZAR DIAS SEGÚN ANTIGÜEDAD REAL
             ->orderBy('fecha_inicio', 'desc')
             ->get();
 
+        $bitacora = \App\Models\RrhhVacacionesBitacora::where('empleado_id', $empleado_id)
+            ->orderBy('fecha_evento', 'desc')
+            ->get();
+
         return view(
             'rrhh.vacaciones.historial',
-            compact('empleado', 'movimientos')
+            compact('empleado', 'movimientos', 'bitacora')
         );
     }
 
@@ -223,12 +283,25 @@ ACTUALIZAR DIAS SEGÚN ANTIGÜEDAD REAL
 
         $movimiento = RrhhVacacionesMovimiento::findOrFail($id);
 
+        /*
+GUARDAR VALORES ANTERIORES PARA BITACORA
+*/
+
+        $diasAnterior = $movimiento->dias_equivalentes;
+        $horasAnterior = $movimiento->horas_equivalentes;
+
         $movimiento->dias_equivalentes = $request->dias_equivalentes;
         $movimiento->horas_equivalentes = $request->horas_equivalentes;
         $movimiento->motivo = $request->motivo;
 
         $movimiento->save();
-
+        RrhhVacacionesBitacora::create([
+            'empleado_id' => $movimiento->empleado_id,
+            'movimiento_id' => $movimiento->id,
+            'accion' => 'EDICION_MOVIMIENTO',
+            'detalle' => "Ajuste manual: días $diasAnterior → {$request->dias_equivalentes}, horas $horasAnterior → {$request->horas_equivalentes}",
+            'usuario' => Auth::user()->name ?? 'Sistema'
+        ]);
         /*
         RECALCULAR PERIODO
         */
@@ -250,5 +323,57 @@ ACTUALIZAR DIAS SEGÚN ANTIGÜEDAD REAL
         return redirect()
             ->route('vacaciones.historial', $movimiento->empleado_id)
             ->with('success', 'Movimiento actualizado correctamente');
+    }
+
+    public function acreditarVacacionesPorAntiguedad($empleado_id)
+    {
+        $empleado = RrhhEmpleado::findOrFail($empleado_id);
+
+        $anio = now()->year;
+
+        /*
+    VALIDAR SI YA EXISTE PERIODO (CLAVE)
+    */
+
+        $periodoExistente = RrhhVacacionesPeriodo::where('empleado_id', $empleado->id)
+            ->where('anio', $anio)
+            ->first();
+
+        if ($periodoExistente) {
+            return $periodoExistente; // 🔴 YA EXISTE → NO HACER NADA
+        }
+
+        /*
+    CALCULAR DIAS SEGUN LEY
+    */
+
+        $vacacionesLey = $empleado->vacacionesPorLey();
+
+        $acumulado = $empleado->vacaciones_acumuladas ?? 0;
+
+        $periodo = RrhhVacacionesPeriodo::create([
+            'empleado_id' => $empleado->id,
+            'anio' => $anio,
+            'dias_correspondientes' => $vacacionesLey,
+            'acumulado_anterior' => $acumulado,
+            'dias_descontados' => 0,
+            'total_disponible' => $vacacionesLey + $acumulado,
+            'total_tomado' => 0,
+            'dias_pendientes' => $vacacionesLey + $acumulado
+        ]);
+
+        /*
+    REGISTRAR BITACORA SOLO UNA VEZ
+    */
+
+        \App\Models\RrhhVacacionesBitacora::create([
+            'empleado_id' => $empleado->id,
+            'movimiento_id' => null,
+            'accion' => 'ACREDITACION_ANUAL',
+            'detalle' => "Se acreditaron {$vacacionesLey} días por antigüedad (Año {$anio})",
+            'usuario' => 'Sistema'
+        ]);
+
+        return $periodo;
     }
 }
