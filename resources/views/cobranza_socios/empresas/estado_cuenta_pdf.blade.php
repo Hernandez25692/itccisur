@@ -167,7 +167,7 @@
                     <img src="{{ public_path('storage/logos/logop.png') }}" class="logo">
                 </td>
                 <td class="header-right">
-                    <strong>CÁMARA DE COMERCIO E INDUSTRIAS DEL SUR</strong><br>
+                    <strong>CAMARA DE COMERCIO E INDUSTRIAS DEL SUR</strong><br>
                     Ciudad Balcanes, Parque Industrial, Choluteca<br>
                     Tel: 3315-0844<br>
                     RTN: 06019008150622<br>

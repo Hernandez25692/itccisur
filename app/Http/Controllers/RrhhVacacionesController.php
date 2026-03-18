@@ -72,7 +72,7 @@ class RrhhVacacionesController extends Controller
         // 📊 DASHBOARD
         $totalEmpleados = $empleados->count();
         $totalPendiente = $empleados->sum('pendiente_calculado');
-        $criticos = $empleados->where('pendiente_calculado', '>', 15)->count();
+        $criticos = $empleados->where('pendiente_calculado', '>', 30)->count();
 
         return view('rrhh.vacaciones.index', compact(
             'empleados',
