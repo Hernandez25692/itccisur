@@ -498,14 +498,11 @@
                                         Editar
                                     </a>
                                     <br><br>
-                                    <form action="{{ route('empleados.destroy', $empleado->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger btn-sm"
-                                            onclick="return confirm('¿Cambiar estado del empleado?')">
-                                            Estado
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-danger btn-sm js-estado-btn"
+                                        data-action="{{ route('empleados.destroy', $empleado->id) }}"
+                                        data-name="{{ $empleado->nombre_completo }}">
+                                        Estado
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -524,5 +521,77 @@
         <div class="mt-3">
             {{ $empleados->withQueryString()->links() }}
         </div>
+
+        {{-- Modal para cambiar estado --}}
+        <div id="estadoModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
+            <div class="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden">
+                <div class="flex items-start justify-between gap-4 bg-sky-50 border-b border-sky-200 px-6 py-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-sky-700">Cambiar estado</h3>
+                        <p class="text-sm text-sky-600 mt-1">¿Deseas cambiar el estado de <span id="estadoModalName" class="font-semibold text-sky-700"></span>?</p>
+                    </div>
+                    <button type="button" id="estadoModalClose" class="text-slate-500 hover:text-slate-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="px-6 py-6">
+                    <form id="estadoModalForm" method="POST" action="">
+                        @csrf
+                        @method('DELETE')
+                        <div class="flex flex-col sm:flex-row items-center justify-end gap-2">
+                            <button type="button" id="estadoModalCancel"
+                                class="w-full sm:w-auto px-4 py-2 rounded-md border border-gray-300 bg-white text-slate-700 hover:bg-gray-50 transition">
+                                Cancelar
+                            </button>
+                            <button type="submit"
+                                class="w-full sm:w-auto px-4 py-2 rounded-md bg-rose-600 text-white hover:bg-rose-700 transition">
+                                Cambiar estado
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const modal = document.getElementById('estadoModal');
+                const form = document.getElementById('estadoModalForm');
+                const nameLabel = document.getElementById('estadoModalName');
+                const cancelBtn = document.getElementById('estadoModalCancel');
+                const closeBtn = document.getElementById('estadoModalClose');
+
+                document.querySelectorAll('.js-estado-btn').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        form.action = btn.dataset.action;
+                        nameLabel.textContent = btn.dataset.name || 'este empleado';
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                    });
+                });
+
+                const closeModal = () => {
+                    modal.classList.remove('flex');
+                    modal.classList.add('hidden');
+                };
+
+                cancelBtn.addEventListener('click', closeModal);
+                closeBtn.addEventListener('click', closeModal);
+
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        closeModal();
+                    }
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+                        closeModal();
+                    }
+                });
+            });
+        </script>
     </div>
 </x-app-layout>

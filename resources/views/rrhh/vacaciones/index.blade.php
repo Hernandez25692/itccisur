@@ -601,8 +601,8 @@
                             <td data-label="Total" class="font-bold">{{ number_format($tomado, 1) }}</td>
                             <td data-label="Pendiente" class="{{ $color }}">
                                 {{ number_format($pendiente, 1) }}
-                                @if ($pendiente > 15)
-                                    <span class="badge-urgent">Urgente</span>
+                                @if ($pendiente > 30)
+                                    <span class="badge-urgent">Descanso</span>
                                 @endif
                             </td>
                             <td data-label="Acciones">
