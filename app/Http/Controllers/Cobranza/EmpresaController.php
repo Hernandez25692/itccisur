@@ -302,7 +302,7 @@ class EmpresaController extends Controller
             'celulares',
             'correos',
             'cargos' => fn($q) => $q->orderBy('fecha_vencimiento', 'desc'),
-            'pagos' => fn($q) => $q->orderBy('fecha_pago', 'desc'),
+            'pagos' => fn($q) => $q->with(['gestor', 'cargos'])->orderBy('fecha_pago', 'desc'),
         ]);
 
         $pendientes = $empresa->cargos->where('estado', 'pendiente')->values();

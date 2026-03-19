@@ -3,6 +3,7 @@
 namespace App\Models\Cobranza;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Pago extends Model
 {
@@ -29,17 +30,24 @@ class Pago extends Model
         return $this->belongsTo(Empresa::class, 'empresa_id');
     }
 
-    public function cargos()
-    {
-        return $this->belongsToMany(Cargo::class, 'cs_pago_cargo', 'pago_id', 'cargo_id')
-            ->withPivot('monto_aplicado')
-            ->withTimestamps();
-    }
+  
 
-    
+
 
     public function usuario()
     {
         return $this->belongsTo(\App\Models\User::class, 'created_by');
+    }
+
+
+    public function gestor()
+    {
+        return $this->belongsTo(User::class, 'gestor_id');
+    }
+
+    public function cargos()
+    {
+        return $this->belongsToMany(Cargo::class, 'cs_pago_cargo')
+            ->withPivot('monto_aplicado');
     }
 }

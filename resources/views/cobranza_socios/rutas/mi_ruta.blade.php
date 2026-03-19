@@ -161,7 +161,15 @@
                             </span>
                         </div>
                     @endif
-
+                    @if ($errors->any())
+                        <div class="bg-red-50 border border-red-200 p-3 rounded-xl text-red-800">
+                            <ul>
+                                @foreach ($errors->all() as $e)
+                                    <li>{{ $e }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>

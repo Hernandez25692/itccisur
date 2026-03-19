@@ -288,7 +288,8 @@
                     </table>
                 </div>
 
-                <h3 class="font-semibold text-gray-900 mt-6 mb-2">Pagados (últimos)</h3>
+                <h3 class="font-semibold text-gray-900 mt-6 mb-2">Pagos realizados</h3>
+
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead class="text-left text-gray-500">
@@ -296,19 +297,36 @@
                                 <th class="py-2">Periodo</th>
                                 <th>Pagado</th>
                                 <th>Total</th>
+                                <th>Gestor</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y">
-                            @forelse($pagados->take(10) as $c)
-                                <tr>
-                                    <td class="py-2">{{ $c->periodo_inicio->format('d/m/Y') }} -
-                                        {{ $c->periodo_fin->format('d/m/Y') }}</td>
-                                    <td>{{ $c->pagado_en?->format('d/m/Y H:i') ?? '—' }}</td>
-                                    <td>L. {{ number_format($c->total, 2) }}</td>
-                                </tr>
+                            @forelse($empresa->pagos as $p)
+                                @foreach ($p->cargos as $c)
+                                    <tr>
+                                        <td class="py-2">
+                                            {{ $c->periodo_inicio->format('d/m/Y') }} -
+                                            {{ $c->periodo_fin->format('d/m/Y') }}
+                                        </td>
+
+                                        <td>
+                                            {{ $p->fecha_pago }}
+                                        </td>
+
+                                        <td>
+                                            L. {{ number_format($c->pivot->monto_aplicado, 2) }}
+                                        </td>
+
+                                        <td>
+                                            {{ $p->gestor?->name ?? '—' }}
+                                        </td>
+                                    </tr>
+                                @endforeach
                             @empty
                                 <tr>
-                                    <td colspan="3" class="py-3 text-gray-400">Aún no hay pagos registrados.</td>
+                                    <td colspan="4" class="py-3 text-gray-400">
+                                        No hay pagos registrados.
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
