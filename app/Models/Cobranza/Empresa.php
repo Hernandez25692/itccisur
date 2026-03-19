@@ -49,8 +49,8 @@ class Empresa extends Model
         'inscripcion_base' => 'decimal:2',
         'cuota_especial' => 'decimal:2',
         'valor_mora' => 'decimal:2',
-        'latitud' => 'decimal:14',
-        'longitud' => 'decimal:14',
+        'latitud' => 'string',
+        'longitud' => 'string',
     ];
 
     public function corte()

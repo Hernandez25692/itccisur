@@ -30,16 +30,16 @@
                     @endforeach
                 </select>
 
-                <input name="capital_min" type="number" step="0.01" required class="rounded-xl border-gray-300"
+                <input name="capital_min" type="text" required class="input-money rounded-xl border-gray-300"
                     placeholder="Capital mínimo">
 
-                <input name="capital_max" type="number" step="0.01" required class="rounded-xl border-gray-300"
+                <input name="capital_max" type="text" required class="input-money rounded-xl border-gray-300"
                     placeholder="Capital máximo">
 
-                <input name="cuota_mensual" type="number" step="0.01" required class="rounded-xl border-gray-300"
+                <input name="cuota_mensual" type="text" required class="input-money rounded-xl border-gray-300"
                     placeholder="Cuota mensual">
 
-                <input name="inscripcion" type="number" step="0.01" class="rounded-xl border-gray-300"
+                <input name="inscripcion" type="text" class="input-money rounded-xl border-gray-300"
                     placeholder="Inscripción">
             </div>
 
@@ -105,4 +105,42 @@
         </div>
 
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const inputs = document.querySelectorAll('.input-money');
+
+            inputs.forEach(input => {
+
+                // Formatear mientras escribe
+                input.addEventListener('input', function(e) {
+                    let value = this.value.replace(/,/g, '').replace(/[^\d.]/g, '');
+
+                    // Evitar múltiples puntos
+                    let parts = value.split('.');
+                    if (parts.length > 2) {
+                        value = parts[0] + '.' + parts[1];
+                    }
+
+                    // Separar enteros y decimales
+                    let integer = parts[0];
+                    let decimal = parts[1] ? '.' + parts[1] : '';
+
+                    // Formato miles
+                    integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                    this.value = integer + decimal;
+                });
+
+                // Limpiar antes de enviar
+                input.form.addEventListener('submit', function() {
+                    inputs.forEach(i => {
+                        i.value = i.value.replace(/,/g, '');
+                    });
+                });
+
+            });
+
+        });
+    </script>
 </x-app-layout>

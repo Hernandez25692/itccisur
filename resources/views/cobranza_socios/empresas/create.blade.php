@@ -62,8 +62,8 @@
 
                 <div>
                     <label class="text-sm font-semibold text-gray-700">Capital declarado</label>
-                    <input name="capital_declarado" type="number" step="0.01"
-                        value="{{ old('capital_declarado') }}" class="w-full rounded-xl border-gray-300">
+                    <input name="capital_declarado" type="text" value="{{ old('capital_declarado') }}"
+                        class="w-full rounded-xl border-gray-300 money">
                 </div>
 
                 <div>
@@ -79,8 +79,8 @@
 
                 <div>
                     <label class="text-sm font-semibold text-gray-700">Cuota especial (opcional)</label>
-                    <input name="cuota_especial" type="number" step="0.01" value="{{ old('cuota_especial') }}"
-                        class="w-full rounded-xl border-gray-300">
+                    <input name="cuota_especial" type="text" value="{{ old('cuota_especial') }}"
+                        class="w-full rounded-xl border-gray-300 money">
                 </div>
 
                 <div>
@@ -244,7 +244,26 @@
             </div>
         </form>
     </div>
+    <script>
+        document.querySelectorAll('.money').forEach(input => {
 
+            input.addEventListener('input', function() {
+                let v = this.value.replace(/,/g, '').replace(/[^\d.]/g, '');
+                let parts = v.split('.');
+                let int = parts[0];
+                let dec = parts[1] ? '.' + parts[1] : '';
+                int = int.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                this.value = int + dec;
+            });
+
+            input.form.addEventListener('submit', function() {
+                document.querySelectorAll('.money').forEach(i => {
+                    i.value = i.value.replace(/,/g, '');
+                });
+            });
+
+        });
+    </script>
     <script>
         const coordInput = document.querySelector('[name="coordenadas"]');
         const latInput = document.querySelector('[name="latitud"]');
@@ -284,7 +303,7 @@
         const rangoInfo = document.getElementById('rango_info');
 
         function calcularRango() {
-            const capital = parseFloat(capitalInput.value);
+            const capital = parseFloat(capitalInput.value.replace(/,/g, ''));
             const tipoEmpresaId = tipoEmpresaSelect.value;
 
             if (!tipoEmpresaId || isNaN(capital)) {
