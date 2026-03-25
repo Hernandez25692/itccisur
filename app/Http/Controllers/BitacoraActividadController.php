@@ -34,8 +34,11 @@ class BitacoraActividadController extends Controller
         }
 
         $actividades = $query->paginate(15);
-
-        return view('bitacora.index', compact('actividades'));
+        $totalMes = BitacoraActividad::whereBetween('fecha', [
+            now()->startOfMonth(),
+            now()->endOfMonth()
+        ])->count();
+        return view('bitacora.index', compact('actividades', 'totalMes'));
     }
 
     /**

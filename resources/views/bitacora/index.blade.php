@@ -73,9 +73,9 @@
             <div class="bg-gradient-to-br from-[#1A2A4F] to-[#2A3A6F] text-white p-4 rounded-xl shadow">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-300">Resueltas este mes</p>
+                        <p class="text-sm text-gray-300">Total actividades del mes</p>
                         <p class="text-2xl font-bold mt-1">
-                            {{ $actividades->whereBetween('fecha', [now()->startOfMonth(), now()->endOfMonth()])->count() }}
+                            {{ $totalMes }}
                         </p>
                     </div>
                     <div class="p-3 bg-white/10 rounded-lg">
@@ -336,9 +336,11 @@
                     @endif
 
                     <!-- Modal Preview -->
-                    <div id="previewModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+                    <div id="previewModal"
+                        class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
                         <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto">
-                            <div class="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white">
+                            <div
+                                class="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white">
                                 <h3 class="text-lg font-bold text-gray-900">Vista Previa</h3>
                                 <button onclick="closePreview()"
                                     class="text-gray-500 hover:text-gray-700 transition-colors">
