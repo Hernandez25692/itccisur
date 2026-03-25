@@ -73,9 +73,9 @@
             <div class="bg-gradient-to-br from-[#1A2A4F] to-[#2A3A6F] text-white p-4 rounded-xl shadow">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-300">Resueltas</p>
+                        <p class="text-sm text-gray-300">Resueltas este mes</p>
                         <p class="text-2xl font-bold mt-1">
-                            {{ $actividades->where('estado', 'resuelto')->count() }}
+                            {{ $actividades->whereBetween('fecha', [now()->startOfMonth(), now()->endOfMonth()])->count() }}
                         </p>
                     </div>
                     <div class="p-3 bg-white/10 rounded-lg">
