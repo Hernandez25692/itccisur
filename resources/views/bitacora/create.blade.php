@@ -308,8 +308,8 @@
 
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label form-label-required">Tipo de Falla</label>
-                            <select name="tipo_falla" class="form-select" required>
+                            <label class="form-label form-label">Tipo de Falla</label>
+                            <select name="tipo_falla" class="form-select" >
                                 <option value="Hardware">Hardware</option>
                                 <option value="Software">Software</option>
                                 <option value="Red">Red</option>
@@ -328,8 +328,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label form-label-required">Equipo Afectado</label>
-                            <select name="equipo_afectado" class="form-select" required>
+                            <label class="form-label form-label">Equipo Afectado</label>
+                            <select name="equipo_afectado" class="form-select" >
                                 <option value="PC Escritorio">PC Escritorio</option>
                                 <option value="Laptop">Laptop</option>
                                 <option value="Switch">Switch</option>
@@ -386,11 +386,11 @@
 
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label form-label-required">Hora inicio</label>
+                            <label class="form-label form-label">Hora inicio</label>
                             <input type="time" name="hora_inicio" class="form-input" id="horaInicio" >
                         </div>
                         <div class="form-group">
-                            <label class="form-label form-label-required">Hora fin</label>
+                            <label class="form-label form-label">Hora fin</label>
                             <input type="time" name="hora_fin" class="form-input" id="horaFin" >
                         </div>
                     </div>
