@@ -309,7 +309,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label form-label">Tipo de Falla</label>
-                            <select name="tipo_falla" class="form-select" >
+                            <select name="tipo_falla" class="form-select">
                                 <option value="Hardware">Hardware</option>
                                 <option value="Software">Software</option>
                                 <option value="Red">Red</option>
@@ -321,15 +321,15 @@
                                 <option value="Internet">Internet</option>
                                 <option value="Aplicación Interna">Aplicación Interna</option>
                                 <option value="Limpieza Física">Limpieza Física</option>
-                                 <option value="Pagina Web">Pagina Web</option>
+                                <option value="Pagina Web">Pagina Web</option>
                                 <option value="Actividad Diaria">Actividad Diaria</option>
-                               
+
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label form-label">Equipo Afectado</label>
-                            <select name="equipo_afectado" class="form-select" >
+                            <select name="equipo_afectado" class="form-select">
                                 <option value="PC Escritorio">PC Escritorio</option>
                                 <option value="Laptop">Laptop</option>
                                 <option value="Switch">Switch</option>
@@ -387,11 +387,11 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label form-label">Hora inicio</label>
-                            <input type="time" name="hora_inicio" class="form-input" id="horaInicio" >
+                            <input type="time" name="hora_inicio" class="form-input" id="horaInicio">
                         </div>
                         <div class="form-group">
                             <label class="form-label form-label">Hora fin</label>
-                            <input type="time" name="hora_fin" class="form-input" id="horaFin" >
+                            <input type="time" name="hora_fin" class="form-input" id="horaFin">
                         </div>
                     </div>
 
@@ -434,7 +434,68 @@
                                 <div class="file-info">PNG, JPG, PDF, DOC, DOCX (Máx. 10MB)</div>
                             </label>
                         </div>
+                        <div id="previewContainer" style="margin-top: 1rem; display: none;">
+                            <img id="imagePreview"
+                                style="max-width: 100%; max-height: 300px; border-radius: 8px; display: none;">
+                            <div id="filePreview"
+                                style="padding: 1rem; background: #f0f4f8; border-radius: 8px; display: none;">
+                                <p style="margin: 0; color: #4a5568;"><strong>📄 Archivo:</strong> <span
+                                        id="fileName"></span></p>
+                                <p style="margin: 0.5rem 0 0 0; color: #718096; font-size: 0.875rem;"><span
+                                        id="fileSize"></span></p>
+                            </div>
+                        </div>
                     </div>
+
+                    <script>
+                        const evidenciaInput = document.getElementById('evidenciaInput');
+                        const previewContainer = document.getElementById('previewContainer');
+                        const imagePreview = document.getElementById('imagePreview');
+                        const filePreview = document.getElementById('filePreview');
+                        const fileName = document.getElementById('fileName');
+                        const fileSize = document.getElementById('fileSize');
+
+                        evidenciaInput.addEventListener('change', function() {
+                            const archivo = this.files[0];
+                            if (!archivo) {
+                                previewContainer.style.display = 'none';
+                                return;
+                            }
+
+                            const extensionesPermitidas = [
+                                'image/png',
+                                'image/jpg',
+                                'image/jpeg',
+                                'application/pdf',
+                                'application/msword',
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                            ];
+
+                            if (!extensionesPermitidas.includes(archivo.type)) {
+                                this.value = "";
+                                previewContainer.style.display = 'none';
+                                abrirModal();
+                                return;
+                            }
+
+                            previewContainer.style.display = 'block';
+                            imagePreview.style.display = 'none';
+                            filePreview.style.display = 'none';
+
+                            if (archivo.type.startsWith('image/')) {
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    imagePreview.src = e.target.result;
+                                    imagePreview.style.display = 'block';
+                                };
+                                reader.readAsDataURL(archivo);
+                            } else {
+                                fileName.textContent = archivo.name;
+                                fileSize.textContent = 'Tamaño: ' + (archivo.size / 1024).toFixed(2) + ' KB';
+                                filePreview.style.display = 'block';
+                            }
+                        });
+                    </script>
 
                     <div class="form-actions">
                         <a href="{{ url()->previous() }}" class="btn-cancel">
