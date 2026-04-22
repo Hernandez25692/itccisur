@@ -1,0 +1,107 @@
+// --- esta en https://www.ccisur.org/wp-admin/admin.php?page=wpcode-snippet-manager&snippet_id=4261 ---
+add_action('rest_api_init', function () {
+    register_rest_route('ccisur/v1', '/validar', array(
+        'methods' => 'GET',
+        'callback' => function ($request) {
+
+            global $wpdb;
+
+            $token = sanitize_text_field($request->get_param('token'));
+
+            // usamos la base actual (ccisur_main)
+            $tabla = $wpdb->prefix . 'certificados_qr';
+
+            $registro = $wpdb->get_row(
+                $wpdb->prepare("SELECT * FROM $tabla WHERE token = %s", $token)
+            );
+
+            if ($registro && $registro->activo == 1) {
+                return [
+                    'valido' => true,
+                    'nombre' => $registro->nombre_formacion,
+                    'fecha' => $registro->fecha
+                ];
+            }
+
+            return ['valido' => false];
+        },
+        'permission_callback' => '__return_true'
+    ));
+});
+
+add_shortcode('validar_certificado', function() {
+    ob_start();
+    ?>
+    <div id="resultado-certificado" style="padding:20px; text-align:center;">
+        <h2>Validando certificado...</h2>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+
+        if (!token) {
+            document.getElementById("resultado-certificado").innerHTML = "<p>Token no proporcionado</p>";
+            return;
+        }
+
+        fetch("https://www.ccisur.org/wp-json/ccisur/v1/validar?token=" + token)
+        .then(res => res.json())
+        .then(data => {
+            if (data.valido) {
+                document.getElementById("resultado-certificado").innerHTML = `
+                    <h2 style="color:green;">✅ Certificado válido</h2>
+                    <p><strong>Formación:</strong> ${data.nombre}</p>
+                    <p><strong>Fecha:</strong> ${data.fecha}</p>
+                `;
+            } else {
+                document.getElementById("resultado-certificado").innerHTML = `
+                    <h2 style="color:red;">❌ Certificado no válido</h2>
+                `;
+            }
+        })
+        .catch(() => {
+            document.getElementById("resultado-certificado").innerHTML = `
+                <h2 style="color:red;">Error de conexión</h2>
+            `;
+        });
+    });
+    </script>
+    <?php
+    return ob_get_clean();
+});
+
+
+add_action('rest_api_init', function () {
+    register_rest_route('ccisur/v1', '/guardar-certificado', array(
+        'methods' => 'POST',
+        'callback' => function ($request) {
+
+            if ($request['api_key'] !== 'CCISUR2026') {
+                return ['success' => false, 'mensaje' => 'No autorizado'];
+            }
+
+            global $wpdb;
+
+            $tabla = $wpdb->prefix . 'certificados_qr';
+
+            $token = sanitize_text_field($request['token']);
+            $nombre = sanitize_text_field($request['nombre_formacion']);
+            $fecha = sanitize_text_field($request['fecha']);
+            $anio = sanitize_text_field($request['anio']);
+
+            $wpdb->insert($tabla, [
+                'token' => $token,
+                'nombre_formacion' => $nombre,
+                'fecha' => $fecha,
+                'anio' => $anio,
+                'activo' => 1,
+                'created_at' => current_time('mysql')
+            ]);
+
+            return ['success' => true];
+        },
+        'permission_callback' => '__return_true'
+    ));
+});

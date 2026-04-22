@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Facades\Http;
 
 class ValidacionQrController extends Controller
 {
@@ -44,13 +45,27 @@ class ValidacionQrController extends Controller
 
         $token = Str::uuid()->toString();
 
-        ValidacionQr::create([
+        // 🔹 1. Guardar en tu sistema TI
+        $registro = ValidacionQr::create([
             'nombre_formacion' => $request->nombre_formacion,
             'fecha_formacion' => $request->fecha_formacion,
             'anio' => $request->anio,
             'token' => $token,
             'activo' => true,
         ]);
+
+        // 🔥 2. ENVIAR A WORDPRESS
+        try {
+            Http::post('https://www.ccisur.org/wp-json/ccisur/v1/guardar-certificado', [
+                'token' => $token,
+                'nombre_formacion' => $request->nombre_formacion,
+                'fecha' => $request->fecha_formacion,
+                'anio' => $request->anio,
+                'api_key' => 'CCISUR2026'
+            ]);
+        } catch (\Exception $e) {
+            // no romper el sistema si falla WP
+        }
 
         return redirect()
             ->route('validaciones_qr.index')

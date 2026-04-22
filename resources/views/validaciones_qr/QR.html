@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificar Certificado · CCISUR</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f4f6fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+
+  /* Brand */
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
+  .brand-shield {
+    width: 44px; height: 44px; background: #0B1F3A;
+    border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .brand-name { font-size: 13px; font-weight: 700; color: #0B1F3A; line-height: 1.25; }
+  .brand-sub  { font-size: 11px; color: #6b7a8d; }
+
+  /* Card */
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid rgba(11,31,58,.08);
+    width: 100%; max-width: 480px;
+    overflow: hidden;
+    animation: fadeUp .45s ease both;
+  }
+  .card-accent { height: 6px; width: 100%; transition: background .4s; }
+  .card-accent.loading { background: #378ADD; animation: pulse-bar 1.2s ease-in-out infinite; }
+  .card-accent.valid   { background: #3B6D11; }
+  .card-accent.invalid { background: #A32D2D; }
+  .card-accent.error   { background: #854F0B; }
+
+  .card-body { padding: 36px 32px 32px; }
+
+  /* State icon */
+  .state-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center;
+    animation: scaleIn .35s ease both .1s;
+  }
+  .state-icon.loading { background: #E6F1FB; }
+  .state-icon.valid   { background: #EAF3DE; }
+  .state-icon.invalid { background: #FCEBEB; }
+  .state-icon.error   { background: #FAEEDA; }
+
+  .state-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+  .state-title.loading { color: #0C447C; }
+  .state-title.valid   { color: #27500A; }
+  .state-title.invalid { color: #791F1F; }
+  .state-title.error   { color: #633806; }
+
+  .state-sub { font-size: 13px; color: #6b7a8d; text-align: center; margin-bottom: 26px; }
+
+  /* Badge */
+  .badge-valid {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #EAF3DE; color: #27500A;
+    border-radius: 50px; padding: 6px 16px;
+    font-size: 12px; font-weight: 600;
+    margin: 0 auto 22px; width: fit-content;
+  }
+
+  /* Info grid */
+  .divider { height: 1px; background: rgba(11,31,58,.07); margin-bottom: 22px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+  .info-item { background: #f8f9fc; border-radius: 10px; padding: 13px 14px; }
+  .info-item.full { grid-column: 1 / -1; }
+  .info-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #6b7a8d; margin-bottom: 4px; }
+  .info-value { font-size: 14px; font-weight: 600; color: #0B1F3A; }
+
+  /* Token */
+  .token-box {
+    background: #f8f9fc; border-radius: 10px;
+    padding: 12px 14px; display: flex; align-items: flex-start;
+    gap: 10px; margin-bottom: 22px;
+  }
+  .token-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #6b7a8d; margin-bottom: 3px; }
+  .token-val { font-family: monospace; font-size: 11px; color: #0B1F3A; word-break: break-all; }
+
+  /* Error box */
+  .error-box { background: #FCEBEB; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; text-align: center; }
+  .error-box p { font-size: 13px; color: #791F1F; line-height: 1.6; }
+
+  .footer-note { font-size: 11px; color: #6b7a8d; text-align: center; border-top: 1px solid rgba(11,31,58,.06); padding-top: 16px; }
+  .site-note { font-size: 11px; color: #9aa3ad; margin-top: 20px; }
+
+  /* Spinner */
+  .spinner {
+    width: 30px; height: 30px;
+    border: 2.5px solid #B5D4F4;
+    border-top-color: #185FA5;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+
+  /* Animations */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scaleIn { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse-bar { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+  @keyframes drawCheck { from { stroke-dashoffset: 60; } to { stroke-dashoffset: 0; } }
+
+  @media (max-width: 440px) {
+    .card-body { padding: 28px 18px 24px; }
+    .info-grid { grid-template-columns: 1fr; }
+    .info-item.full { grid-column: unset; }
+    .brand { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="brand">
+  <div class="brand-shield">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2L4 6v5c0 4.8 3.6 9.3 8 10.4C16.4 20.3 20 15.8 20 11V6L12 2z" fill="#C5A049" opacity=".9"/>
+      <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div>
+    <div class="brand-name">Cámara de Comercio e Industrias del Sur</div>
+    <div class="brand-sub">Portal de verificación de certificados</div>
+  </div>
+</div>
+
+<div class="card" id="card">
+  <div class="card-accent loading" id="accent"></div>
+  <div class="card-body" id="card-body">
+
+    <!-- Estado: cargando (inicial) -->
+    <div class="state-icon loading" id="state-icon">
+      <div class="spinner"></div>
+    </div>
+    <div class="state-title loading" id="state-title">Validando certificado...</div>
+    <p class="state-sub" id="state-sub">Consultando base de datos, por favor espera</p>
+
+    <div id="result-content"></div>
+
+  </div>
+</div>
+
+<p class="site-note">ccisur.org · Sistema oficial de verificación</p>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const token  = params.get('token');
+const apiURL = "https://ccisur.org/api/validar/" + token; // ← cambia esta URL
+
+const icon  = document.getElementById('state-icon');
+const title = document.getElementById('state-title');
+const sub   = document.getElementById('state-sub');
+const acc   = document.getElementById('accent');
+const body  = document.getElementById('result-content');
+
+function setValid(data) {
+  acc.className   = 'card-accent valid';
+  icon.className  = 'state-icon valid';
+  title.className = 'state-title valid';
+  title.textContent = 'Certificado verificado';
+  sub.textContent   = 'Este certificado es auténtico y fue emitido por CCISUR';
+  icon.innerHTML = `
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="17" r="16" stroke="#3B6D11" stroke-width="1.5" fill="none"/>
+      <path d="M10 17l5 5 9-9" stroke="#3B6D11" stroke-width="2.2"
+        stroke-linecap="round" stroke-linejoin="round"
+        stroke-dasharray="60" stroke-dashoffset="60"
+        style="animation:drawCheck .45s ease .1s forwards"/>
+    </svg>`;
+  body.innerHTML = `
+    <div style="display:flex;justify-content:center;margin-bottom:22px">
+      <div class="badge-valid">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1L2 3.5v3c0 3.1 2.3 6 5 6.7 2.7-.7 5-3.6 5-6.7v-3L7 1z" fill="#3B6D11" opacity=".8"/>
+          <path d="M5 7l1.5 1.5 3-3" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Certificado válido
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="info-grid">
+      <div class="info-item full">
+        <div class="info-label">Formación</div>
+        <div class="info-value">${data.nombre_formacion}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Fecha de emisión</div>
+        <div class="info-value">${data.fecha_formacion}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Año</div>
+        <div class="info-value">${data.anio}</div>
+      </div>
+    </div>
+    <div class="token-box">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px">
+        <rect x="2" y="2" width="5" height="5" rx="1" stroke="#6b7a8d" stroke-width="1.2"/>
+        <rect x="9" y="2" width="5" height="5" rx="1" stroke="#6b7a8d" stroke-width="1.2"/>
+        <rect x="2" y="9" width="5" height="5" rx="1" stroke="#6b7a8d" stroke-width="1.2"/>
+        <rect x="9" y="9" width="5" height="5" rx="1" stroke="#6b7a8d" stroke-width="1.2"/>
+      </svg>
+      <div>
+        <div class="token-label">Token de verificación</div>
+        <div class="token-val">${token}</div>
+      </div>
+    </div>
+    <p class="footer-note">Verificado el ${new Date().toLocaleDateString('es-HN',{day:'numeric',month:'long',year:'numeric'})} · CCISUR Sistema de Certificaciones</p>`;
+}
+
+function setInvalid(msg) {
+  acc.className   = 'card-accent invalid';
+  icon.className  = 'state-icon invalid';
+  title.className = 'state-title invalid';
+  title.textContent = 'Certificado no válido';
+  sub.textContent   = 'No se encontró este código en nuestro sistema';
+  icon.innerHTML = `
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="17" r="16" stroke="#A32D2D" stroke-width="1.5" fill="none"/>
+      <path d="M12 12l10 10M22 12l-10 10" stroke="#A32D2D" stroke-width="2" stroke-linecap="round"/>
+    </svg>`;
+  body.innerHTML = `
+    <div class="divider"></div>
+    <div class="error-box"><p>${msg || 'No se encontró ningún certificado asociado a este código. Si crees que es un error, comunícate con CCISUR.'}</p></div>
+    <p class="footer-note">Intento registrado · ${new Date().toLocaleDateString('es-HN',{day:'numeric',month:'long',year:'numeric'})}</p>`;
+}
+
+function setError() {
+  acc.className   = 'card-accent error';
+  icon.className  = 'state-icon error';
+  title.className = 'state-title error';
+  title.textContent = 'Error de conexión';
+  sub.textContent   = 'No se pudo conectar con el servidor';
+  icon.innerHTML = `
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="17" r="16" stroke="#854F0B" stroke-width="1.5" fill="none"/>
+      <path d="M17 10v8" stroke="#854F0B" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="17" cy="22" r="1.2" fill="#854F0B"/>
+    </svg>`;
+  body.innerHTML = `
+    <div class="divider"></div>
+    <div class="error-box" style="background:#FAEEDA"><p style="color:#633806">No fue posible conectarse al servidor de verificación. Intenta nuevamente o contáctanos.</p></div>
+    <p class="footer-note">ccisur.org · it@ccisur.org</p>`;
+}
+
+if (!token) {
+  setInvalid('No se proporcionó ningún token de verificación en el enlace.');
+} else {
+  fetch(apiURL)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && data.valido) setValid(data);
+      else setInvalid();
+    })
+    .catch(() => setError());
+}
+</script>
+</body>
+</html>
