@@ -18,6 +18,7 @@
     use App\Http\Controllers\RrhhEmpleadoController;
     use App\Http\Controllers\RrhhVacacionesPeriodoController;
     use App\Http\Controllers\RrhhVacacionesController;
+    use App\Http\Controllers\ValidacionQrController;
 
     Route::get('/', function () {
         return view('welcome');
@@ -32,7 +33,13 @@
             Route::resource('users', UserController::class);
         });
 
-
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('validaciones_qr', ValidacionQrController::class);
+    });
+    Route::get('/validar/{token}', [ValidacionQrController::class, 'validar'])->name('validaciones_qr.validar');
+    Route::get('/qr/{token}', [ValidacionQrController::class, 'descargarQr'])->name('validaciones_qr.qr');
+    Route::get('/qr-preview/{token}', [ValidacionQrController::class, 'qrPreview']);
+    
 
     Route::middleware(['auth'])->group(function () {
         Route::get('/gor/resumen', [GorResumenController::class, 'index'])->name('gor.resumen');

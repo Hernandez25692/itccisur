@@ -127,7 +127,23 @@
                                 :class="{ 'hidden': !sidebarOpen }"></span>
                         @endif
                     </a>
+                    <a href="{{ route('validaciones_qr.index') }}"
+                        class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200 
+   {{ request()->routeIs('validaciones_qr.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
+                        :class="{ 'justify-center px-3': !sidebarOpen }"
+                        :title="!sidebarOpen ? 'QR Validaciones' : ''">
 
+                        <i class="fas fa-qrcode w-5 text-lg flex-shrink-0"></i>
+
+                        <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">
+                            QR Validaciones
+                        </span>
+
+                        @if (request()->routeIs('validaciones_qr.*'))
+                            <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
+                                :class="{ 'hidden': !sidebarOpen }"></span>
+                        @endif
+                    </a>
                     @role('admin_ti|gerencia|usuario|calendario')
                         @if (Route::has('calendario-editorial.dashboard'))
                             <a href="{{ route('calendario-editorial.dashboard') }}"
