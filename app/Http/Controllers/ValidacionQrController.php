@@ -18,7 +18,7 @@ class ValidacionQrController extends Controller
         foreach ($validaciones as $v) {
             $result = Builder::create()
                 ->writer(new PngWriter())
-                ->data('https://www.ccisur.org/4236-2/?token=' . $v->token)
+                ->data('https://www.ccisur.org/validar-certificado/?token=' . $v->token)
                 ->size(200)
                 ->margin(5)
                 ->build();
@@ -118,7 +118,7 @@ class ValidacionQrController extends Controller
     {
         $registro = ValidacionQr::where('token', $token)->firstOrFail();
 
-        $url = 'https://www.ccisur.org/4236-2/?token=' . $registro->token;
+        $url = 'https://www.ccisur.org/validar-certificado/?token=' . $registro->token;
 
         $result = Builder::create()
             ->writer(new PngWriter())
@@ -144,7 +144,7 @@ class ValidacionQrController extends Controller
 
         $svg = QrCode::format('svg')
             ->size(300)
-            ->generate('https://www.ccisur.org/4236-2/?token=' . $registro->token);
+            ->generate('https://www.ccisur.org/validar-certificado/?token=' . $registro->token);
 
         return response(trim($svg), 200)
             ->header('Content-Type', 'image/svg+xml');
