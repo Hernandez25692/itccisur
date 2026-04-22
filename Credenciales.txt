@@ -17,3 +17,7 @@ Reiniciar Nginx  sudo systemctl reload nginx
 
 EJECUTAR ROLES php artisan db:seed --class=RoleSeeder
 
+Para subir cambios y no acepta 
+sudo git stash  --guardar temporalmente tus cambios
+sudo git pull origin main
+sudo git stash pop  --sudo git stash pop
