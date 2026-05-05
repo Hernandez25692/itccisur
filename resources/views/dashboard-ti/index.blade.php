@@ -403,6 +403,121 @@
         .bg-primary {
             background: var(--primary-medium);
         }
+
+        /* Filtros del dashboard */
+        .filters-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+        }
+
+        .filters-title {
+            color: var(--text-dark);
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(160px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group label {
+            display: block;
+            color: var(--text-medium);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .filter-control {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 0.65rem 0.8rem;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            background: white;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .filter-control:focus {
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 3px rgba(197, 160, 73, 0.18);
+        }
+
+        .filters-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-filter,
+        .btn-clear {
+            border: none;
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-filter {
+            background: var(--gold-primary);
+            color: white;
+        }
+
+        .btn-filter:hover {
+            background: var(--gold-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-clear {
+            background: var(--primary-medium);
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .active-filter-summary {
+            margin-top: 1rem;
+            color: var(--text-medium);
+            font-size: 0.9rem;
+        }
+
+        .active-filter-summary strong {
+            color: var(--primary-medium);
+        }
+
+        @media (max-width: 1200px) {
+            .filters-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-actions {
+                flex-direction: column;
+            }
+        }
     </style>
 
     <div class="dashboard-container">
@@ -410,38 +525,126 @@
             <h1 class="dashboard-title">Dashboard TI – Resumen Gerencial</h1>
             <p class="dashboard-subtitle">Panel de control del Departamento de Sistemas y TI - CCISUR</p>
         </div>
+        {{-- Filtros del Dashboard TI --}}
+        <div class="filters-card">
+            <h2 class="filters-title">Filtros del Resumen Gerencial</h2>
 
+            <form method="GET" action="{{ route('dashboard-ti.index') }}">
+                <div class="filters-grid">
+
+                    <div class="filter-group">
+                        <label for="fecha_inicio">Fecha inicio</label>
+                        <input type="date" id="fecha_inicio" name="fecha_inicio" class="filter-control"
+                            value="{{ request('fecha_inicio', $fechaInicio->format('Y-m-d')) }}">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="fecha_fin">Fecha fin</label>
+                        <input type="date" id="fecha_fin" name="fecha_fin" class="filter-control"
+                            value="{{ request('fecha_fin', $fechaFin->format('Y-m-d')) }}">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="estado">Estado</label>
+                        <select id="estado" name="estado" class="filter-control">
+                            <option value="">Todos</option>
+                            @foreach ($estados as $item)
+                                <option value="{{ $item }}" {{ request('estado') == $item ? 'selected' : '' }}>
+                                    {{ ucfirst($item) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="prioridad">Prioridad</label>
+                        <select id="prioridad" name="prioridad" class="filter-control">
+                            <option value="">Todas</option>
+                            @foreach ($prioridadesFiltro as $item)
+                                <option value="{{ $item }}"
+                                    {{ request('prioridad') == $item ? 'selected' : '' }}>
+                                    {{ ucfirst($item) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="tipo_falla">Tipo de falla</label>
+                        <select id="tipo_falla" name="tipo_falla" class="filter-control">
+                            <option value="">Todas</option>
+                            @foreach ($tiposFallaFiltro as $item)
+                                <option value="{{ $item }}"
+                                    {{ request('tipo_falla') == $item ? 'selected' : '' }}>
+                                    {{ ucfirst($item) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="filters-actions" style="margin-top: 1rem;">
+                    <button type="submit" class="btn-filter">
+                        Aplicar filtros
+                    </button>
+
+                    <a href="{{ route('dashboard-ti.index') }}" class="btn-clear">
+                        Limpiar filtros
+                    </a>
+                </div>
+
+                <div class="active-filter-summary">
+                    Mostrando información del
+                    <strong>{{ $fechaInicio->format('d/m/Y') }}</strong>
+                    al
+                    <strong>{{ $fechaFin->format('d/m/Y') }}</strong>
+
+                    @if (request('estado'))
+                        · Estado: <strong>{{ ucfirst(request('estado')) }}</strong>
+                    @endif
+
+                    @if (request('prioridad'))
+                        · Prioridad: <strong>{{ ucfirst(request('prioridad')) }}</strong>
+                    @endif
+
+                    @if (request('tipo_falla'))
+                        · Tipo de falla: <strong>{{ ucfirst(request('tipo_falla')) }}</strong>
+                    @endif
+                </div>
+            </form>
+        </div>
         {{-- 🔔 Alertas de vencimiento de licencias / dominios / servicios --}}
         @if ($alertas->count() > 0)
             <div class="alert-container">
-            <div class="alert-header">
-                <div class="alert-icon">
-                ⚠️
+                <div class="alert-header">
+                    <div class="alert-icon">
+                        ⚠️
+                    </div>
+                    <h2 class="alert-title" style="color: white;">Alertas de vencimiento (próximos 15 días)</h2>
                 </div>
-                <h2 class="alert-title" style="color: white;">Alertas de vencimiento (próximos 15 días)</h2>
-            </div>
 
-            <ul class="alert-list">
-                @foreach ($alertas as $alerta)
-                <li class="alert-item" style="color: white; background: rgba(255, 255, 255, 0.15);">
-                    <strong>{{ $alerta->actividad }}</strong>
-                    @if ($alerta->tipo)
-                    <span class="alert-type">{{ $alerta->tipo }}</span>
-                    @endif
-                    — vence el
-                    <span class="alert-date">
-                    {{ \Carbon\Carbon::parse($alerta->fecha_vencimiento)->format('d/m/Y') }}
-                    </span>
-                </li>
-                @endforeach
-            </ul>
+                <ul class="alert-list">
+                    @foreach ($alertas as $alerta)
+                        <li class="alert-item" style="color: white; background: rgba(255, 255, 255, 0.15);">
+                            <strong>{{ $alerta->actividad }}</strong>
+                            @if ($alerta->tipo)
+                                <span class="alert-type">{{ $alerta->tipo }}</span>
+                            @endif
+                            — vence el
+                            <span class="alert-date">
+                                {{ \Carbon\Carbon::parse($alerta->fecha_vencimiento)->format('d/m/Y') }}
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
         {{-- Tarjetas resumen --}}
         <div class="metrics-grid">
             <div class="metric-card" style="--accent-color: #3B82F6;">
-                <h3 class="metric-label">Actividades Hoy</h3>
+                <h3 class="metric-label">Actividades del período</h3>
                 <p class="metric-value">{{ $actividadesHoy }}</p>
                 <div class="metric-trend">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -467,7 +670,7 @@
             </div>
 
             <div class="metric-card" style="--accent-color: #10B981;">
-                <h3 class="metric-label">Resueltas este mes</h3>
+                <h3 class="metric-label">Resueltas del período</h3>
                 <p class="metric-value">{{ $resueltasMes }}</p>
                 <div class="metric-trend">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -478,8 +681,19 @@
                     Completadas
                 </div>
             </div>
+            <div class="metric-card" style="--accent-color: #6366F1;">
+                <h3 class="metric-label">Tiempo promedio</h3>
+                <p class="metric-value">{{ $tiempoPromedio }} min</p>
+                <div class="metric-trend" style="background: rgba(99, 102, 241, 0.1); color: #6366F1;">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-12.75a.75.75 0 00-1.5 0v5c0 .199.079.39.22.53l3 3a.75.75 0 101.06-1.06l-2.78-2.78V5.25z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Promedio filtrado
+                </div>
+            </div>
 
-            
         </div>
 
         {{-- Gráficas --}}
@@ -672,106 +886,106 @@
         new Chart(document.getElementById('porDiaChart'), {
             type: 'line',
             data: {
-            labels: {!! json_encode($porDia->keys()) !!},
-            datasets: [{
-                label: 'Actividades',
-                data: {!! json_encode($porDia->values()) !!},
-                backgroundColor: 'rgba(197, 160, 73, 0.15)',
-                borderColor: '#C5A049',
-                borderWidth: 3,
-                tension: 0.3,
-                fill: true,
-                pointBackgroundColor: '#C5A049',
-                pointBorderColor: 'white',
-                pointBorderWidth: 3,
-                pointRadius: 6,
-                pointHoverRadius: 9,
-                pointStyle: 'circle',
-                segment: {
-                borderDash: [0]
-                }
-            }]
+                labels: {!! json_encode($porDia->keys()) !!},
+                datasets: [{
+                    label: 'Actividades',
+                    data: {!! json_encode($porDia->values()) !!},
+                    backgroundColor: 'rgba(197, 160, 73, 0.15)',
+                    borderColor: '#C5A049',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: '#C5A049',
+                    pointBorderColor: 'white',
+                    pointBorderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 9,
+                    pointStyle: 'circle',
+                    segment: {
+                        borderDash: [0]
+                    }
+                }]
             },
             options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
-            plugins: {
-                legend: {
-                display: true,
-                position: 'top',
-                labels: {
-                    color: '#1F2937',
-                    font: {
-                    weight: 600,
-                    size: 12
+                responsive: true,
+                maintainAspectRatio: true,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#1F2937',
+                            font: {
+                                weight: 600,
+                                size: 12
+                            },
+                            padding: 15,
+                            usePointStyle: true
+                        }
                     },
-                    padding: 15,
-                    usePointStyle: true
-                }
+                    tooltip: {
+                        backgroundColor: 'rgba(26, 42, 79, 0.95)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: '#C5A049',
+                        borderWidth: 2,
+                        padding: 14,
+                        cornerRadius: 8,
+                        titleFont: {
+                            weight: 600,
+                            size: 13
+                        },
+                        bodyFont: {
+                            size: 12
+                        },
+                        displayColors: true,
+                        boxPadding: 6
+                    }
                 },
-                tooltip: {
-                backgroundColor: 'rgba(26, 42, 79, 0.95)',
-                titleColor: 'white',
-                bodyColor: 'white',
-                borderColor: '#C5A049',
-                borderWidth: 2,
-                padding: 14,
-                cornerRadius: 8,
-                titleFont: {
-                    weight: 600,
-                    size: 13
-                },
-                bodyFont: {
-                    size: 12
-                },
-                displayColors: true,
-                boxPadding: 6
-                }
-            },
-            scales: {
-                y: {
-                beginAtZero: true,
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.08)',
-                    lineWidth: 1,
-                    drawBorder: true
-                },
-                ticks: {
-                    color: '#4B5563',
-                    font: {
-                    size: 11,
-                    weight: 500
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.08)',
+                            lineWidth: 1,
+                            drawBorder: true
+                        },
+                        ticks: {
+                            color: '#4B5563',
+                            font: {
+                                size: 11,
+                                weight: 500
+                            },
+                            padding: 8
+                        },
+                        border: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            lineWidth: 1
+                        }
                     },
-                    padding: 8
-                },
-                border: {
-                    color: 'rgba(0, 0, 0, 0.1)',
-                    lineWidth: 1
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            lineWidth: 1
+                        },
+                        ticks: {
+                            color: '#4B5563',
+                            font: {
+                                size: 11,
+                                weight: 500
+                            },
+                            padding: 8
+                        },
+                        border: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            lineWidth: 1
+                        }
+                    }
                 }
-                },
-                x: {
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.05)',
-                    lineWidth: 1
-                },
-                ticks: {
-                    color: '#4B5563',
-                    font: {
-                    size: 11,
-                    weight: 500
-                    },
-                    padding: 8
-                },
-                border: {
-                    color: 'rgba(0, 0, 0, 0.1)',
-                    lineWidth: 1
-                }
-                }
-            }
             }
         });
     </script>
