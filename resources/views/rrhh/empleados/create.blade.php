@@ -203,6 +203,11 @@
             color: var(--gray-500);
         }
 
+        .emp-input option {
+            color: var(--navy-900);
+            background: var(--white);
+        }
+
         .emp-input:hover {
             border-color: rgba(255, 255, 255, 0.18);
             background: rgba(255, 255, 255, 0.06);
@@ -405,7 +410,8 @@
                                 <label class="emp-label" for="identidad">Identidad</label>
                                 <input id="identidad" type="text" name="identidad"
                                     class="emp-input @error('identidad') is-invalid @enderror"
-                                    placeholder="0000-0000-00000" value="{{ old('identidad') }}">
+                                    placeholder="0000-0000-00000" value="{{ old('identidad') }}" maxlength="15"
+                                    inputmode="numeric" pattern="[0-9]{4}-[0-9]{4}-[0-9]{5}">
                                 @error('identidad')
                                     <span class="emp-error">{{ $message }}</span>
                                 @enderror
@@ -425,7 +431,8 @@
                                 <label class="emp-label" for="telefono">Teléfono</label>
                                 <input id="telefono" type="text" name="telefono"
                                     class="emp-input @error('telefono') is-invalid @enderror"
-                                    placeholder="+504 0000-0000" value="{{ old('telefono') }}">
+                                    placeholder="+504 0000-0000" value="{{ old('telefono') }}" maxlength="14"
+                                    inputmode="numeric" pattern="\+504 [0-9]{4}-[0-9]{4}">
                                 @error('telefono')
                                     <span class="emp-error">{{ $message }}</span>
                                 @enderror
@@ -441,9 +448,16 @@
 
                             <div class="emp-field">
                                 <label class="emp-label" for="cargo">Cargo</label>
-                                <input id="cargo" type="text" name="cargo"
-                                    class="emp-input @error('cargo') is-invalid @enderror"
-                                    placeholder="Ej. Analista de sistemas" value="{{ old('cargo') }}">
+                                <select id="cargo" name="cargo"
+                                    class="emp-input @error('cargo') is-invalid @enderror" style="color: #000;">
+                                    <option value="">Seleccione un cargo</option>
+                                    @foreach (['Director Ejecutivo', 'Ejecutiva de Registro', 'Receptor', 'Ejecutiva de Asistencia a Socios', 'Gerente de Servicios Empresariales y Afiliaciones', 'Encargado IT', 'Gerente Administrativa', 'Contador', 'Gestor de Cobros y Promotor de Afiliaciones', 'Asistente Administrativo', 'Ejecutivo de Recursos Humanos', 'Gerente de Operaciones Registrales', 'Registrador Titular', 'Auxiliar de Logística', 'Auxiliar Contable', 'Ejecutivo de Proyecto', 'Extractador', 'Recursos Humanos', 'Registrador Adjunto', 'Implementadora', 'Delegado Registral'] as $cargoOption)
+                                        <option value="{{ $cargoOption }}"
+                                            {{ old('cargo') === $cargoOption ? 'selected' : '' }}>
+                                            {{ $cargoOption }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 @error('cargo')
                                     <span class="emp-error">{{ $message }}</span>
                                 @enderror
@@ -451,9 +465,26 @@
 
                             <div class="emp-field">
                                 <label class="emp-label" for="area">Área / Departamento</label>
-                                <input id="area" type="text" name="area"
-                                    class="emp-input @error('area') is-invalid @enderror" placeholder="Ej. Tecnología"
-                                    value="{{ old('area') }}">
+                                <select id="area" name="area"
+                                    class="emp-input @error('area') is-invalid @enderror">
+                                    <option value="">Seleccione un área</option>
+                                    <option value="Gerencia de Servicios Empresariales y Afiliaciones"
+                                        {{ old('area') === 'Gerencia de Servicios Empresariales y Afiliaciones' ? 'selected' : '' }}>
+                                        Gerencia de Servicios Empresariales y Afiliaciones
+                                    </option>
+                                    <option value="Dirección Ejecutiva"
+                                        {{ old('area') === 'Dirección Ejecutiva' ? 'selected' : '' }}>
+                                        Dirección Ejecutiva
+                                    </option>
+                                    <option value="Gerencia Administrativa y Financiera"
+                                        {{ old('area') === 'Gerencia Administrativa y Financiera' ? 'selected' : '' }}>
+                                        Gerencia Administrativa y Financiera
+                                    </option>
+                                    <option value="Gerencia de Operaciones Registrales"
+                                        {{ old('area') === 'Gerencia de Operaciones Registrales' ? 'selected' : '' }}>
+                                        Gerencia de Operaciones Registrales
+                                    </option>
+                                </select>
                                 @error('area')
                                     <span class="emp-error">{{ $message }}</span>
                                 @enderror
@@ -516,5 +547,43 @@
         </div>
 
     </div>
+
+    <script>
+        const identidad = document.getElementById('identidad');
+        const telefono = document.getElementById('telefono');
+
+        function formatearIdentidad() {
+            const numeros = identidad.value.replace(/\D/g, '').slice(0, 13);
+            identidad.value = [
+                numeros.slice(0, 4),
+                numeros.slice(4, 8),
+                numeros.slice(8, 13)
+            ].filter(Boolean).join('-');
+        }
+
+        identidad.addEventListener('input', formatearIdentidad);
+        formatearIdentidad();
+
+        function formatearTelefono() {
+            let numeros = telefono.value.replace(/\D/g, '');
+
+            if (numeros.startsWith('504')) {
+                numeros = numeros.slice(3);
+            }
+
+            numeros = numeros.slice(0, 8);
+            telefono.value = numeros ?
+                `+504 ${numeros.slice(0, 4)}${numeros.length > 4 ? `-${numeros.slice(4)}` : ''}` :
+                '';
+        }
+
+        telefono.addEventListener('focus', () => {
+            if (!telefono.value) {
+                telefono.value = '+504 ';
+            }
+        });
+        telefono.addEventListener('input', formatearTelefono);
+        formatearTelefono();
+    </script>
 
 </x-app-layout>
