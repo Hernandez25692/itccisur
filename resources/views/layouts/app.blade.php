@@ -662,7 +662,7 @@
         </aside>
 
         <!-- Contenedor Principal -->
-        <div class="flex-1 flex flex-col overflow-hidden main-container" :class="{ 'lg:ml-20': !sidebarOpen }">
+        <div class="flex-1 min-w-0 flex flex-col overflow-hidden main-container" :class="{ 'lg:ml-20': !sidebarOpen }">
 
             <!-- Topbar -->
             <header class="bg-white shadow-sm border-b flex-shrink-0">

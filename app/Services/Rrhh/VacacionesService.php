@@ -163,7 +163,8 @@ class VacacionesService
             return $numeros->isNotEmpty();
         }
 
-        if ($numeros->contains(null)) {
+        // Comparación estricta: el periodo 0 no es un periodo sin número
+        if ($numeros->containsStrict(null)) {
             return true;
         }
 
@@ -589,6 +590,25 @@ class VacacionesService
         }
 
         return ($dias < -self::EPSILON ? '-' : '') . $texto;
+    }
+
+    /**
+     * Separa días en días completos y horas restantes (8 h = 1 día).
+     * Ej.: 15.625 => ['dias' => 15, 'horas' => 5.0, 'negativo' => false].
+     *
+     * @return array{dias: int, horas: float, negativo: bool}
+     */
+    public static function partesDias(float $dias): array
+    {
+        $horasDia = (new JornadaLaboral)->horasPorDia();
+        $horasTotales = round(abs($dias) * $horasDia, 2);
+        $enteros = (int) floor($horasTotales / $horasDia + self::EPSILON);
+
+        return [
+            'dias' => $enteros,
+            'horas' => round($horasTotales - $enteros * $horasDia, 2),
+            'negativo' => $dias < -self::EPSILON,
+        ];
     }
 
     /**

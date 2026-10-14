@@ -50,17 +50,30 @@ class RrhhEmpleadoController extends Controller
             });
         }
 
-        // 📌 ESTADO
-        if ($request->filled('estado')) {
-            $query->where('estado', $request->estado);
-        }
-
         // 📌 AREA
         if ($request->filled('area')) {
             $query->where('area', $request->area);
         }
 
-        $empleados = $query->orderBy('nombre_completo')->get();
+        // Conteo por estado con los mismos filtros de búsqueda y área
+        $conteo = (clone $query)->toBase()->selectRaw('estado, count(*) as total')->groupBy('estado')->pluck('total', 'estado');
+        $conteo = [
+            'activo' => (int) ($conteo['activo'] ?? 0),
+            'inactivo' => (int) ($conteo['inactivo'] ?? 0),
+        ];
+        $conteo['todos'] = $conteo['activo'] + $conteo['inactivo'];
+
+        // 📌 ESTADO (por defecto solo activos)
+        $estadoFiltro = in_array($request->input('estado'), ['activo', 'inactivo', 'todos'], true)
+            ? $request->input('estado')
+            : 'activo';
+
+        if ($estadoFiltro !== 'todos') {
+            $query->where('estado', $estadoFiltro);
+        }
+
+        // Ordenados por área para mostrarlos agrupados
+        $empleados = $query->orderByRaw('area is null')->orderBy('area')->orderBy('nombre_completo')->get();
 
         // El saldo se calcula a partir de los movimientos, por eso el filtro
         // de pendientes se aplica antes de paginar.
@@ -82,9 +95,9 @@ class RrhhEmpleadoController extends Controller
 
         $pagina = LengthAwarePaginator::resolveCurrentPage();
         $empleados = new LengthAwarePaginator(
-            $empleados->forPage($pagina, 15)->values(),
+            $empleados->forPage($pagina, 50)->values(),
             $empleados->count(),
-            15,
+            50,
             $pagina,
             ['path' => $request->url(), 'query' => $request->query()]
         );
@@ -93,6 +106,10 @@ class RrhhEmpleadoController extends Controller
             'empleados' => $empleados,
             'estados' => $estados,
             'areas' => $this->areasRegistradas(),
+            'conteo' => $conteo,
+            'estadoFiltro' => $estadoFiltro,
+            'hoy' => $hoy,
+            'venceAcumuladas' => $this->vacaciones->vencimientoAcumuladoHistorico(),
         ]);
     }
 

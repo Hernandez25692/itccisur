@@ -1,706 +1,414 @@
 <x-app-layout>
+
+    @include('rrhh.partials.ui')
+
     <style>
-        :root {
-            --blue-deep: #0f172a;
-            --blue-medium: #1e293b;
-            --blue-light: #334155;
-            --gold-primary: #C5A049;
-            --gold-light: #d4b168;
-            --gold-dark: #a8843a;
-            --bg-light: #f8fafc;
-            --text-dark: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.06);
-            --shadow-md: 0 4px 6px rgba(15, 23, 42, 0.08);
-            --shadow-lg: 0 10px 15px rgba(15, 23, 42, 0.1);
-            --radius-md: 8px;
-            --radius-lg: 12px;
+        .rh-planilla {
+            min-width: 1040px;
         }
 
-        .container-custom {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 1.5rem 1rem;
-        }
-
-        /* Título principal */
-        h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--blue-deep);
-            margin-bottom: 1.5rem !important;
-            position: relative;
-            padding-bottom: 0.5rem;
-        }
-
-        h2::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 70px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
-            border-radius: 2px;
-        }
-
-        /* Dashboard cards */
-        .dashboard-card {
-            background: var(--blue-medium);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-            padding: 1rem !important;
-        }
-
-        .dashboard-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-
-        .dashboard-card.critical {
-            background: #dc2626;
-        }
-
-        .dashboard-card h6 {
-            color: var(--gold-primary);
-            font-weight: 600;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.25rem;
-        }
-
-        .dashboard-card.critical h6 {
-            color: white;
-        }
-
-        .dashboard-card h3 {
-            color: white;
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        /* Filtros - Card */
-        .filters-card {
-            background: var(--blue-medium);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            transition: box-shadow 0.3s ease;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .filters-card:hover {
-            box-shadow: var(--shadow-md);
-        }
-
-        /* Inputs y selects */
-        .filter-input,
-        .filter-select {
-            width: 100%;
-            padding: 0.4rem 0.6rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-            background-color: white;
-            color: var(--text-dark);
-        }
-
-        .filter-input:focus,
-        .filter-select:focus {
-            border-color: var(--gold-primary);
-            box-shadow: 0 0 0 2px rgba(197, 160, 73, 0.15);
-            outline: none;
-        }
-
-        .filter-input::placeholder {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-        }
-
-        /* Botón Filtrar */
-        .btn-filter {
-            width: 100%;
-            background: var(--gold-primary);
-            border: none;
-            color: var(--blue-deep);
-            font-weight: 600;
-            padding: 0.4rem 0.8rem;
-            border-radius: var(--radius-md);
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(197, 160, 73, 0.3);
-            cursor: pointer;
-        }
-
-        .btn-filter:hover {
-            background: var(--gold-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(197, 160, 73, 0.4);
-        }
-
-        /* Tabla - CON SCROLL Y COLUMNAS FIJAS */
-        .table-container {
-            width: 100%;
-            background: white;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            overflow-x: auto;
-            overflow-y: visible;
-            max-height: 800px;
-        }
-
-        .custom-table {
-            width: 100%;
-            background: white;
-            border-collapse: collapse;
-            table-layout: auto;
-            min-width: 1400px;
-        }
-
-        .custom-table thead {
-            background: linear-gradient(135deg, var(--blue-deep), var(--blue-medium));
+        .rh-planilla .c-nombre {
             position: sticky;
-            top: 0;
-            z-index: 10;
+            left: 0;
+            z-index: 1;
+            min-width: 13.5rem;
+            max-width: 16rem;
+            box-shadow: inset -1px 0 0 var(--rule);
         }
 
-        .custom-table thead th {
-            color: white;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            padding: 0.8rem 0.5rem;
-            border: none;
-            white-space: nowrap;
+        .rh-planilla thead .c-nombre {
+            z-index: 2;
+        }
+
+        .rh-planilla .c-saldo {
+            min-width: 12rem;
+            padding-left: 1rem;
+        }
+
+        .rh-planilla .c-mes {
+            width: 2.45rem;
+            padding-left: 1px;
+            padding-right: 1px;
             text-align: center;
-        }
-
-        /* Primeras 4 columnas fijas */
-        .custom-table thead th:nth-child(1),
-        .custom-table thead th:nth-child(2),
-        .custom-table thead th:nth-child(3),
-        .custom-table thead th:nth-child(4) {
-            position: sticky;
-            background: linear-gradient(135deg, var(--blue-deep), var(--blue-medium));
-            z-index: 50;
-        }
-
-        .custom-table thead th:nth-child(1) {
-            left: 0;
-            border-top-left-radius: var(--radius-lg);
-            text-align: left;
-            padding-left: 0.8rem;
-            min-width: 140px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .custom-table thead th:nth-child(2) {
-            left: 140px;
-            min-width: 90px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .custom-table thead th:nth-child(3) {
-            left: 230px;
-            min-width: 70px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .custom-table thead th:nth-child(4) {
-            left: 300px;
-            min-width: 70px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Meses - ancho aumentado */
-        .custom-table thead th:nth-child(n+5):nth-child(-n+16) {
-            min-width: 50px;
-        }
-
-        .custom-table thead th:nth-child(17) {
-            min-width: 80px;
-        }
-
-        .custom-table thead th:nth-child(18) {
-            min-width: 70px;
-        }
-
-        .custom-table thead th:nth-child(19) {
-            min-width: 80px;
-        }
-
-        .custom-table thead th:last-child {
-            border-top-right-radius: var(--radius-lg);
-            min-width: 120px;
-        }
-
-        .custom-table tbody tr {
-            transition: all 0.2s ease;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .custom-table tbody tr:hover {
-            background-color: rgba(197, 160, 73, 0.05);
-        }
-
-        .custom-table tbody td {
-            padding: 0.7rem 0.5rem;
             vertical-align: middle;
-            color: var(--text-dark);
-            font-size: 0.8rem;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
-        /* Primeras 4 columnas fijas */
-        .custom-table tbody td:nth-child(1),
-        .custom-table tbody td:nth-child(2),
-        .custom-table tbody td:nth-child(3),
-        .custom-table tbody td:nth-child(4) {
-            position: sticky;
-            background: white !important;
-            z-index: 50;
-        }
-
-        .custom-table tbody tr:hover td:nth-child(1),
-        .custom-table tbody tr:hover td:nth-child(2),
-        .custom-table tbody tr:hover td:nth-child(3),
-        .custom-table tbody tr:hover td:nth-child(4) {
-            background-color: #f0ede5 !important;
-        }
-
-        .custom-table tbody td:nth-child(1) {
-            left: 0;
-            padding-left: 0.8rem;
-            font-weight: 600;
-            text-align: left;
-            min-width: 140px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
-        }
-
-        .custom-table tbody td:nth-child(2) {
-            left: 140px;
+        .rh-planilla thead .c-mes {
             text-align: center;
-            min-width: 90px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
+            padding-left: 0;
+            padding-right: 0;
         }
 
-        .custom-table tbody td:nth-child(3) {
-            left: 230px;
-            text-align: center;
-            min-width: 70px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
-        }
-
-        .custom-table tbody td:nth-child(4) {
-            left: 300px;
-            text-align: center;
-            min-width: 70px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
-        }
-
-        .custom-table tbody td:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)) {
-            text-align: center;
-        }
-
-        /* Colores para pendiente */
-        .text-green-custom {
-            color: #10b981 !important;
-            font-weight: 600;
-        }
-
-        .text-yellow-custom {
-            color: var(--gold-primary) !important;
-            font-weight: 600;
-        }
-
-        .text-red-custom {
-            color: #ef4444 !important;
-            font-weight: 700;
-        }
-
-        /* Badge urgente */
-        .badge-urgent {
-            background: #ef4444 !important;
-            color: white;
-            font-size: 0.5rem;
-            padding: 0.1rem 0.25rem;
-            border-radius: 20px;
-            margin-top: 2px;
-            display: inline-block;
-            font-weight: 600;
-            text-transform: uppercase;
-            line-height: 1;
-        }
-
-        /* Botones de acciones */
-        .btn-action-add {
-            background: var(--gold-primary);
-            border: none;
-            color: var(--blue-deep);
-            padding: 0.3rem 0.5rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(197, 160, 73, 0.2);
+        .rh-planilla thead .c-mes abbr {
             text-decoration: none;
-            display: inline-block;
+        }
+
+        .rh-planilla thead .c-mes.is-hoy {
+            color: var(--navy);
+            box-shadow: inset 0 -2px 0 var(--gold);
+        }
+
+        .rh-planilla tbody .c-mes.is-hoy {
+            background: var(--gold-wash);
+        }
+
+        .rh-planilla .c-total {
+            vertical-align: middle;
+            text-align: right;
+            font-weight: 600;
+            padding-left: 1rem;
             white-space: nowrap;
-            margin: 0 2px;
-            min-width: 32px;
-            text-align: center;
-            line-height: 1.2;
         }
 
-        .btn-action-add:hover {
-            background: var(--gold-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(197, 160, 73, 0.3);
-            color: white;
+        .rh-planilla .c-acc {
+            vertical-align: middle;
         }
 
-        .btn-action-view {
-            background: #64748b;
-            border: none;
-            color: white;
-            padding: 0.3rem 0.5rem;
-            border-radius: 20px;
+        .rh-cel {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2rem;
+            margin: 0 auto;
+            border-radius: 4px;
             font-size: 0.75rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);
-            text-decoration: none;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            box-shadow: inset 0 0 0 1px var(--rule);
+        }
+
+        .rh-cel.h-1,
+        .rh-cel.h-2,
+        .rh-cel.h-3,
+        .rh-cel.h-4 {
+            box-shadow: none;
+        }
+
+        .rh-cel[data-tip] {
+            cursor: default;
+        }
+
+        .rh-cel[data-tip]:hover {
+            outline: 2px solid var(--navy);
+            outline-offset: 1px;
+        }
+
+        .rh-dot {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 0 1.5px var(--paper);
+        }
+
+        .rh-key-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gold);
             display: inline-block;
-            white-space: nowrap;
-            margin: 0 2px;
-            min-width: 40px;
-            text-align: center;
-            line-height: 1.2;
         }
 
-        .btn-action-view:hover {
-            background: #475569;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(100, 116, 139, 0.3);
-            color: white;
+        .rh-planilla-top {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.6rem 1.5rem;
+            padding: 0 0 0.75rem;
         }
 
-        /* Grid responsive */
-        .grid-custom {
-            display: grid;
-            gap: 1rem;
-        }
-
-        @media (min-width: 768px) {
-            .grid-custom {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        /* Filtros grid */
-        .filters-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.8rem;
-        }
-
-        @media (min-width: 768px) {
-            .filters-grid {
-                grid-template-columns: repeat(6, 1fr);
-            }
-        }
-
-        /* Responsive table para móviles */
-        @media (max-width: 1200px) {
-            .custom-table {
-                table-layout: auto;
-                min-width: 100%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container-custom {
-                padding: 1rem;
+        @media (max-width: 760px) {
+            .rh-planilla {
+                min-width: 0;
             }
 
-            h2 {
-                font-size: 1.6rem;
-            }
-
-            .custom-table thead {
+            .rh-planilla thead {
                 display: none;
             }
 
-            .custom-table tbody tr {
+            .rh-planilla,
+            .rh-planilla tbody {
                 display: block;
-                margin-bottom: 1rem;
-                border: 1px solid var(--border-color);
-                border-radius: var(--radius-md);
-                padding: 0.8rem;
             }
 
-            .custom-table tbody td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0.3rem 0;
-                border: none;
-                white-space: normal;
-                font-size: 0.8rem;
-                text-align: right;
+            .rh-planilla tbody tr {
+                display: grid;
+                grid-template-columns: repeat(12, minmax(0, 1fr));
+                column-gap: 2px;
+                padding: 0.9rem 0;
+                border-bottom: 1px solid var(--rule);
             }
 
-            .custom-table tbody td:before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: var(--blue-deep);
-                margin-right: 1rem;
-                min-width: 100px;
+            .rh-planilla tbody tr > * {
+                border-bottom: none !important;
+                padding: 0.2rem 0 !important;
+                background: transparent !important;
+            }
+
+            .rh-planilla .c-nombre {
+                position: static;
+                box-shadow: none;
+                grid-column: 1 / -1;
+                max-width: none;
+            }
+
+            .rh-planilla .c-saldo {
+                grid-column: 1 / -1;
+                padding-bottom: 0.5rem !important;
+            }
+
+            .rh-planilla .c-mes {
+                width: auto;
+            }
+
+            .rh-planilla .c-mes::before {
+                content: attr(data-mes);
+                display: block;
+                font-size: 0.65rem;
+                color: var(--ink-3);
+                margin-bottom: 2px;
+            }
+
+            .rh-cel {
+                width: 100%;
+            }
+
+            .rh-planilla .c-total {
+                grid-column: 1 / 5;
                 text-align: left;
+                padding-top: 0.6rem !important;
             }
 
-            .custom-table tbody td:first-child {
-                font-weight: 700;
-                color: var(--blue-deep);
+            .rh-planilla .c-total::before {
+                content: 'Total del año: ';
+                font-weight: 400;
+                color: var(--ink-3);
             }
 
-            .btn-action-add,
-            .btn-action-view {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.9rem;
-                min-width: 50px;
+            .rh-planilla .c-acc {
+                grid-column: 5 / -1;
+                padding-top: 0.6rem !important;
             }
-        }
-
-        .custom-table thead th:nth-child(20) {
-            min-width: 90px;
-        }
-
-        .dashboard-card.warning {
-            background: #b45309;
-        }
-
-        .dashboard-card.warning h6 {
-            color: white;
-        }
-
-        .notice {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-            border-radius: var(--radius-lg);
-            padding: 0.9rem 1.1rem;
-            margin-bottom: 1.25rem;
-            font-size: 0.9rem;
-        }
-
-        .notice.success {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #047857;
-        }
-
-        .notice.error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #b91c1c;
-        }
-
-        .notice.warning {
-            background: #fef3c7;
-            border: 1px solid rgba(180, 83, 9, 0.3);
-            color: #78350f;
-        }
-
-        .btn-process {
-            background: var(--blue-deep);
-            color: var(--gold-light);
-            border: none;
-            border-radius: var(--radius-md);
-            padding: 0.45rem 0.9rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .btn-process:hover {
-            background: var(--blue-medium);
-        }
-
-        .btn-clear {
-            display: block;
-            width: 100%;
-            text-align: center;
-            background: #64748b;
-            color: white;
-            font-weight: 600;
-            padding: 0.4rem 0.8rem;
-            border-radius: var(--radius-md);
-            font-size: 0.8rem;
-        }
-
-        .header-row {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .text-sub {
-            display: block;
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            font-weight: 400;
-        }
-
-        .legend {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            margin-top: 0.9rem;
-            line-height: 1.6;
         }
     </style>
 
     @php
+        $servicio = app(\App\Services\Rrhh\VacacionesService::class);
         $critico = config('rrhh.vacaciones.saldo_critico');
-        $diasAlerta = config('rrhh.vacaciones.alerta_vencimiento_dias');
-        $mesesES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        $alerta = config('rrhh.vacaciones.alerta_vencimiento_dias');
+        $meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        $mesActual = $anio === $hoy->year ? $hoy->month : null;
+        $filtrando = request()->filled('search') || request()->filled('area') || request()->filled('pendiente') || request()->filled('orden');
+        $pendiente = request('pendiente');
+        $hayAcumuladas = $filas->contains(fn ($fila) => $fila['medidor']['acumuladas'] > 0);
+        $n = fn ($valor) => \App\Services\Rrhh\VacacionesService::numero(round($valor, 2));
+        $n1 = fn ($valor) => \App\Services\Rrhh\VacacionesService::numero(round($valor, 1));
+        $dh = function ($valor) {
+            $p = \App\Services\Rrhh\VacacionesService::partesDias($valor);
+
+            return ($p['negativo'] ? '−' : '') . $p['dias'] . ' ' . ($p['dias'] === 1 ? 'día' : 'días')
+                . ($p['horas'] > 0 ? ' y ' . \App\Services\Rrhh\VacacionesService::numero($p['horas']) . ' h' : '');
+        };
+        $corto = fn ($valor) => \App\Services\Rrhh\VacacionesService::formatoDias($valor);
+        $enlace = fn (array $cambios) => request()->fullUrlWithQuery($cambios);
     @endphp
 
-    <div class="container-custom">
-        {{-- Título --}}
-        <div class="header-row">
-            <h2>Control de Vacaciones {{ $anio }}</h2>
+    <div class="rh">
 
-            <form method="POST" action="{{ route('vacaciones.procesar') }}">
-                @csrf
-                <button type="submit" class="btn-process"
-                    title="Acredita los días por aniversario pendientes y recalcula los saldos. Se puede ejecutar varias veces sin duplicar.">
-                    Procesar acreditaciones
-                </button>
-            </form>
-        </div>
+        {{-- Encabezado --}}
+        <header class="rh-head">
+            <div class="rh-head-main">
+                <div class="rh-title-row">
+                    <h1 class="rh-title">Vacaciones</h1>
+                    <nav class="rh-year" aria-label="Año de la planilla">
+                        <a class="rh-year-step" href="{{ $enlace(['anio' => $anio - 1]) }}"
+                            aria-label="Ver {{ $anio - 1 }}">@include('rrhh.partials.icono', ['i' => 'anterior'])</a>
+                        <span class="rh-year-num" aria-current="page">{{ $anio }}</span>
+                        <a class="rh-year-step" href="{{ $enlace(['anio' => $anio + 1]) }}"
+                            aria-label="Ver {{ $anio + 1 }}">@include('rrhh.partials.icono', ['i' => 'siguiente'])</a>
+                    </nav>
+                </div>
+                <p class="rh-sub">
+                    Al {{ $hoy->translatedFormat('j \d\e F \d\e Y') }},
+                    {{ $resumen['empleados'] }} {{ $resumen['empleados'] === 1 ? 'colaborador activo tiene' : 'colaboradores activos suman' }}
+                    <strong>{{ $dh($resumen['disponibles']) }} disponibles</strong>.
+                    Los meses muestran lo tomado en {{ $anio }}.
+                </p>
+            </div>
+            <div class="rh-head-actions">
+                <form method="POST" action="{{ route('vacaciones.procesar') }}">
+                    @csrf
+                    <button type="submit" class="rh-btn"
+                        title="Acredita los aniversarios pendientes y recalcula los saldos. Se puede ejecutar varias veces sin duplicar.">
+                        @include('rrhh.partials.icono', ['i' => 'actualizar'])
+                        Procesar acreditaciones
+                    </button>
+                </form>
+                <a href="{{ route('empleados.index') }}" class="rh-btn is-quiet">Empleados</a>
+            </div>
+        </header>
 
+        {{-- Mensajes --}}
         @if (session('success'))
-            <div class="notice success">{{ session('success') }}</div>
+            <div class="rh-notice is-good" role="status">
+                <span class="rh-notice-text">@include('rrhh.partials.icono', ['i' => 'ok']){{ session('success') }}</span>
+            </div>
         @endif
 
         @if (session('error'))
-            <div class="notice error">{{ session('error') }}</div>
+            <div class="rh-notice is-crit" role="alert">
+                <span class="rh-notice-text">@include('rrhh.partials.icono', ['i' => 'alerta']){{ session('error') }}</span>
+            </div>
         @endif
 
         @if ($pendientesAcreditar > 0)
-            <div class="notice warning">
-                <span>
-                    Hay <strong>{{ $pendientesAcreditar }}</strong> empleado(s) con aniversario laboral sin acreditar o
-                    con periodos del esquema anterior. Procese las acreditaciones para que los saldos queden al día.
+            <div class="rh-notice is-warn">
+                <span class="rh-notice-text">
+                    @include('rrhh.partials.icono', ['i' => 'alerta'])
+                    <span>
+                        {{ $pendientesAcreditar }} {{ $pendientesAcreditar === 1 ? 'colaborador tiene' : 'colaboradores tienen' }}
+                        aniversarios sin acreditar. Los saldos no estarán al día hasta procesarlos.
+                    </span>
                 </span>
                 <form method="POST" action="{{ route('vacaciones.procesar') }}">
                     @csrf
-                    <button type="submit" class="btn-process">Procesar ahora</button>
+                    <button type="submit" class="rh-btn is-dark is-sm">Procesar ahora</button>
                 </form>
             </div>
         @endif
 
-        {{-- DASHBOARD --}}
-        <div class="grid-custom mb-6">
-            <div class="dashboard-card text-center">
-                <h6>Total Empleados</h6>
-                <h3>{{ $totalEmpleados }}</h3>
+        {{-- Lo que requiere atención --}}
+        <ul class="rh-attn" aria-label="Requieren atención">
+            @if ($resumen['debe_salir'] > 0)
+                <li>
+                    <a href="{{ $enlace(['pendiente' => $pendiente === 'critico' ? null : 'critico']) }}"
+                        class="rh-attn-item is-tone-serious {{ $pendiente === 'critico' ? 'is-active' : '' }}"
+                        aria-pressed="{{ $pendiente === 'critico' ? 'true' : 'false' }}">
+                        @include('rrhh.partials.icono', ['i' => 'bandera'])
+                        <span><strong>{{ $resumen['debe_salir'] }}</strong> con más de {{ $critico }} días: deben programar vacaciones</span>
+                    </a>
+                </li>
+            @endif
+            @if ($resumen['vence_pronto'] > 0)
+                <li>
+                    <a href="{{ $enlace(['pendiente' => $pendiente === 'por_vencer' ? null : 'por_vencer']) }}"
+                        class="rh-attn-item is-tone-warn {{ $pendiente === 'por_vencer' ? 'is-active' : '' }}"
+                        aria-pressed="{{ $pendiente === 'por_vencer' ? 'true' : 'false' }}">
+                        @include('rrhh.partials.icono', ['i' => 'reloj-arena'])
+                        <span><strong>{{ $resumen['vence_pronto'] }}</strong> pierden {{ $dh($resumen['dias_por_vencer']) }} en los próximos {{ $alerta }} días si no los toman</span>
+                    </a>
+                </li>
+            @endif
+            @if ($resumen['adelanto'] > 0)
+                <li>
+                    <a href="{{ $enlace(['pendiente' => $pendiente === 'adelanto' ? null : 'adelanto']) }}"
+                        class="rh-attn-item is-tone-crit {{ $pendiente === 'adelanto' ? 'is-active' : '' }}"
+                        aria-pressed="{{ $pendiente === 'adelanto' ? 'true' : 'false' }}">
+                        @include('rrhh.partials.icono', ['i' => 'menos'])
+                        <span><strong>{{ $resumen['adelanto'] }}</strong> con vacaciones adelantadas (saldo negativo)</span>
+                    </a>
+                </li>
+            @endif
+            @if ($resumen['debe_salir'] + $resumen['vence_pronto'] + $resumen['adelanto'] === 0 && $resumen['empleados'] > 0)
+                <li class="rh-attn-item is-tone-good">
+                    @include('rrhh.partials.icono', ['i' => 'ok'])
+                    <span>Nadie tiene saldos críticos, días por vencer ni adelantos.</span>
+                </li>
+            @endif
+        </ul>
+
+        {{-- Filtros --}}
+        <form method="GET" class="rh-filters" id="filtros" role="search">
+            <input type="hidden" name="anio" value="{{ $anio }}">
+
+            <label class="rh-field is-search">
+                <span class="sr-only">Buscar colaborador</span>
+                @include('rrhh.partials.icono', ['i' => 'buscar'])
+                <input type="search" name="search" value="{{ request('search') }}" class="rh-input"
+                    placeholder="Buscar por nombre o identidad">
+            </label>
+
+            <label class="rh-field">
+                <span class="sr-only">Área</span>
+                <select name="area" class="rh-select js-auto">
+                    <option value="">Todas las áreas</option>
+                    @foreach ($areas as $area)
+                        <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
+                    @endforeach
+                </select>
+            </label>
+
+            <label class="rh-field">
+                <span class="sr-only">Saldo</span>
+                <select name="pendiente" class="rh-select js-auto">
+                    <option value="">Cualquier saldo</option>
+                    <option value="con" @selected($pendiente === 'con')>Con saldo</option>
+                    <option value="sin" @selected($pendiente === 'sin')>Sin saldo</option>
+                    <option value="critico" @selected($pendiente === 'critico')>Más de {{ $critico }} días</option>
+                    <option value="por_vencer" @selected($pendiente === 'por_vencer')>Con días por vencer</option>
+                    <option value="adelanto" @selected($pendiente === 'adelanto')>Con adelanto</option>
+                </select>
+            </label>
+
+            <label class="rh-field">
+                <span class="sr-only">Ordenar</span>
+                <select name="orden" class="rh-select js-auto">
+                    <option value="">Ordenar por nombre</option>
+                    <option value="saldo" @selected(request('orden') === 'saldo')>Mayor saldo primero</option>
+                    <option value="vence" @selected(request('orden') === 'vence')>Vencimiento más próximo</option>
+                </select>
+            </label>
+
+            <div class="rh-filters-end">
+                @if ($filtrando)
+                    <a href="{{ route('vacaciones.index', ['anio' => $anio]) }}" class="rh-clear">Limpiar filtros</a>
+                @endif
+                <button type="submit" class="rh-btn is-dark">Aplicar</button>
             </div>
-            <div class="dashboard-card text-center">
-                <h6>Días Pendientes</h6>
-                <h3>{{ number_format($totalPendiente, 2) }}</h3>
+        </form>
+
+        {{-- Leyenda --}}
+        <div class="rh-planilla-top">
+            <div class="rh-legend" aria-hidden="true">
+                <span class="rh-legend-item">
+                    Días tomados por mes
+                    <span class="rh-scale">
+                        <span class="h-1">&lt;1</span><span class="h-2">1–3</span><span class="h-3">3–6</span><span class="h-4">6+</span>
+                    </span>
+                </span>
+                <span class="rh-legend-item"><span class="rh-key-dot"></span> Permiso especial (no descuenta)</span>
             </div>
-            <div class="dashboard-card critical text-center">
-                <h6>Críticos (&gt;{{ $critico }} días)</h6>
-                <h3>{{ $criticos }}</h3>
-            </div>
-            <div class="dashboard-card warning text-center">
-                <h6>Vencen en {{ $diasAlerta }} días</h6>
-                <h3>{{ $porVencer }}</h3>
+            <div class="rh-legend" aria-hidden="true">
+                <span class="rh-legend-item"><span class="rh-key is-bar" style="background: var(--serie-periodo)"></span> Disponible del periodo</span>
+                @if ($hayAcumuladas)
+                    <span class="rh-legend-item"><span class="rh-key is-bar" style="background: var(--serie-acum)"></span> Acumuladas, vencen el {{ $venceAcumuladas->format('d-m-Y') }}</span>
+                @endif
+                <span class="rh-legend-item"><span class="rh-key is-bar" style="background: var(--pista)"></span> Ya tomado</span>
             </div>
         </div>
 
-        {{-- FILTROS --}}
-        <div class="filters-card">
-            <form method="GET" class="filters-grid">
-                <div>
-                    <input type="text" name="search" placeholder="Buscar colaborador" value="{{ request('search') }}"
-                        class="filter-input">
-                </div>
-
-                <div>
-                    <input type="number" name="anio" min="2000" max="2100" value="{{ $anio }}"
-                        class="filter-input" title="Año de los meses mostrados">
-                </div>
-
-                <div>
-                    <select name="area" class="filter-select">
-                        <option value="">Área</option>
-                        @foreach ($areas as $area)
-                            <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <select name="pendiente" class="filter-select">
-                        <option value="">Vacaciones</option>
-                        <option value="con" {{ request('pendiente') == 'con' ? 'selected' : '' }}>Con saldo</option>
-                        <option value="sin" {{ request('pendiente') == 'sin' ? 'selected' : '' }}>Sin saldo</option>
-                        <option value="critico" {{ request('pendiente') == 'critico' ? 'selected' : '' }}>Crítico
-                        </option>
-                        <option value="por_vencer" {{ request('pendiente') == 'por_vencer' ? 'selected' : '' }}>
-                            Por vencer
-                        </option>
-                    </select>
-                </div>
-
-                <div>
-                    <button type="submit" class="btn-filter">
-                        Filtrar
-                    </button>
-                </div>
-
-                <div>
-                    <a href="{{ route('vacaciones.index') }}" class="btn-clear">Limpiar</a>
-                </div>
-            </form>
-        </div>
-
-        {{-- TABLA --}}
-        <div class="table-container">
-            <table class="custom-table">
+        {{-- Planilla --}}
+        <div class="rh-table-wrap">
+            <table class="rh-table rh-planilla">
+                <caption class="sr-only">
+                    Saldo de vacaciones de cada colaborador y días tomados por mes en {{ $anio }}
+                </caption>
                 <thead>
                     <tr>
-                        <th>Colaborador</th>
-                        <th>Ingreso</th>
-                        <th title="Días por ley del periodo laboral actual">Ley</th>
-                        <th title="Vacaciones acumuladas (histórico) pendientes de tomar">Acum.</th>
-                        @for ($i = 1; $i <= 12; $i++)
-                            <th title="Días descontados en {{ $mesesES[$i - 1] }} {{ $anio }}">{{ $mesesES[$i - 1] }}</th>
-                        @endfor
-                        <th title="Permisos especiales del año (no descuentan)">Permisos</th>
-                        <th title="Días descontados en {{ $anio }}">Total</th>
-                        <th title="Saldo disponible hoy">Saldo</th>
-                        <th title="Próximo vencimiento de días no tomados">Vence</th>
-                        <th>Acciones</th>
+                        <th scope="col" class="c-nombre">Colaborador</th>
+                        <th scope="col" class="c-saldo">Saldo disponible</th>
+                        @foreach ($meses as $i => $mes)
+                            <th scope="col" class="c-mes {{ $mesActual === $i + 1 ? 'is-hoy' : '' }}">
+                                <abbr title="{{ ucfirst($mes) }}">{{ ucfirst(mb_substr($mes, 0, 3)) }}</abbr>
+                            </th>
+                        @endforeach
+                        <th scope="col" class="c-total">Total {{ $anio }}</th>
+                        <th scope="col" class="c-acc"><span class="sr-only">Acciones</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -708,69 +416,95 @@
                         @php
                             $empleado = $fila['empleado'];
                             $estado = $fila['estado'];
-                            $saldo = $estado->saldo;
                             $proximo = $estado->proximoVencimiento;
-                            $venceProntoDias = $proximo ? (int) $hoy->diffInDays($proximo['fecha']) : null;
-
-                            if ($saldo <= 5) {
-                                $color = 'text-green-custom';
-                            } elseif ($saldo <= $critico) {
-                                $color = 'text-yellow-custom';
-                            } else {
-                                $color = 'text-red-custom';
-                            }
+                            $actual = $estado->periodoActual;
+                            $anios = $empleado->aniosServicio();
+                            $servicioTexto = $anios === 0 ? 'menos de un año' : $anios . ' ' . ($anios === 1 ? 'año' : 'años');
                         @endphp
                         <tr>
-                            <td data-label="Colaborador" class="font-semibold" title="{{ $empleado->nombre_completo }}">
-                                {{ $empleado->nombre_completo }}</td>
-                            <td data-label="Ingreso">{{ $empleado->fecha_contratacion->format('d-m-Y') }}</td>
-                            <td data-label="Ley">{{ \App\Services\Rrhh\VacacionesService::numero($estado->diasPorLeyActual()) }}</td>
-                            <td data-label="Acum.">
-                                {{ $estado->acumuladoRestante() > 0 ? number_format($estado->acumuladoRestante(), 1) : '-' }}
-                            </td>
-                            @for ($i = 1; $i <= 12; $i++)
-                                <td data-label="{{ $mesesES[$i - 1] }}">
-                                    {{ $fila['meses'][$i] > 0 ? number_format($fila['meses'][$i], 1) : '-' }}</td>
-                            @endfor
-                            <td data-label="Permisos">
-                                {{ $fila['permisos'] > 0 ? number_format($fila['permisos'], 1) : '-' }}
-                            </td>
-                            <td data-label="Total" class="font-bold">{{ number_format($fila['tomado_anio'], 1) }}</td>
-                            <td data-label="Saldo" class="{{ $color }}" title="{{ \App\Services\Rrhh\VacacionesService::formatoDias($saldo) }}">
-                                {{ number_format($saldo, 1) }}
-                                @if ($saldo < 0)
-                                    <span class="badge-urgent">Adelanto</span>
-                                @elseif ($saldo > $critico)
-                                    <span class="badge-urgent">Descanso</span>
-                                @endif
-                            </td>
-                            <td data-label="Vence">
-                                @if ($proximo)
-                                    {{ $proximo['fecha']->format('d-m-Y') }}
-                                    <span class="text-sub {{ $venceProntoDias <= $diasAlerta ? 'text-red-custom' : '' }}">
-                                        {{ number_format($proximo['dias'], 1) }} d
+                            <th scope="row" class="c-nombre">
+                                <a href="{{ route('vacaciones.historial', $empleado) }}" class="rh-name" title="Ver historial y estado de cuenta">{{ $empleado->nombre_completo }}</a>
+                                <span class="rh-meta">{{ $empleado->cargo ? $empleado->cargo . ', ' : '' }}{{ $servicioTexto }} de servicio</span>
+                            </th>
+
+                            <td class="c-saldo">
+                                @include('rrhh.partials.saldo', ['saldo' => $estado->saldo])
+                                @include('rrhh.partials.medidor', ['medidor' => $fila['medidor']])
+
+                                @if ($fila['adelanto'] || $fila['vence_pronto'] || $fila['debe_salir'])
+                                    <div class="rh-chips">
+                                        @if ($fila['adelanto'])
+                                            <span class="rh-chip is-crit">@include('rrhh.partials.icono', ['i' => 'menos']) Adelanto de {{ $corto(abs($estado->saldo)) }}</span>
+                                        @endif
+                                        @if ($fila['vence_pronto'])
+                                            <span class="rh-chip is-warn">@include('rrhh.partials.icono', ['i' => 'reloj-arena']) {{ $corto($proximo['dias']) }} vencen el {{ $proximo['fecha']->format('d-m') }}</span>
+                                        @endif
+                                        @if ($fila['debe_salir'])
+                                            <span class="rh-chip is-serious">@include('rrhh.partials.icono', ['i' => 'bandera']) Programar vacaciones</span>
+                                        @endif
+                                    </div>
+                                @elseif ($proximo)
+                                    <span class="rh-saldo-note">Vencen el {{ $proximo['fecha']->format('d-m-Y') }}</span>
+                                @elseif ($actual)
+                                    <span class="rh-saldo-note">
+                                        Acredita {{ $servicio->diasPorAntiguedad($actual['numero'] + 1) }} días el
+                                        {{ $actual['fin']->addDay()->format('d-m-Y') }}
                                     </span>
-                                @else
-                                    -
                                 @endif
                             </td>
-                            <td data-label="Acciones">
-                                <div style="display: flex; gap: 0.2rem; justify-content: center; align-items: center;">
-                                    <a href="{{ route('vacaciones.crear', $empleado) }}" class="btn-action-add"
-                                        title="Registrar vacaciones o permiso">
-                                        +
-                                    </a>
-                                    <a href="{{ route('vacaciones.historial', $empleado) }}"
-                                        class="btn-action-view" title="Historial y estado de cuenta">
-                                        Ver
+
+                            @foreach ($meses as $i => $mes)
+                                @php
+                                    $dato = $fila['meses'][$i + 1];
+                                    $dias = $dato['dias'];
+                                    $nivel = $dias <= 0 ? '' : ($dias < 1 ? 'h-1' : ($dias < 3 ? 'h-2' : ($dias < 6 ? 'h-3' : 'h-4')));
+                                    $partes = [];
+                                    if ($dias > 0) {
+                                        $partes[] = $n($dias) . ' ' . ($dias == 1 ? 'día' : 'días') . ' de vacaciones';
+                                    }
+                                    if ($dato['permisos'] > 0) {
+                                        $partes[] = $dato['permisos'] . ' ' . ($dato['permisos'] === 1 ? 'permiso especial' : 'permisos especiales')
+                                            . ' (' . $n($dato['permisos_horas']) . ' h, no descuentan)';
+                                    }
+                                    $detalle = $partes ? ucfirst($mes) . ' ' . $anio . ': ' . implode(' y ', $partes) . '.' : null;
+                                @endphp
+                                <td class="c-mes {{ $mesActual === $i + 1 ? 'is-hoy' : '' }}" data-mes="{{ ucfirst(mb_substr($mes, 0, 3)) }}">
+                                    <span class="rh-cel {{ $nivel }}" @if ($detalle) data-tip="{{ $detalle }}" @endif>
+                                        <span aria-hidden="true">{{ $dias > 0 ? $n1($dias) : '' }}</span>
+                                        @if ($dato['permisos'] > 0)
+                                            <i class="rh-dot" aria-hidden="true"></i>
+                                        @endif
+                                        @if ($detalle)
+                                            <span class="sr-only">{{ $detalle }}</span>
+                                        @endif
+                                    </span>
+                                </td>
+                            @endforeach
+
+                            <td class="c-total num">{{ $fila['tomado_anio'] > 0 ? $corto($fila['tomado_anio']) : '—' }}</td>
+
+                            <td class="c-acc">
+                                <div class="rh-actions">
+                                    <a href="{{ route('vacaciones.crear', $empleado) }}" class="rh-btn is-sm"
+                                        aria-label="Registrar vacaciones o permiso para {{ $empleado->nombre_completo }}">
+                                        @include('rrhh.partials.icono', ['i' => 'mas'])
+                                        Registrar
                                     </a>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="21" class="text-center py-4 text-gray-500">
-                                Sin registros
+                            <td colspan="16">
+                                <div class="rh-empty">
+                                    @if ($filtrando)
+                                        <p>Ningún colaborador coincide con los filtros.</p>
+                                        <a href="{{ route('vacaciones.index', ['anio' => $anio]) }}" class="rh-btn">Limpiar filtros</a>
+                                    @else
+                                        <p>Aún no hay colaboradores activos registrados.</p>
+                                        <a href="{{ route('empleados.create') }}" class="rh-btn is-primary">Registrar empleado</a>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -778,15 +512,45 @@
             </table>
         </div>
 
-        <p class="legend">
-            <strong>Saldo</strong>: días disponibles hoy (acumulado histórico + días por ley acreditados − vacaciones
-            tomadas o programadas − días vencidos). Un saldo negativo es un adelanto que se compensa con la próxima
-            acreditación.<br>
-            Los días por ley se acreditan en cada aniversario laboral. Desde el
-            {{ app(\App\Services\Rrhh\VacacionesService::class)->inicioSinAcumulacion()->format('d-m-Y') }} no se acumulan: vencen al
-            siguiente aniversario, y las acumuladas históricas vencen el
-            {{ app(\App\Services\Rrhh\VacacionesService::class)->vencimientoAcumuladoHistorico()->format('d-m-Y') }}.
-            Los domingos no se descuentan; 8 horas = 1 día.
+        <p class="rh-foot">
+            Los días por ley se acreditan en cada aniversario laboral (10, 12, 15 y 20 días según los años de servicio).
+            Desde el {{ $servicio->inicioSinAcumulacion()->format('d-m-Y') }} no se acumulan: los días de cada periodo
+            vencen al siguiente aniversario y las vacaciones acumuladas vencen el {{ $venceAcumuladas->format('d-m-Y') }}.
+            Al registrar vacaciones se descuentan primero los días que vencen antes. Los domingos no se descuentan y
+            8 horas equivalen a 1 día.
         </p>
+
+        <div class="rh-tip" id="rh-tip" role="tooltip" hidden></div>
     </div>
+
+    <script>
+        (function() {
+            // Los filtros de lista se aplican al cambiarlos
+            document.querySelectorAll('#filtros .js-auto').forEach((campo) => {
+                campo.addEventListener('change', () => campo.form.requestSubmit());
+            });
+
+            // Detalle de cada mes al pasar el cursor
+            const tip = document.getElementById('rh-tip');
+
+            const mostrar = (celda) => {
+                tip.textContent = celda.dataset.tip;
+                tip.hidden = false;
+                const caja = celda.getBoundingClientRect();
+                const ancho = tip.offsetWidth;
+                const izquierda = Math.min(window.innerWidth - ancho - 8, Math.max(8, caja.left + caja.width / 2 - ancho / 2));
+                const arriba = caja.top - tip.offsetHeight - 8;
+                tip.style.left = izquierda + 'px';
+                tip.style.top = (arriba < 8 ? caja.bottom + 8 : arriba) + 'px';
+            };
+
+            document.querySelectorAll('.rh-cel[data-tip]').forEach((celda) => {
+                celda.addEventListener('pointerenter', () => mostrar(celda));
+                celda.addEventListener('pointerleave', () => tip.hidden = true);
+            });
+
+            window.addEventListener('scroll', () => tip.hidden = true, true);
+        })();
+    </script>
+
 </x-app-layout>

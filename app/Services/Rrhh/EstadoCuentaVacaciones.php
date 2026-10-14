@@ -46,6 +46,30 @@ class EstadoCuentaVacaciones
     }
 
     /**
+     * Datos para la barra de saldo: de lo acreditado que sigue vigente, cuánto
+     * queda de acumuladas (vencen el 31-dic-2026), cuánto del periodo y cuánto
+     * ya se usó.
+     *
+     * @return array{total: float, acumuladas: float, periodo: float, usado: float}
+     */
+    public function medidor(CarbonImmutable $hoy, CarbonImmutable $venceAcumuladas): array
+    {
+        $vigentes = collect($this->bolsas)->filter(fn ($bolsa) => $bolsa['vence']->gte($hoy));
+        $esAcumulada = fn ($bolsa) => $bolsa['vence']->equalTo($venceAcumuladas);
+
+        $total = (float) $vigentes->sum('acreditado');
+        $acumuladas = (float) $vigentes->filter($esAcumulada)->sum('restante');
+        $periodo = (float) $vigentes->reject($esAcumulada)->sum('restante');
+
+        return [
+            'total' => round($total, 4),
+            'acumuladas' => round($acumuladas, 4),
+            'periodo' => round($periodo, 4),
+            'usado' => round(max(0, $total - $acumuladas - $periodo), 4),
+        ];
+    }
+
+    /**
      * Días que vencen en los próximos $dias días (desde $hoy).
      */
     public function porVencerEn(int $dias, ?CarbonImmutable $hoy = null): float

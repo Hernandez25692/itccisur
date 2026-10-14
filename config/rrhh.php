@@ -83,6 +83,7 @@ return [
         'Registrador Adjunto',
         'Implementadora',
         'Delegado Registral',
+        'Auxiliar de Limpieza',
     ],
 
 ];

@@ -234,6 +234,15 @@ it('acredita una sola vez aunque el proceso se ejecute varias veces', function (
         ->and(rrhhServicio()->requiereSincronizacion($empleado->fresh('periodosVacaciones'), CarbonImmutable::parse('2027-03-12')))->toBeTrue();
 });
 
+it('no pide acreditar a quien está en su primer año (periodo 0)', function () {
+    $empleado = rrhhEmpleado('2025-12-01', '2026-03-16');
+    rrhhSincronizar($empleado, '2026-10-14');
+
+    expect($empleado->periodosVacaciones()->pluck('numero_periodo')->all())->toBe([0])
+        ->and(rrhhServicio()->requiereSincronizacion($empleado->fresh('periodosVacaciones'), CarbonImmutable::parse('2026-10-14')))->toBeFalse()
+        ->and(rrhhServicio()->requiereSincronizacion($empleado->fresh('periodosVacaciones'), CarbonImmutable::parse('2026-12-01')))->toBeTrue();
+});
+
 it('convierte los periodos por año calendario en periodos laborales', function () {
     $empleado = rrhhEmpleado('2018-08-10', '2026-03-20', 5);
 

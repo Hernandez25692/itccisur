@@ -54,13 +54,19 @@ class RrhhVacacionesController extends Controller
         $anio = (int) $request->input('anio', date('Y'));
         $anio = $anio >= 2000 && $anio <= 2100 ? $anio : (int) date('Y');
         $hoy = CarbonImmutable::today();
+        $critico = config('rrhh.vacaciones.saldo_critico');
+        $alerta = config('rrhh.vacaciones.alerta_vencimiento_dias');
+        $venceAcumuladas = $this->vacaciones->vencimientoAcumuladoHistorico();
 
         $query = RrhhEmpleado::where('estado', 'activo')
             ->with(['periodosVacaciones', 'movimientosVacaciones']);
 
         // 🔍 BUSQUEDA
         if ($request->filled('search')) {
-            $query->where('nombre_completo', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('nombre_completo', 'like', '%' . $request->search . '%')
+                    ->orWhere('identidad', 'like', '%' . $request->search . '%');
+            });
         }
 
         // 📌 AREA
@@ -68,45 +74,53 @@ class RrhhVacacionesController extends Controller
             $query->where('area', $request->area);
         }
 
-        $filas = $query->orderBy('nombre_completo')->get()->map(function ($empleado) use ($anio, $hoy) {
-            $meses = array_fill(1, 12, 0.0);
-            $permisos = 0.0;
-
-            foreach ($empleado->movimientosVacaciones as $movimiento) {
-                if ($movimiento->estado !== 'aprobado' || $movimiento->fecha_inicio->year !== $anio) {
-                    continue;
-                }
-
-                if ($movimiento->tipo_movimiento === 'permiso_especial') {
-                    $permisos += (float) $movimiento->dias_equivalentes;
-                } elseif (in_array($movimiento->tipo_movimiento, ['vacacion_dias', 'vacacion_horas'], true)) {
-                    $meses[$movimiento->fecha_inicio->month] += $this->vacaciones->diasADescontar($movimiento);
-                }
-            }
+        $filas = $query->orderBy('nombre_completo')->get()->map(function ($empleado) use ($anio, $hoy, $critico, $alerta, $venceAcumuladas) {
+            $estado = $this->vacaciones->estadoCuenta($empleado, null, $hoy);
+            $meses = $this->resumenMensual($empleado, $anio);
+            $proximo = $estado->proximoVencimiento;
+            $diasParaVencer = $proximo ? (int) $hoy->diffInDays($proximo['fecha']) : null;
 
             return [
                 'empleado' => $empleado,
-                'estado' => $this->vacaciones->estadoCuenta($empleado, null, $hoy),
+                'estado' => $estado,
                 'meses' => $meses,
-                'permisos' => $permisos,
-                'tomado_anio' => array_sum($meses),
+                'tomado_anio' => array_sum(array_column($meses, 'dias')),
+                'medidor' => $estado->medidor($hoy, $venceAcumuladas),
+                'dias_para_vencer' => $diasParaVencer,
+                'vence_pronto' => $proximo && $diasParaVencer <= $alerta,
+                'debe_salir' => $estado->saldo > $critico,
+                'adelanto' => $estado->saldo < 0,
             ];
         });
 
-        // 🎯 FILTRO POR PENDIENTE
-        $critico = config('rrhh.vacaciones.saldo_critico');
+        // Lo que requiere atención, sobre todo el grupo (antes de filtrar por saldo)
+        $resumen = [
+            'empleados' => $filas->count(),
+            'disponibles' => $filas->sum(fn ($fila) => max(0, $fila['estado']->saldo)),
+            'debe_salir' => $filas->where('debe_salir', true)->count(),
+            'vence_pronto' => $filas->where('vence_pronto', true)->count(),
+            'dias_por_vencer' => $filas->where('vence_pronto', true)->sum(fn ($fila) => $fila['estado']->proximoVencimiento['dias']),
+            'adelanto' => $filas->where('adelanto', true)->count(),
+        ];
 
+        // 🎯 FILTRO POR SALDO
         if ($request->filled('pendiente')) {
             $filas = $filas->filter(fn ($fila) => match ($request->pendiente) {
                 'con' => $fila['estado']->saldo > 0,
                 'sin' => $fila['estado']->saldo <= 0,
-                'critico' => $fila['estado']->saldo > $critico,
-                'por_vencer' => $fila['estado']->porVencerEn(config('rrhh.vacaciones.alerta_vencimiento_dias'), $hoy) > 0,
+                'critico' => $fila['debe_salir'],
+                'por_vencer' => $fila['vence_pronto'],
+                'adelanto' => $fila['adelanto'],
                 default => true,
-            })->values();
+            });
         }
 
-        // 📊 DASHBOARD
+        $filas = match ($request->input('orden')) {
+            'saldo' => $filas->sortByDesc(fn ($fila) => $fila['estado']->saldo),
+            'vence' => $filas->sortBy(fn ($fila) => ($fila['estado']->proximoVencimiento['fecha'] ?? null)?->getTimestamp() ?? PHP_INT_MAX),
+            default => $filas,
+        };
+
         $pendientesAcreditar = RrhhEmpleado::where('estado', 'activo')
             ->with('periodosVacaciones')
             ->get()
@@ -114,18 +128,46 @@ class RrhhVacacionesController extends Controller
             ->count();
 
         return view('rrhh.vacaciones.index', [
-            'filas' => $filas,
+            'filas' => $filas->values(),
             'anio' => $anio,
             'hoy' => $hoy,
+            'resumen' => $resumen,
             'areas' => collect(config('rrhh.areas'))
                 ->merge(RrhhEmpleado::whereNotNull('area')->distinct()->pluck('area'))
                 ->unique()->sort()->values(),
-            'totalEmpleados' => $filas->count(),
-            'totalPendiente' => $filas->sum(fn ($fila) => max(0, $fila['estado']->saldo)),
-            'criticos' => $filas->filter(fn ($fila) => $fila['estado']->saldo > $critico)->count(),
-            'porVencer' => $filas->filter(fn ($fila) => $fila['estado']->porVencerEn(config('rrhh.vacaciones.alerta_vencimiento_dias'), $hoy) > 0)->count(),
             'pendientesAcreditar' => $pendientesAcreditar,
+            'venceAcumuladas' => $venceAcumuladas,
         ]);
+    }
+
+    /**
+     * Días descontados y permisos de cada mes del año para la planilla.
+     */
+    private function resumenMensual(RrhhEmpleado $empleado, int $anio): array
+    {
+        $meses = [];
+
+        for ($mes = 1; $mes <= 12; $mes++) {
+            $meses[$mes] = ['dias' => 0.0, 'registros' => 0, 'permisos' => 0, 'permisos_horas' => 0.0];
+        }
+
+        foreach ($empleado->movimientosVacaciones as $movimiento) {
+            if ($movimiento->estado !== 'aprobado' || $movimiento->fecha_inicio->year !== $anio) {
+                continue;
+            }
+
+            $mes = $movimiento->fecha_inicio->month;
+
+            if ($movimiento->tipo_movimiento === 'permiso_especial') {
+                $meses[$mes]['permisos']++;
+                $meses[$mes]['permisos_horas'] += (float) $movimiento->horas_equivalentes;
+            } elseif (in_array($movimiento->tipo_movimiento, ['vacacion_dias', 'vacacion_horas'], true)) {
+                $meses[$mes]['dias'] += $this->vacaciones->diasADescontar($movimiento);
+                $meses[$mes]['registros']++;
+            }
+        }
+
+        return $meses;
     }
 
     public function crearSolicitud(RrhhEmpleado $empleado)
