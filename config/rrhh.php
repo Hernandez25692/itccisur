@@ -84,6 +84,8 @@ return [
         'Implementadora',
         'Delegado Registral',
         'Auxiliar de Limpieza',
+        'Ejecutivo de Marketing',
+        'Digitalizador de Documentos',
     ],
 
 ];
