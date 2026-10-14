@@ -2,26 +2,61 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\RrhhEmpleado;
-use App\Models\RrhhVacacionesPeriodo;
-use App\Models\RrhhVacacionesMovimiento;
-use Carbon\Carbon;
 use App\Models\RrhhVacacionesBitacora;
+use App\Models\RrhhVacacionesMovimiento;
+use App\Services\Rrhh\EstadoCuentaVacaciones;
+use App\Services\Rrhh\VacacionesService;
+use Carbon\CarbonImmutable;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class RrhhVacacionesController extends Controller
 {
+    private const MENSAJES = [
+        'required' => 'El campo :attribute es obligatorio.',
+        'required_if' => 'El campo :attribute es obligatorio para este tipo de movimiento.',
+        'required_with' => 'Indique la hora de inicio y la hora de fin.',
+        'date' => 'Ingrese una fecha válida en :attribute.',
+        'date_format' => 'Ingrese una hora válida en :attribute.',
+        'fecha_inicio.after_or_equal' => 'La fecha de inicio no puede ser anterior a la fecha de contratación.',
+        'fecha_fin.after_or_equal' => 'La fecha de fin no puede ser anterior a la fecha de inicio.',
+        'hora_fin.after' => 'La hora de fin debe ser posterior a la hora de inicio.',
+        'numeric' => 'El campo :attribute debe ser un número.',
+        'min' => 'El campo :attribute debe ser mayor que cero.',
+        'max' => 'El campo :attribute es demasiado grande.',
+        'in' => 'Seleccione una opción válida en :attribute.',
+        'archivo.mimes' => 'El comprobante debe ser PDF, JPG o PNG.',
+        'archivo.max' => 'El comprobante no debe superar 2 MB.',
+    ];
+
+    private const ATRIBUTOS = [
+        'tipo_movimiento' => 'tipo de solicitud',
+        'fecha_inicio' => 'fecha de inicio',
+        'fecha_fin' => 'fecha de fin',
+        'hora_inicio' => 'hora de inicio',
+        'hora_fin' => 'hora de fin',
+        'dias_manual' => 'días',
+        'horas_manual' => 'horas',
+        'operacion' => 'operación',
+        'motivo' => 'motivo',
+        'motivo_anulacion' => 'motivo de anulación',
+    ];
+
+    public function __construct(private VacacionesService $vacaciones) {}
 
     public function index(Request $request)
     {
-        $anio = $request->anio ?? date('Y');
+        $anio = (int) $request->input('anio', date('Y'));
+        $anio = $anio >= 2000 && $anio <= 2100 ? $anio : (int) date('Y');
+        $hoy = CarbonImmutable::today();
 
         $query = RrhhEmpleado::where('estado', 'activo')
-            ->with(['periodosVacaciones' => function ($q) use ($anio) {
-                $q->where('anio', $anio)
-                    ->with('movimientos');
-            }]);
+            ->with(['periodosVacaciones', 'movimientosVacaciones']);
 
         // 🔍 BUSQUEDA
         if ($request->filled('search')) {
@@ -30,346 +65,397 @@ class RrhhVacacionesController extends Controller
 
         // 📌 AREA
         if ($request->filled('area')) {
-            $query->where('area', 'like', '%' . $request->area . '%');
+            $query->where('area', $request->area);
         }
 
-        $empleados = $query->orderBy('nombre_completo')->get();
+        $filas = $query->orderBy('nombre_completo')->get()->map(function ($empleado) use ($anio, $hoy) {
+            $meses = array_fill(1, 12, 0.0);
+            $permisos = 0.0;
 
-        // 🔥 CALCULOS + FILTRO DE PENDIENTES
-        $empleados = $empleados->map(function ($empleado) use ($anio) {
+            foreach ($empleado->movimientosVacaciones as $movimiento) {
+                if ($movimiento->estado !== 'aprobado' || $movimiento->fecha_inicio->year !== $anio) {
+                    continue;
+                }
 
-            $periodo = $empleado->periodosVacaciones->where('anio', $anio)->first();
+                if ($movimiento->tipo_movimiento === 'permiso_especial') {
+                    $permisos += (float) $movimiento->dias_equivalentes;
+                } elseif (in_array($movimiento->tipo_movimiento, ['vacacion_dias', 'vacacion_horas'], true)) {
+                    $meses[$movimiento->fecha_inicio->month] += $this->vacaciones->diasADescontar($movimiento);
+                }
+            }
 
-            $vacaciones = $empleado->vacacionesPorLey();
-
-            $acumulado = $periodo
-                ? $periodo->acumulado_anterior
-                : $empleado->vacaciones_acumuladas ?? 0;
-
-            $tomado = $periodo ? $periodo->total_tomado : 0;
-
-            $pendiente = $vacaciones + $acumulado - $tomado;
-
-            $empleado->pendiente_calculado = $pendiente;
-            $empleado->periodo_actual = $periodo;
-
-            return $empleado;
+            return [
+                'empleado' => $empleado,
+                'estado' => $this->vacaciones->estadoCuenta($empleado, null, $hoy),
+                'meses' => $meses,
+                'permisos' => $permisos,
+                'tomado_anio' => array_sum($meses),
+            ];
         });
 
         // 🎯 FILTRO POR PENDIENTE
+        $critico = config('rrhh.vacaciones.saldo_critico');
+
         if ($request->filled('pendiente')) {
-
-            $empleados = $empleados->filter(function ($emp) use ($request) {
-
-                if ($request->pendiente == 'con') return $emp->pendiente_calculado > 0;
-                if ($request->pendiente == 'sin') return $emp->pendiente_calculado <= 0;
-                if ($request->pendiente == 'critico') return $emp->pendiente_calculado > 15;
-
-                return true;
-            });
+            $filas = $filas->filter(fn ($fila) => match ($request->pendiente) {
+                'con' => $fila['estado']->saldo > 0,
+                'sin' => $fila['estado']->saldo <= 0,
+                'critico' => $fila['estado']->saldo > $critico,
+                'por_vencer' => $fila['estado']->porVencerEn(config('rrhh.vacaciones.alerta_vencimiento_dias'), $hoy) > 0,
+                default => true,
+            })->values();
         }
 
         // 📊 DASHBOARD
-        $totalEmpleados = $empleados->count();
-        $totalPendiente = $empleados->sum('pendiente_calculado');
-        $criticos = $empleados->where('pendiente_calculado', '>', 30)->count();
+        $pendientesAcreditar = RrhhEmpleado::where('estado', 'activo')
+            ->with('periodosVacaciones')
+            ->get()
+            ->filter(fn ($empleado) => $this->vacaciones->requiereSincronizacion($empleado, $hoy))
+            ->count();
 
-        return view('rrhh.vacaciones.index', compact(
-            'empleados',
-            'anio',
-            'totalEmpleados',
-            'totalPendiente',
-            'criticos'
-        ));
+        return view('rrhh.vacaciones.index', [
+            'filas' => $filas,
+            'anio' => $anio,
+            'hoy' => $hoy,
+            'areas' => collect(config('rrhh.areas'))
+                ->merge(RrhhEmpleado::whereNotNull('area')->distinct()->pluck('area'))
+                ->unique()->sort()->values(),
+            'totalEmpleados' => $filas->count(),
+            'totalPendiente' => $filas->sum(fn ($fila) => max(0, $fila['estado']->saldo)),
+            'criticos' => $filas->filter(fn ($fila) => $fila['estado']->saldo > $critico)->count(),
+            'porVencer' => $filas->filter(fn ($fila) => $fila['estado']->porVencerEn(config('rrhh.vacaciones.alerta_vencimiento_dias'), $hoy) > 0)->count(),
+            'pendientesAcreditar' => $pendientesAcreditar,
+        ]);
     }
 
-
-    public function crearSolicitud($empleado_id)
+    public function crearSolicitud(RrhhEmpleado $empleado)
     {
+        if ($empleado->estado !== 'activo') {
+            return redirect()
+                ->route('vacaciones.historial', $empleado)
+                ->with('error', 'El empleado está inactivo; no se pueden registrar vacaciones.');
+        }
 
-        $empleado = RrhhEmpleado::findOrFail($empleado_id);
+        $empleado->load(['periodosVacaciones', 'movimientosVacaciones']);
 
-        return view('rrhh.vacaciones.crear_solicitud', compact('empleado'));
+        return view('rrhh.vacaciones.crear_solicitud', [
+            'empleado' => $empleado,
+            'movimiento' => new RrhhVacacionesMovimiento(['tipo_movimiento' => 'vacacion_dias']),
+            'estado' => $this->vacaciones->estadoCuenta($empleado),
+            'jornada' => config('rrhh.jornada'),
+        ]);
     }
-
 
     public function guardarSolicitud(Request $request)
     {
-
-        $request->validate([
-            'empleado_id' => 'required',
-            'tipo_movimiento' => 'required',
-            'fecha_inicio' => 'required|date'
-        ]);
-
-        $horas = 0;
-        $dias = 0;
-
-        if ($request->tipo_movimiento == 'vacacion_horas') {
-
-            if ($request->hora_inicio && $request->hora_fin) {
-
-                $inicio = Carbon::parse($request->hora_inicio);
-                $fin = Carbon::parse($request->hora_fin);
-
-                $horas = $inicio->diffInMinutes($fin) / 60;
-
-                $dias = $horas / 8;
-            }
-        }
-
-        if ($request->tipo_movimiento == 'permiso_especial') {
-
-            if ($request->hora_inicio && $request->hora_fin) {
-
-                $inicio = Carbon::parse($request->hora_inicio);
-                $fin = Carbon::parse($request->hora_fin);
-
-                $horas = $inicio->diffInMinutes($fin) / 60;
-
-                $dias = $horas / 8;
-            } else {
-
-                $dias = 1;
-                $horas = 8;
-            }
-        }
-
-        if ($request->tipo_movimiento == 'vacacion_dias') {
-
-            $inicio = Carbon::parse($request->fecha_inicio);
-            $fin = Carbon::parse($request->fecha_fin);
-
-            $dias = $inicio->diffInDaysFiltered(function (Carbon $date) {
-                return $date->dayOfWeek !== Carbon::SUNDAY;
-            }, $fin) + 1;
-        }
-
-        /*
-        AJUSTE MANUAL DEL ADMIN
-        */
-
-        if ($request->filled('dias_ajuste')) {
-
-            $dias = $request->dias_ajuste;
-            $horas = $dias * 8;
-        }
-
-        $mes = Carbon::parse($request->fecha_inicio)->format('m');
-
-        $anio = Carbon::parse($request->fecha_inicio)->format('Y');
+        $request->validate(['empleado_id' => ['required', 'exists:rrhh_empleados,id']]);
 
         $empleado = RrhhEmpleado::findOrFail($request->empleado_id);
 
-        $vacacionesLey = $empleado->vacacionesPorLey();
-        $acumuladoInicial = $empleado->vacaciones_acumuladas ?? 0;
-
-        $periodo = RrhhVacacionesPeriodo::firstOrCreate(
-            [
-                'empleado_id' => $request->empleado_id,
-                'anio' => $anio
-            ],
-            [
-                'dias_correspondientes' => $vacacionesLey,
-                'acumulado_anterior' => $acumuladoInicial,
-                'dias_descontados' => 0,
-                'total_disponible' => $vacacionesLey + $acumuladoInicial,
-                'total_tomado' => 0,
-                'dias_pendientes' => $vacacionesLey + $acumuladoInicial
-            ]
-        );
-        /*
-ACTUALIZAR DIAS SEGÚN ANTIGÜEDAD REAL
-*/
-
-        if ($periodo->dias_correspondientes != $vacacionesLey) {
-
-            $periodo->dias_correspondientes = $vacacionesLey;
-
-            $periodo->total_disponible =
-                $vacacionesLey + $periodo->acumulado_anterior;
-
-            $periodo->dias_pendientes =
-                $periodo->total_disponible - $periodo->total_tomado;
-
-            $periodo->save();
+        if ($empleado->estado !== 'activo') {
+            return redirect()
+                ->route('vacaciones.historial', $empleado)
+                ->with('error', 'El empleado está inactivo; no se pueden registrar vacaciones.');
         }
 
+        $movimiento = new RrhhVacacionesMovimiento([
+            'empleado_id' => $empleado->id,
+            'estado' => 'aprobado',
+            'aprobado_por' => $this->usuario(),
+            'fecha_aprobacion' => now(),
+        ]);
 
-        $movimiento = new RrhhVacacionesMovimiento();
+        $this->aplicarFormulario($request, $empleado, $movimiento);
 
-        $movimiento->empleado_id = $request->empleado_id;
-        $movimiento->periodo_vacacion_id = $periodo->id;
-        $movimiento->tipo_movimiento = $request->tipo_movimiento;
-        $movimiento->fecha_inicio = $request->fecha_inicio;
-        $movimiento->fecha_fin = $request->fecha_fin;
-        $movimiento->hora_inicio = $request->hora_inicio;
-        $movimiento->hora_fin = $request->hora_fin;
-        $movimiento->dias_equivalentes = $dias;
-        $movimiento->horas_equivalentes = $horas;
-        $movimiento->mes_referencia = $mes;
-        $movimiento->motivo = $request->motivo;
-        $movimiento->estado = 'aprobado';
+        DB::transaction(function () use ($request, $empleado, $movimiento) {
+            if ($request->hasFile('archivo')) {
+                $movimiento->archivo_comprobante = $request->file('archivo')->store('rrhh/vacaciones', 'local');
+            }
 
-        if ($request->hasFile('archivo')) {
+            $movimiento->save();
 
-            $archivo = $request->file('archivo')->store('vacaciones');
+            $estado = $this->sincronizar($empleado);
 
-            $movimiento->archivo_comprobante = $archivo;
-        }
-
-        $movimiento->save();
-
-        /*
-        ACTUALIZAR SALDOS
-        */
-
-        if ($request->tipo_movimiento != 'permiso_especial') {
-
-            $periodo->total_tomado += $dias;
-
-            $periodo->dias_pendientes =
-                ($periodo->dias_correspondientes + $periodo->acumulado_anterior)
-                - $periodo->total_tomado;
-
-            $periodo->save();
-        }
+            RrhhVacacionesBitacora::registrar(
+                $empleado->id,
+                'REGISTRO_MOVIMIENTO',
+                'Registrado: ' . $movimiento->descripcion()
+                    . ($movimiento->es_adelanto ? ' — autorizado como vacaciones adelantadas' : '')
+                    . '. Saldo después del registro: ' . VacacionesService::formatoDias($estado->saldo) . '.',
+                $movimiento->id
+            );
+        });
 
         return redirect()
-            ->route('vacaciones.index')
+            ->route('vacaciones.historial', $empleado)
             ->with('success', 'Solicitud registrada correctamente');
     }
 
-
-    public function historial($empleado_id)
+    public function historial(RrhhEmpleado $empleado)
     {
+        $empleado->load(['periodosVacaciones', 'movimientosVacaciones']);
 
-        $empleado = RrhhEmpleado::findOrFail($empleado_id);
-
-        $movimientos = RrhhVacacionesMovimiento::where('empleado_id', $empleado_id)
-            ->orderBy('fecha_inicio', 'desc')
-            ->get();
-
-        $bitacora = \App\Models\RrhhVacacionesBitacora::where('empleado_id', $empleado_id)
-            ->orderBy('fecha_evento', 'desc')
-            ->get();
-
-        return view(
-            'rrhh.vacaciones.historial',
-            compact('empleado', 'movimientos', 'bitacora')
-        );
+        return view('rrhh.vacaciones.historial', [
+            'empleado' => $empleado,
+            'estado' => $this->vacaciones->estadoCuenta($empleado),
+            'movimientos' => $empleado->movimientosVacaciones->sortByDesc(fn ($m) => [$m->fecha_inicio->toDateString(), $m->id])->values(),
+            'bitacora' => $empleado->bitacoraVacaciones()->orderByDesc('fecha_evento')->orderByDesc('id')->get(),
+            'requiereSincronizacion' => $this->vacaciones->requiereSincronizacion($empleado),
+        ]);
     }
 
-
-    public function editarMovimiento($id)
+    public function editarMovimiento(RrhhVacacionesMovimiento $movimiento)
     {
+        if ($movimiento->estado === 'anulado') {
+            return redirect()
+                ->route('vacaciones.historial', $movimiento->empleado_id)
+                ->with('error', 'El movimiento está anulado y no se puede editar.');
+        }
 
-        $movimiento = RrhhVacacionesMovimiento::findOrFail($id);
+        $empleado = $movimiento->empleado->load(['periodosVacaciones', 'movimientosVacaciones']);
 
-        return view(
-            'rrhh.vacaciones.editar_movimiento',
-            compact('movimiento')
-        );
+        return view('rrhh.vacaciones.editar_movimiento', [
+            'empleado' => $empleado,
+            'movimiento' => $movimiento,
+            'estado' => $this->vacaciones->estadoCuenta($empleado),
+            'jornada' => config('rrhh.jornada'),
+        ]);
     }
 
-
-    public function actualizarMovimiento(Request $request, $id)
+    public function actualizarMovimiento(Request $request, RrhhVacacionesMovimiento $movimiento)
     {
+        if ($movimiento->estado === 'anulado') {
+            return redirect()
+                ->route('vacaciones.historial', $movimiento->empleado_id)
+                ->with('error', 'El movimiento está anulado y no se puede editar.');
+        }
 
-        $request->validate([
-            'dias_equivalentes' => 'nullable|numeric',
-            'horas_equivalentes' => 'nullable|numeric',
-        ]);
+        $empleado = $movimiento->empleado;
+        $antes = $movimiento->descripcion();
+        $motivoAntes = $movimiento->motivo;
 
-        $movimiento = RrhhVacacionesMovimiento::findOrFail($id);
+        $this->aplicarFormulario($request, $empleado, $movimiento);
 
-        /*
-GUARDAR VALORES ANTERIORES PARA BITACORA
-*/
+        DB::transaction(function () use ($request, $empleado, $movimiento, $antes, $motivoAntes) {
+            if ($request->hasFile('archivo')) {
+                $movimiento->archivo_comprobante = $request->file('archivo')->store('rrhh/vacaciones', 'local');
+            }
 
-        $diasAnterior = $movimiento->dias_equivalentes;
-        $horasAnterior = $movimiento->horas_equivalentes;
+            $cambioArchivo = $movimiento->isDirty('archivo_comprobante');
+            $movimiento->save();
 
-        $movimiento->dias_equivalentes = $request->dias_equivalentes;
-        $movimiento->horas_equivalentes = $request->horas_equivalentes;
-        $movimiento->motivo = $request->motivo;
+            $cambios = [];
 
-        $movimiento->save();
-        RrhhVacacionesBitacora::create([
-            'empleado_id' => $movimiento->empleado_id,
-            'movimiento_id' => $movimiento->id,
-            'accion' => 'EDICION_MOVIMIENTO',
-            'detalle' => "Ajuste manual: días $diasAnterior → {$request->dias_equivalentes}, horas $horasAnterior → {$request->horas_equivalentes}",
-            'usuario' => Auth::user()->name ?? 'Sistema'
-        ]);
-        /*
-        RECALCULAR PERIODO
-        */
+            if ($antes !== $movimiento->descripcion()) {
+                $cambios[] = "{$antes} → {$movimiento->descripcion()}";
+            }
 
-        $periodo = RrhhVacacionesPeriodo::find($movimiento->periodo_vacacion_id);
+            if ($motivoAntes !== $movimiento->motivo && $movimiento->tipo_movimiento !== 'ajuste_manual') {
+                $cambios[] = 'motivo: «' . ($motivoAntes ?: '—') . '» → «' . ($movimiento->motivo ?: '—') . '»';
+            }
 
-        $total = RrhhVacacionesMovimiento::where('periodo_vacacion_id', $periodo->id)
-            ->where('tipo_movimiento', '!=', 'permiso_especial')
-            ->sum('dias_equivalentes');
+            if ($cambioArchivo) {
+                $cambios[] = 'se adjuntó un nuevo comprobante';
+            }
 
-        $periodo->total_tomado = $total;
+            $estado = $this->sincronizar($empleado);
 
-        $periodo->dias_pendientes =
-            ($periodo->dias_correspondientes + $periodo->acumulado_anterior)
-            - $total;
-
-        $periodo->save();
+            RrhhVacacionesBitacora::registrar(
+                $empleado->id,
+                'EDICION_MOVIMIENTO',
+                ($cambios ? 'Cambios: ' . implode('; ', $cambios) : 'Guardado sin cambios')
+                    . '. Saldo actual: ' . VacacionesService::formatoDias($estado->saldo) . '.',
+                $movimiento->id
+            );
+        });
 
         return redirect()
-            ->route('vacaciones.historial', $movimiento->empleado_id)
+            ->route('vacaciones.historial', $empleado)
             ->with('success', 'Movimiento actualizado correctamente');
     }
 
-    public function acreditarVacacionesPorAntiguedad($empleado_id)
+    /**
+     * Los movimientos no se borran: se anulan y quedan en el historial.
+     */
+    public function anularMovimiento(Request $request, RrhhVacacionesMovimiento $movimiento)
     {
-        $empleado = RrhhEmpleado::findOrFail($empleado_id);
+        $datos = $request->validate([
+            'motivo_anulacion' => ['required', 'string', 'max:500'],
+        ], self::MENSAJES, self::ATRIBUTOS);
 
-        $anio = now()->year;
-
-        // 🔴 VALIDAR SI YA EXISTE
-        $periodoExistente = RrhhVacacionesPeriodo::where('empleado_id', $empleado->id)
-            ->where('anio', $anio)
-            ->first();
-
-        if ($periodoExistente) {
-            return $periodoExistente;
+        if ($movimiento->estado === 'anulado') {
+            return redirect()->route('vacaciones.historial', $movimiento->empleado_id);
         }
 
-        // 🔥 CALCULAR DIAS SEGUN LEY
-        $vacacionesLey = $empleado->vacacionesPorLey();
+        $empleado = $movimiento->empleado;
 
-        // 🚫 EVITAR CREAR PERIODOS SI NO LE CORRESPONDEN DIAS
-        if ($vacacionesLey <= 0) {
+        DB::transaction(function () use ($empleado, $movimiento, $datos) {
+            $movimiento->estado = 'anulado';
+            $movimiento->observacion = trim(($movimiento->observacion ? $movimiento->observacion . "\n" : '')
+                . 'Anulado: ' . $datos['motivo_anulacion']);
+            $movimiento->save();
+
+            $estado = $this->sincronizar($empleado);
+
+            RrhhVacacionesBitacora::registrar(
+                $empleado->id,
+                'ANULACION_MOVIMIENTO',
+                'Anulado: ' . $movimiento->descripcion() . '. Motivo: ' . $datos['motivo_anulacion']
+                    . '. Saldo actual: ' . VacacionesService::formatoDias($estado->saldo) . '.',
+                $movimiento->id
+            );
+        });
+
+        return redirect()
+            ->route('vacaciones.historial', $empleado)
+            ->with('success', 'Movimiento anulado; el saldo fue recalculado.');
+    }
+
+    /**
+     * Descarga el comprobante (los archivos no son públicos).
+     */
+    public function comprobante(RrhhVacacionesMovimiento $movimiento)
+    {
+        $ruta = $movimiento->archivo_comprobante;
+
+        abort_unless($ruta, 404);
+
+        foreach (['local', 'public'] as $disco) {
+            if (Storage::disk($disco)->exists($ruta)) {
+                return Storage::disk($disco)->response($ruta);
+            }
+        }
+
+        abort(404);
+    }
+
+    /**
+     * Valida el formulario, calcula días/horas, revisa traslapes y saldo, y
+     * llena el movimiento (sin guardarlo).
+     */
+    private function aplicarFormulario(Request $request, RrhhEmpleado $empleado, RrhhVacacionesMovimiento $movimiento): void
+    {
+        $datos = $request->validate([
+            'tipo_movimiento' => ['required', Rule::in(array_keys(RrhhVacacionesMovimiento::TIPOS))],
+            'fecha_inicio' => ['required', 'date', 'after_or_equal:' . $empleado->fecha_contratacion->toDateString()],
+            'fecha_fin' => ['nullable', 'required_if:tipo_movimiento,vacacion_dias', 'date', 'after_or_equal:fecha_inicio'],
+            'hora_inicio' => ['nullable', 'required_if:tipo_movimiento,vacacion_horas', 'required_with:hora_fin', 'date_format:H:i'],
+            'hora_fin' => ['nullable', 'required_if:tipo_movimiento,vacacion_horas', 'required_with:hora_inicio', 'date_format:H:i', 'after:hora_inicio'],
+            'dias_manual' => ['nullable', 'required_if:tipo_movimiento,ajuste_manual', 'numeric', 'min:0.01', 'max:365'],
+            'horas_manual' => ['nullable', 'numeric', 'min:0.01', 'max:24'],
+            'operacion' => ['nullable', 'required_if:tipo_movimiento,ajuste_manual', 'in:sumar,restar'],
+            'motivo' => ['nullable', 'required_if:tipo_movimiento,ajuste_manual', 'string', 'max:1000'],
+            'archivo' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'adelanto' => ['nullable', 'boolean'],
+        ], self::MENSAJES, self::ATRIBUTOS);
+
+        $tipo = $datos['tipo_movimiento'];
+        $porHoras = $tipo === 'vacacion_horas'
+            || ($tipo === 'permiso_especial' && ! empty($datos['hora_inicio']) && ! empty($datos['hora_fin']));
+
+        // Normaliza los campos que no aplican al tipo elegido
+        if ($tipo === 'ajuste_manual') {
+            $datos['fecha_fin'] = null;
+        } elseif ($porHoras) {
+            $datos['fecha_fin'] = $datos['fecha_inicio'];
+        } else {
+            $datos['fecha_fin'] = $datos['fecha_fin'] ?? $datos['fecha_inicio'];
+        }
+
+        if (! $porHoras) {
+            $datos['hora_inicio'] = $datos['hora_fin'] = null;
+        }
+
+        $cantidades = $this->vacaciones->calcularCantidades($tipo, $datos);
+
+        if ($tipo !== 'ajuste_manual' && $cantidades['horas'] <= 0) {
+            throw ValidationException::withMessages([
+                $porHoras ? 'hora_fin' : 'fecha_fin' => $porHoras
+                    ? 'Las horas seleccionadas quedan fuera de la jornada (8:00–12:00 y 13:00–17:00).'
+                    : 'El rango seleccionado no tiene días a descontar (los domingos no se cuentan).',
+            ]);
+        }
+
+        $movimiento->fill([
+            'tipo_movimiento' => $tipo,
+            'fecha_inicio' => $datos['fecha_inicio'],
+            'fecha_fin' => $datos['fecha_fin'],
+            'hora_inicio' => $datos['hora_inicio'],
+            'hora_fin' => $datos['hora_fin'],
+            'dias_equivalentes' => $cantidades['dias'],
+            'horas_equivalentes' => $cantidades['horas'],
+            'motivo' => $datos['motivo'] ?? null,
+            'mes_referencia' => CarbonImmutable::parse($datos['fecha_inicio'])->format('m'),
+        ]);
+
+        if ($traslape = $this->buscarTraslape($empleado, $movimiento)) {
+            throw ValidationException::withMessages([
+                'fecha_inicio' => 'Ya existe un movimiento registrado en esas fechas: ' . $traslape->descripcion() . '.',
+            ]);
+        }
+
+        // Vacaciones adelantadas: se permiten solo si se autorizan explícitamente
+        $empleado->load(['periodosVacaciones', 'movimientosVacaciones']);
+        $adelanto = $this->vacaciones->evaluarAdelanto($empleado, $movimiento);
+
+        if ($adelanto['requiere'] > 0 && ! $request->boolean('adelanto')) {
+            throw ValidationException::withMessages([
+                'adelanto' => 'El empleado no tiene saldo suficiente para esta solicitud (faltan '
+                    . VacacionesService::formatoDias($adelanto['requiere']) . '). Marque «Autorizar como vacaciones adelantadas» '
+                    . 'para registrarla; el saldo quedará negativo y se compensará con la próxima acreditación.',
+            ]);
+        }
+
+        $movimiento->es_adelanto = $adelanto['requiere'] > 0 || $adelanto['propio'] > 0;
+    }
+
+    private function buscarTraslape(RrhhEmpleado $empleado, RrhhVacacionesMovimiento $movimiento): ?RrhhVacacionesMovimiento
+    {
+        if ($movimiento->tipo_movimiento === 'ajuste_manual') {
             return null;
         }
 
-        $acumulado = $empleado->vacaciones_acumuladas ?? 0;
+        $inicio = $movimiento->fecha_inicio->toDateString();
+        $fin = ($movimiento->fecha_fin ?? $movimiento->fecha_inicio)->toDateString();
 
-        $periodo = RrhhVacacionesPeriodo::create([
-            'empleado_id' => $empleado->id,
-            'anio' => $anio,
-            'dias_correspondientes' => $vacacionesLey,
-            'acumulado_anterior' => $acumulado,
-            'dias_descontados' => 0,
-            'total_disponible' => $vacacionesLey + $acumulado,
-            'total_tomado' => 0,
-            'dias_pendientes' => $vacacionesLey + $acumulado
-        ]);
+        $candidatos = RrhhVacacionesMovimiento::where('empleado_id', $empleado->id)
+            ->where('estado', 'aprobado')
+            ->where('tipo_movimiento', '!=', 'ajuste_manual')
+            ->when($movimiento->exists, fn ($q) => $q->where('id', '!=', $movimiento->id))
+            ->whereDate('fecha_inicio', '<=', $fin)
+            ->where(fn ($q) => $q->whereDate('fecha_fin', '>=', $inicio)
+                ->orWhere(fn ($q) => $q->whereNull('fecha_fin')->whereDate('fecha_inicio', '>=', $inicio)))
+            ->get();
 
-        // 🧾 BITÁCORA CLARA (MEJORADA)
-        RrhhVacacionesBitacora::create([
-            'empleado_id' => $empleado->id,
-            'movimiento_id' => null,
-            'accion' => 'ACREDITACION_ANUAL',
-            'detalle' => "ACREDITACIÓN AUTOMÁTICA: {$vacacionesLey} días asignados según antigüedad laboral para el año {$anio}",
-            'usuario' => 'Sistema'
-        ]);
+        foreach ($candidatos as $existente) {
+            // Dos movimientos por horas el mismo día solo chocan si se cruzan las horas
+            if ($movimiento->esPorHoras() && $existente->esPorHoras()) {
+                if ($movimiento->horaInicioCorta() < $existente->horaFinCorta()
+                    && $movimiento->horaFinCorta() > $existente->horaInicioCorta()) {
+                    return $existente;
+                }
 
-        return $periodo;
+                continue;
+            }
+
+            return $existente;
+        }
+
+        return null;
+    }
+
+    /**
+     * Enlaza el movimiento con su periodo, recalcula y devuelve el estado de cuenta.
+     */
+    private function sincronizar(RrhhEmpleado $empleado): EstadoCuentaVacaciones
+    {
+        $this->vacaciones->sincronizarEmpleado($empleado, null, $this->usuario());
+
+        return $this->vacaciones->estadoCuenta($empleado->load(['periodosVacaciones', 'movimientosVacaciones']));
+    }
+
+    private function usuario(): string
+    {
+        return Auth::user()?->name ?? 'Sistema';
     }
 }

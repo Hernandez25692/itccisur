@@ -1,84 +1,86 @@
 <x-app-layout>
-    <div class="container mx-auto px-4 py-8">
-       
-        <div class="rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6 mb-8 shadow-xl">
-            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-white">Editar movimiento</h2>
-                    <p class="text-sm text-slate-200">
-                        Modifica los detalles del movimiento de vacaciones.
-                    </p>
+
+    @include('rrhh.vacaciones.partials.estilos')
+
+    <div class="vac-page">
+        <div class="vac-container">
+
+            {{-- Breadcrumb --}}
+            <nav class="vac-breadcrumb">
+                <a href="{{ route('dashboard') }}">Inicio</a>
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+                <a href="{{ route('vacaciones.index') }}">Control de Vacaciones</a>
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+                <a href="{{ route('vacaciones.historial', $empleado) }}">{{ $empleado->nombre_completo }}</a>
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+                <span>Editar movimiento</span>
+            </nav>
+
+            @include('rrhh.vacaciones.partials.alertas')
+
+            <div class="vac-card">
+
+                {{-- Header --}}
+                <div class="vac-header">
+                    <div class="vac-header-icon">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                        </svg>
+                    </div>
+                    <div class="vac-header-main">
+                        <h1 class="vac-header-title">Editar movimiento</h1>
+                        <p class="vac-header-sub">
+                            <span class="vac-employee-name">{{ $empleado->nombre_completo }}</span> ·
+                            {{ $movimiento->descripcion() }}
+                        </p>
+                    </div>
                 </div>
 
-                
+                <div class="vac-body">
+                    <div class="vac-alert">
+                        Los cambios recalculan el saldo y quedan registrados en la bitácora con el valor anterior y el
+                        nuevo. Si el movimiento no debió registrarse, anúlelo desde el historial.
+                    </div>
+
+                    <div class="vac-section">
+                        <div class="vac-section-label">Saldo actual del empleado</div>
+                        @include('rrhh.vacaciones.partials.resumen_saldo')
+                    </div>
+
+                    <form method="POST" action="{{ route('vacaciones.actualizar', $movimiento) }}"
+                        enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+
+                        @include('rrhh.vacaciones.partials.form_movimiento')
+
+                        <div class="vac-footer">
+                            <a href="{{ route('vacaciones.historial', $empleado) }}" class="vac-btn-cancel">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="vac-btn-save">
+                                <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Actualizar movimiento
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
+
         </div>
-
-        @if (session('success'))
-            <div class="rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-4 mb-6 text-sm text-emerald-700">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <section class="rounded-xl bg-white shadow-sm overflow-hidden">
-            <header class="flex items-center justify-between px-6 py-4 border-b border-amber-200 bg-amber-50">
-                <h3 class="text-lg font-semibold text-amber-700">Detalles del movimiento</h3>
-                <span class="text-sm text-amber-600">Actualiza la información necesaria</span>
-            </header>
-
-            <div class="p-6">
-                <form method="POST" action="{{ route('vacaciones.actualizar', $movimiento->id) }}" class="space-y-6">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label for="dias_equivalentes" class="text-sm font-medium text-slate-700">
-                                Días equivalentes
-                            </label>
-                            <input id="dias_equivalentes" name="dias_equivalentes" type="number" step="0.25"
-                                value="{{ $movimiento->dias_equivalentes }}"
-                                class="w-full px-3 py-2 rounded border border-gray-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 @error('dias_equivalentes') border-red-500 @enderror">
-                            @error('dias_equivalentes')
-                                <p class="text-sm text-red-400">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="space-y-2">
-                            <label for="horas_equivalentes" class="text-sm font-medium text-slate-700">
-                                Horas equivalentes
-                            </label>
-                            <input id="horas_equivalentes" name="horas_equivalentes" type="number" step="0.25"
-                                value="{{ $movimiento->horas_equivalentes }}"
-                                class="w-full px-3 py-2 rounded border border-gray-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 @error('horas_equivalentes') border-red-500 @enderror">
-                            @error('horas_equivalentes')
-                                <p class="text-sm text-red-400">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="space-y-2 md:col-span-2">
-                            <label for="motivo" class="text-sm font-medium text-slate-700">
-                                Motivo
-                            </label>
-                            <textarea id="motivo" name="motivo" rows="4"
-                                class="w-full px-3 py-2 rounded border border-gray-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 @error('motivo') border-red-500 @enderror">{{ $movimiento->motivo }}</textarea>
-                            @error('motivo')
-                                <p class="text-sm text-red-400">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col sm:flex-row items-center justify-end gap-3">
-                        <a href="{{ url()->previous() }}" class="w-full sm:w-auto text-center px-4 py-2 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition">
-                            Cancelar
-                        </a>
-                        <button type="submit" class="w-full sm:w-auto px-5 py-2 rounded-md bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 font-semibold shadow hover:from-amber-300 hover:to-amber-400 transition">
-                            Actualizar movimiento
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </section>
     </div>
-</x-app-layout>
 
+</x-app-layout>

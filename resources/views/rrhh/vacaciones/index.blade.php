@@ -161,7 +161,7 @@
             background: white;
             border-collapse: collapse;
             table-layout: auto;
-            min-width: 1200px;
+            min-width: 1400px;
         }
 
         .custom-table thead {
@@ -404,7 +404,7 @@
 
         @media (min-width: 768px) {
             .grid-custom {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
@@ -417,7 +417,7 @@
 
         @media (min-width: 768px) {
             .filters-grid {
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(6, 1fr);
             }
         }
 
@@ -482,11 +482,140 @@
                 min-width: 50px;
             }
         }
+
+        .custom-table thead th:nth-child(20) {
+            min-width: 90px;
+        }
+
+        .dashboard-card.warning {
+            background: #b45309;
+        }
+
+        .dashboard-card.warning h6 {
+            color: white;
+        }
+
+        .notice {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            border-radius: var(--radius-lg);
+            padding: 0.9rem 1.1rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        .notice.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #047857;
+        }
+
+        .notice.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #b91c1c;
+        }
+
+        .notice.warning {
+            background: #fef3c7;
+            border: 1px solid rgba(180, 83, 9, 0.3);
+            color: #78350f;
+        }
+
+        .btn-process {
+            background: var(--blue-deep);
+            color: var(--gold-light);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 0.45rem 0.9rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-process:hover {
+            background: var(--blue-medium);
+        }
+
+        .btn-clear {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: #64748b;
+            color: white;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .text-sub {
+            display: block;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .legend {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.9rem;
+            line-height: 1.6;
+        }
     </style>
+
+    @php
+        $critico = config('rrhh.vacaciones.saldo_critico');
+        $diasAlerta = config('rrhh.vacaciones.alerta_vencimiento_dias');
+        $mesesES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    @endphp
 
     <div class="container-custom">
         {{-- Título --}}
-        <h2>Control de Vacaciones {{ $anio }}</h2>
+        <div class="header-row">
+            <h2>Control de Vacaciones {{ $anio }}</h2>
+
+            <form method="POST" action="{{ route('vacaciones.procesar') }}">
+                @csrf
+                <button type="submit" class="btn-process"
+                    title="Acredita los días por aniversario pendientes y recalcula los saldos. Se puede ejecutar varias veces sin duplicar.">
+                    Procesar acreditaciones
+                </button>
+            </form>
+        </div>
+
+        @if (session('success'))
+            <div class="notice success">{{ session('success') }}</div>
+        @endif
+
+        @if (session('error'))
+            <div class="notice error">{{ session('error') }}</div>
+        @endif
+
+        @if ($pendientesAcreditar > 0)
+            <div class="notice warning">
+                <span>
+                    Hay <strong>{{ $pendientesAcreditar }}</strong> empleado(s) con aniversario laboral sin acreditar o
+                    con periodos del esquema anterior. Procese las acreditaciones para que los saldos queden al día.
+                </span>
+                <form method="POST" action="{{ route('vacaciones.procesar') }}">
+                    @csrf
+                    <button type="submit" class="btn-process">Procesar ahora</button>
+                </form>
+            </div>
+        @endif
 
         {{-- DASHBOARD --}}
         <div class="grid-custom mb-6">
@@ -499,8 +628,12 @@
                 <h3>{{ number_format($totalPendiente, 2) }}</h3>
             </div>
             <div class="dashboard-card critical text-center">
-                <h6>Críticos</h6>
+                <h6>Críticos (&gt;{{ $critico }} días)</h6>
                 <h3>{{ $criticos }}</h3>
+            </div>
+            <div class="dashboard-card warning text-center">
+                <h6>Vencen en {{ $diasAlerta }} días</h6>
+                <h3>{{ $porVencer }}</h3>
             </div>
         </div>
 
@@ -513,12 +646,17 @@
                 </div>
 
                 <div>
-                    <input type="number" name="anio" value="{{ request('anio', $anio) }}" class="filter-input">
+                    <input type="number" name="anio" min="2000" max="2100" value="{{ $anio }}"
+                        class="filter-input" title="Año de los meses mostrados">
                 </div>
 
                 <div>
-                    <input type="text" name="area" placeholder="Área" value="{{ request('area') }}"
-                        class="filter-input">
+                    <select name="area" class="filter-select">
+                        <option value="">Área</option>
+                        @foreach ($areas as $area)
+                            <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div>
@@ -528,6 +666,9 @@
                         <option value="sin" {{ request('pendiente') == 'sin' ? 'selected' : '' }}>Sin saldo</option>
                         <option value="critico" {{ request('pendiente') == 'critico' ? 'selected' : '' }}>Crítico
                         </option>
+                        <option value="por_vencer" {{ request('pendiente') == 'por_vencer' ? 'selected' : '' }}>
+                            Por vencer
+                        </option>
                     </select>
                 </div>
 
@@ -536,6 +677,10 @@
                         Filtrar
                     </button>
                 </div>
+
+                <div>
+                    <a href="{{ route('vacaciones.index') }}" class="btn-clear">Limpiar</a>
+                </div>
             </form>
         </div>
 
@@ -543,75 +688,80 @@
         <div class="table-container">
             <table class="custom-table">
                 <thead>
-                    @php
-                        $mesesES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-                    @endphp
                     <tr>
                         <th>Colaborador</th>
                         <th>Ingreso</th>
-                        <th>Vac.</th>
-                        <th>Acum.</th>
+                        <th title="Días por ley del periodo laboral actual">Ley</th>
+                        <th title="Vacaciones acumuladas (histórico) pendientes de tomar">Acum.</th>
                         @for ($i = 1; $i <= 12; $i++)
-                            <th>{{ $mesesES[$i - 1] }}</th>
+                            <th title="Días descontados en {{ $mesesES[$i - 1] }} {{ $anio }}">{{ $mesesES[$i - 1] }}</th>
                         @endfor
-                        <th>Permisos</th>
-                        <th>Total</th>
-                        <th>Pendiente</th>
+                        <th title="Permisos especiales del año (no descuentan)">Permisos</th>
+                        <th title="Días descontados en {{ $anio }}">Total</th>
+                        <th title="Saldo disponible hoy">Saldo</th>
+                        <th title="Próximo vencimiento de días no tomados">Vence</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($empleados as $empleado)
+                    @forelse ($filas as $fila)
                         @php
-                            $periodo = $empleado->periodo_actual;
-                            $vacaciones = $empleado->vacacionesPorLey();
-                            $acumulado = $periodo ? $periodo->acumulado_anterior : 0;
-                            $tomado = $periodo ? $periodo->total_tomado : 0;
-                            $pendiente = $empleado->pendiente_calculado;
+                            $empleado = $fila['empleado'];
+                            $estado = $fila['estado'];
+                            $saldo = $estado->saldo;
+                            $proximo = $estado->proximoVencimiento;
+                            $venceProntoDias = $proximo ? (int) $hoy->diffInDays($proximo['fecha']) : null;
 
-                            if ($pendiente <= 5) {
+                            if ($saldo <= 5) {
                                 $color = 'text-green-custom';
-                            } elseif ($pendiente <= 15) {
+                            } elseif ($saldo <= $critico) {
                                 $color = 'text-yellow-custom';
                             } else {
                                 $color = 'text-red-custom';
                             }
                         @endphp
                         <tr>
-                            <td data-label="Colaborador" class="font-semibold">{{ $empleado->nombre_completo }}</td>
-                            <td data-label="Ingreso">
-                                {{ \Carbon\Carbon::parse($empleado->fecha_contratacion)->format('d-m-Y') }}</td>
-                            <td data-label="Vac.">{{ number_format($vacaciones, 1) }}</td>
-                            <td data-label="Acum.">{{ number_format($acumulado, 1) }}</td>
+                            <td data-label="Colaborador" class="font-semibold" title="{{ $empleado->nombre_completo }}">
+                                {{ $empleado->nombre_completo }}</td>
+                            <td data-label="Ingreso">{{ $empleado->fecha_contratacion->format('d-m-Y') }}</td>
+                            <td data-label="Ley">{{ \App\Services\Rrhh\VacacionesService::numero($estado->diasPorLeyActual()) }}</td>
+                            <td data-label="Acum.">
+                                {{ $estado->acumuladoRestante() > 0 ? number_format($estado->acumuladoRestante(), 1) : '-' }}
+                            </td>
                             @for ($i = 1; $i <= 12; $i++)
-                                @php
-                                    $valor = $periodo
-                                        ? $periodo->movimientos
-                                            ->where('mes_referencia', $i)
-                                            ->where('tipo_movimiento', '!=', 'permiso_especial')
-                                            ->sum('dias_equivalentes')
-                                        : 0;
-                                @endphp
                                 <td data-label="{{ $mesesES[$i - 1] }}">
-                                    {{ $valor > 0 ? number_format($valor, 1) : '-' }}</td>
+                                    {{ $fila['meses'][$i] > 0 ? number_format($fila['meses'][$i], 1) : '-' }}</td>
                             @endfor
                             <td data-label="Permisos">
-                                {{ number_format($periodo?->movimientos->where('tipo_movimiento', 'permiso_especial')->sum('dias_equivalentes') ?? 0, 1) }}
+                                {{ $fila['permisos'] > 0 ? number_format($fila['permisos'], 1) : '-' }}
                             </td>
-                            <td data-label="Total" class="font-bold">{{ number_format($tomado, 1) }}</td>
-                            <td data-label="Pendiente" class="{{ $color }}">
-                                {{ number_format($pendiente, 1) }}
-                                @if ($pendiente > 30)
+                            <td data-label="Total" class="font-bold">{{ number_format($fila['tomado_anio'], 1) }}</td>
+                            <td data-label="Saldo" class="{{ $color }}" title="{{ \App\Services\Rrhh\VacacionesService::formatoDias($saldo) }}">
+                                {{ number_format($saldo, 1) }}
+                                @if ($saldo < 0)
+                                    <span class="badge-urgent">Adelanto</span>
+                                @elseif ($saldo > $critico)
                                     <span class="badge-urgent">Descanso</span>
+                                @endif
+                            </td>
+                            <td data-label="Vence">
+                                @if ($proximo)
+                                    {{ $proximo['fecha']->format('d-m-Y') }}
+                                    <span class="text-sub {{ $venceProntoDias <= $diasAlerta ? 'text-red-custom' : '' }}">
+                                        {{ number_format($proximo['dias'], 1) }} d
+                                    </span>
+                                @else
+                                    -
                                 @endif
                             </td>
                             <td data-label="Acciones">
                                 <div style="display: flex; gap: 0.2rem; justify-content: center; align-items: center;">
-                                    <a href="{{ route('vacaciones.crear', $empleado->id) }}" class="btn-action-add">
+                                    <a href="{{ route('vacaciones.crear', $empleado) }}" class="btn-action-add"
+                                        title="Registrar vacaciones o permiso">
                                         +
                                     </a>
-                                    <a href="{{ route('vacaciones.historial', $empleado->id) }}"
-                                        class="btn-action-view">
+                                    <a href="{{ route('vacaciones.historial', $empleado) }}"
+                                        class="btn-action-view" title="Historial y estado de cuenta">
                                         Ver
                                     </a>
                                 </div>
@@ -619,7 +769,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="20" class="text-center py-4 text-gray-500">
+                            <td colspan="21" class="text-center py-4 text-gray-500">
                                 Sin registros
                             </td>
                         </tr>
@@ -627,5 +777,16 @@
                 </tbody>
             </table>
         </div>
+
+        <p class="legend">
+            <strong>Saldo</strong>: días disponibles hoy (acumulado histórico + días por ley acreditados − vacaciones
+            tomadas o programadas − días vencidos). Un saldo negativo es un adelanto que se compensa con la próxima
+            acreditación.<br>
+            Los días por ley se acreditan en cada aniversario laboral. Desde el
+            {{ app(\App\Services\Rrhh\VacacionesService::class)->inicioSinAcumulacion()->format('d-m-Y') }} no se acumulan: vencen al
+            siguiente aniversario, y las acumuladas históricas vencen el
+            {{ app(\App\Services\Rrhh\VacacionesService::class)->vencimientoAcumuladoHistorico()->format('d-m-Y') }}.
+            Los domingos no se descuentan; 8 horas = 1 día.
+        </p>
     </div>
 </x-app-layout>

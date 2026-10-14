@@ -363,45 +363,42 @@
 
 
 
-    Route::prefix('rrhh')->group(function () {
+    // Recursos Humanos
+    Route::middleware(['auth', 'role:admin_ti|rrhh'])
+        ->prefix('rrhh')
+        ->group(function () {
 
-        Route::resource('empleados', RrhhEmpleadoController::class);
+            Route::resource('empleados', RrhhEmpleadoController::class)->except(['show', 'destroy']);
 
-        Route::get(
-            'generar-periodos/{anio?}',
-            [RrhhVacacionesPeriodoController::class, 'generarPeriodos']
-        )
-            ->name('rrhh.generar.periodos');
+            Route::patch('empleados/{empleado}/estado', [RrhhEmpleadoController::class, 'cambiarEstado'])
+                ->name('empleados.estado');
 
-        Route::get('vacaciones', [RrhhVacacionesController::class, 'index'])->name('vacaciones.index');
+            Route::get('vacaciones', [RrhhVacacionesController::class, 'index'])->name('vacaciones.index');
 
-        Route::get(
-            'vacaciones/solicitud/{empleado}',
-            [RrhhVacacionesController::class, 'crearSolicitud']
-        )
-            ->name('vacaciones.crear');
+            // Acreditación por aniversario (también corre a diario: rrhh:acreditar-vacaciones)
+            Route::post('vacaciones/procesar-acreditaciones', [RrhhVacacionesPeriodoController::class, 'procesar'])
+                ->name('vacaciones.procesar');
 
-        Route::post(
-            'vacaciones/guardar',
-            [RrhhVacacionesController::class, 'guardarSolicitud']
-        )
-            ->name('vacaciones.guardar');
+            Route::get('vacaciones/solicitud/{empleado}', [RrhhVacacionesController::class, 'crearSolicitud'])
+                ->name('vacaciones.crear');
 
-        Route::get(
-            '/rrhh/vacaciones/{empleado}/historial',
-            [RrhhVacacionesController::class, 'historial']
-        )->name('vacaciones.historial');
-    });
-    Route::get(
-        '/vacaciones/editar/{id}',
-        [RrhhVacacionesController::class, 'editarMovimiento']
-    )
-        ->name('vacaciones.editar');
+            Route::post('vacaciones/guardar', [RrhhVacacionesController::class, 'guardarSolicitud'])
+                ->name('vacaciones.guardar');
 
-    Route::put(
-        '/vacaciones/actualizar/{id}',
-        [RrhhVacacionesController::class, 'actualizarMovimiento']
-    )
-        ->name('vacaciones.actualizar');
+            Route::get('vacaciones/{empleado}/historial', [RrhhVacacionesController::class, 'historial'])
+                ->name('vacaciones.historial');
+
+            Route::get('vacaciones/movimiento/{movimiento}/editar', [RrhhVacacionesController::class, 'editarMovimiento'])
+                ->name('vacaciones.editar');
+
+            Route::put('vacaciones/movimiento/{movimiento}', [RrhhVacacionesController::class, 'actualizarMovimiento'])
+                ->name('vacaciones.actualizar');
+
+            Route::patch('vacaciones/movimiento/{movimiento}/anular', [RrhhVacacionesController::class, 'anularMovimiento'])
+                ->name('vacaciones.anular');
+
+            Route::get('vacaciones/movimiento/{movimiento}/comprobante', [RrhhVacacionesController::class, 'comprobante'])
+                ->name('vacaciones.comprobante');
+        });
 
     require __DIR__ . '/auth.php';

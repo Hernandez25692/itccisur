@@ -2,55 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\RrhhEmpleado;
-use App\Models\RrhhVacacionesPeriodo;
-use Carbon\Carbon;
+use App\Services\Rrhh\VacacionesService;
+use Illuminate\Support\Facades\Auth;
 
 class RrhhVacacionesPeriodoController extends Controller
 {
-
-    public function generarPeriodos($anio = null)
+    /**
+     * Acredita los días por aniversario pendientes de todos los empleados.
+     * Es el mismo proceso que corre a diario el comando rrhh:acreditar-vacaciones;
+     * se puede ejecutar varias veces sin duplicar acreditaciones.
+     */
+    public function procesar(VacacionesService $vacaciones)
     {
-        $anio = $anio ?? date('Y');
+        $resultado = $vacaciones->sincronizarTodos(null, Auth::user()?->name ?? 'Sistema');
 
-        $empleados = RrhhEmpleado::where('estado', 'activo')->get();
+        $mensaje = $resultado['acreditaciones'] > 0
+            ? "Se acreditaron {$resultado['acreditaciones']} periodo(s) de vacaciones a {$resultado['empleados']} empleado(s)."
+            : 'No había acreditaciones pendientes; los saldos fueron recalculados.';
 
-        foreach ($empleados as $empleado) {
-
-            $existe = RrhhVacacionesPeriodo::where('empleado_id', $empleado->id)
-                ->where('anio', $anio)
-                ->first();
-
-            if (!$existe) {
-
-                $antiguedad = Carbon::parse($empleado->fecha_contratacion)->diffInYears(now());
-
-                $dias = 0;
-
-                if ($antiguedad >= 4) {
-                    $dias = 20;
-                } elseif ($antiguedad == 3) {
-                    $dias = 15;
-                } elseif ($antiguedad == 2) {
-                    $dias = 12;
-                } elseif ($antiguedad == 1) {
-                    $dias = 10;
-                }
-
-                RrhhVacacionesPeriodo::create([
-                    'empleado_id' => $empleado->id,
-                    'anio' => $anio,
-                    'dias_correspondientes' => $dias,
-                    'acumulado_anterior' => 0,
-                    'dias_descontados' => 0,
-                    'total_disponible' => $dias,
-                    'total_tomado' => 0,
-                    'dias_pendientes' => $dias
-                ]);
-            }
-        }
-
-        return back()->with('success', 'Periodos de vacaciones generados correctamente');
+        return back()->with('success', $mensaje);
     }
 }

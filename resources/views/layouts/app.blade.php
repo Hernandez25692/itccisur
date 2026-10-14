@@ -304,13 +304,20 @@
                             </a>
                             <a href="{{ route('vacaciones.index') }}"
                                 class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
-{{ request()->routeIs('vacaciones.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+        {{ request()->routeIs('vacaciones.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
+                                :class="{ 'justify-center px-3': !sidebarOpen }"
+                                :title="!sidebarOpen ? 'Control de Vacaciones' : ''">
 
-                                <i class="fas fa-calendar-alt w-5"></i>
+                                <i class="fas fa-calendar-alt w-5 text-lg flex-shrink-0"></i>
 
-                                <span class="ml-3">
+                                <span class="ml-3 font-medium truncate" :class="{ 'hidden': !sidebarOpen }">
                                     Control de Vacaciones
                                 </span>
+
+                                @if (request()->routeIs('vacaciones.*'))
+                                    <span class="ml-auto w-1 h-6 bg-white rounded-full flex-shrink-0"
+                                        :class="{ 'hidden': !sidebarOpen }"></span>
+                                @endif
 
                             </a>
 
@@ -593,6 +600,24 @@
                         </a>
                     @endrole
 
+                    @role('admin_ti|rrhh')
+                        <a href="{{ route('empleados.index') }}" @click="mobileMenuOpen = false"
+                            class="flex items-center px-4 py-4 text-blue-100 rounded-xl transition-all duration-200 {{ request()->routeIs('empleados.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+                            <i class="fas fa-user-tie w-6 text-xl flex-shrink-0"></i>
+                            <span class="ml-4 font-medium">Control de Empleados</span>
+                            @if (request()->routeIs('empleados.*'))
+                                <span class="ml-auto w-2 h-8 bg-white rounded-full flex-shrink-0"></span>
+                            @endif
+                        </a>
+                        <a href="{{ route('vacaciones.index') }}" @click="mobileMenuOpen = false"
+                            class="flex items-center px-4 py-4 text-blue-100 rounded-xl transition-all duration-200 {{ request()->routeIs('vacaciones.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}">
+                            <i class="fas fa-calendar-alt w-6 text-xl flex-shrink-0"></i>
+                            <span class="ml-4 font-medium">Control de Vacaciones</span>
+                            @if (request()->routeIs('vacaciones.*'))
+                                <span class="ml-auto w-2 h-8 bg-white rounded-full flex-shrink-0"></span>
+                            @endif
+                        </a>
+                    @endrole
 
                 </div>
 

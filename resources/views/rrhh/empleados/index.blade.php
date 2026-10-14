@@ -360,14 +360,71 @@
                 flex-wrap: wrap;
             }
         }
+
+        /* Botón vacaciones */
+        .btn-info {
+            background: var(--blue-medium);
+            border: none;
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-info:hover {
+            background: var(--blue-deep);
+            color: var(--gold-light);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #b91c1c;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .text-sub {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .legend {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+        }
     </style>
+
+    @php
+        $critico = config('rrhh.vacaciones.saldo_critico');
+    @endphp
 
     <div class="container">
         <h2 class="mb-4">Control de Empleados RRHH</h2>
 
-        <div class="d-flex justify-content-between mb-3">
+        <div class="d-flex justify-content-between mb-3" style="display:flex; gap:.5rem; flex-wrap:wrap;">
             <a href="{{ route('empleados.create') }}" class="btn btn-primary">
                 + Nuevo empleado
+            </a>
+            <a href="{{ route('vacaciones.index') }}" class="btn btn-info" style="align-self:center;">
+                Control de vacaciones
             </a>
         </div>
 
@@ -375,6 +432,12 @@
         @if (session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert-error">
+                {{ session('error') }}
             </div>
         @endif
 
@@ -400,8 +463,13 @@
 
             {{-- AREA --}}
             <div class="flex-1 min-w-[150px]">
-                <input type="text" name="area" placeholder="Área" value="{{ request('area') }}"
+                <select name="area"
                     class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C5A049] text-[#0f172a]">
+                    <option value="">Área</option>
+                    @foreach ($areas as $area)
+                        <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
+                    @endforeach
+                </select>
             </div>
 
             {{-- PENDIENTES --}}
@@ -411,7 +479,7 @@
                     <option value="">Vacaciones</option>
                     <option value="con" {{ request('pendiente') == 'con' ? 'selected' : '' }}>Con saldo</option>
                     <option value="sin" {{ request('pendiente') == 'sin' ? 'selected' : '' }}>Sin saldo</option>
-                    <option value="critico" {{ request('pendiente') == 'critico' ? 'selected' : '' }}>Crítico (&gt;15
+                    <option value="critico" {{ request('pendiente') == 'critico' ? 'selected' : '' }}>Crítico (&gt;{{ $critico }}
                         días)</option>
                 </select>
             </div>
@@ -423,7 +491,7 @@
                     Filtrar
                 </button>
                 <a href="{{ route('empleados.index') }}"
-                    class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded shadow">
+                    class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded shadow text-center">
                     Limpiar
                 </a>
             </div>
@@ -437,32 +505,26 @@
                     <tr>
                         <th>Nombre</th>
                         <th>Identidad</th>
-                        <th>Cargo</th>
-                        <th>Área</th>
+                        <th>Cargo / Área</th>
                         <th>Contratación</th>
-                        <th class="text-center">Acumulado</th>
-                        <th class="text-center">Tomado</th>
-                        <th class="text-center">Pendiente</th>
+                        <th class="text-center" title="Días por ley del periodo laboral actual">Días ley</th>
+                        <th class="text-center" title="Vacaciones acumuladas de periodos anteriores que aún no se toman">Acum.</th>
+                        <th class="text-center" title="Días tomados en el periodo laboral actual">Tomado</th>
+                        <th class="text-center" title="Saldo disponible hoy">Saldo</th>
                         <th>Estado</th>
-                        <th width="200">Acciones</th>
+                        <th width="220">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($empleados as $empleado)
                         @php
-                            $anio = date('Y');
-                            $periodo = $empleado->periodosVacaciones->where('anio', $anio)->first();
-                            $vacaciones = $periodo ? $periodo->dias_correspondientes : $empleado->vacacionesPorLey();
-                            $acumulado = $periodo
-                                ? $periodo->acumulado_anterior
-                                : $empleado->vacaciones_acumuladas ?? 0;
-                            $tomado = $periodo ? $periodo->total_tomado : 0;
-                            $pendiente = $vacaciones + $acumulado - $tomado;
+                            $estado = $estados[$empleado->id];
+                            $saldo = $estado->saldo;
 
                             // COLORES INTELIGENTES
-                            if ($pendiente <= 5) {
+                            if ($saldo <= 5) {
                                 $color = 'text-success';
-                            } elseif ($pendiente <= 15) {
+                            } elseif ($saldo <= $critico) {
                                 $color = 'text-warning';
                             } else {
                                 $color = 'text-danger fw-bold';
@@ -471,15 +533,23 @@
                         <tr>
                             <td data-label="Nombre">{{ $empleado->nombre_completo }}</td>
                             <td data-label="Identidad">{{ $empleado->identidad }}</td>
-                            <td data-label="Cargo">{{ $empleado->cargo }}</td>
-                            <td data-label="Área">{{ $empleado->area }}</td>
+                            <td data-label="Cargo / Área">
+                                {{ $empleado->cargo }}
+                                <span class="text-sub">{{ $empleado->area }}</span>
+                            </td>
                             <td data-label="Contratación">
-                                {{ \Carbon\Carbon::parse($empleado->fecha_contratacion)->format('d-m-Y') }}</td>
-                            <td data-label="Acumulado" class="text-center">{{ number_format($acumulado, 2) }}</td>
-                            <td data-label="Tomado" class="text-center">{{ number_format($tomado, 2) }}</td>
-                            <td data-label="Pendiente" class="text-center {{ $color }}">
-                                {{ number_format($pendiente, 2) }}
-                                @if ($pendiente > 30)
+                                {{ $empleado->fecha_contratacion->format('d-m-Y') }}
+                                <span class="text-sub">{{ $empleado->aniosServicio() }} año(s)</span>
+                            </td>
+                            <td data-label="Días ley" class="text-center">{{ \App\Services\Rrhh\VacacionesService::numero($estado->diasPorLeyActual()) }}</td>
+                            <td data-label="Acum." class="text-center">{{ number_format($estado->acumuladoRestante(), 2) }}</td>
+                            <td data-label="Tomado" class="text-center">{{ number_format($estado->tomadoPeriodoActual(), 2) }}</td>
+                            <td data-label="Saldo" class="text-center {{ $color }}">
+                                {{ number_format($saldo, 2) }}
+                                @if ($saldo < 0)
+                                    <span class="text-sub">adelantado</span>
+                                @endif
+                                @if ($saldo > $critico)
                                     <br>
                                     <small class="badge bg-danger">Debe salir</small>
                                 @endif
@@ -489,19 +559,27 @@
                                     <span class="badge bg-success">Activo</span>
                                 @else
                                     <span class="badge bg-danger">Inactivo</span>
+                                    @if ($empleado->fecha_salida)
+                                        <span class="text-sub">Salida: {{ $empleado->fecha_salida->format('d-m-Y') }}</span>
+                                    @endif
                                 @endif
                             </td>
                             <td data-label="Acciones">
-                                <div class="d-flex gap-1">
-                                    <a href="{{ route('empleados.edit', $empleado->id) }}"
+                                <div class="d-flex gap-1" style="display:flex; gap:.35rem; flex-wrap:wrap;">
+                                    <a href="{{ route('empleados.edit', $empleado) }}"
                                         class="btn btn-warning btn-sm">
                                         Editar
                                     </a>
-                                    <br><br>
-                                    <button type="button" class="btn btn-danger btn-sm js-estado-btn"
-                                        data-action="{{ route('empleados.destroy', $empleado->id) }}"
-                                        data-name="{{ $empleado->nombre_completo }}">
-                                        Estado
+                                    <a href="{{ route('vacaciones.historial', $empleado) }}"
+                                        class="btn btn-info btn-sm">
+                                        Vacaciones
+                                    </a>
+                                    <button type="button"
+                                        class="btn {{ $empleado->estado === 'activo' ? 'btn-danger' : 'btn-success' }} btn-sm js-estado-btn"
+                                        data-action="{{ route('empleados.estado', $empleado) }}"
+                                        data-name="{{ $empleado->nombre_completo }}"
+                                        data-accion="{{ $empleado->estado === 'activo' ? 'desactivar' : 'activar' }}">
+                                        {{ $empleado->estado === 'activo' ? 'Desactivar' : 'Activar' }}
                                     </button>
                                 </div>
                             </td>
@@ -517,9 +595,14 @@
             </table>
         </div>
 
+        <p class="legend">
+            Saldo = acumulado histórico + días por ley acreditados − vacaciones tomadas o programadas − días vencidos.
+            Los permisos especiales no descuentan.
+        </p>
+
         {{-- PAGINACION --}}
         <div class="mt-3">
-            {{ $empleados->withQueryString()->links() }}
+            {{ $empleados->links() }}
         </div>
 
         {{-- Modal para cambiar estado --}}
@@ -528,7 +611,8 @@
                 <div class="flex items-start justify-between gap-4 bg-sky-50 border-b border-sky-200 px-6 py-4">
                     <div>
                         <h3 class="text-lg font-semibold text-sky-700">Cambiar estado</h3>
-                        <p class="text-sm text-sky-600 mt-1">¿Deseas cambiar el estado de <span id="estadoModalName" class="font-semibold text-sky-700"></span>?</p>
+                        <p class="text-sm text-sky-600 mt-1">¿Deseas <span id="estadoModalAccion">cambiar el estado de</span> <span id="estadoModalName" class="font-semibold text-sky-700"></span>?</p>
+                        <p id="estadoModalNota" class="text-sm text-slate-500 mt-2"></p>
                     </div>
                     <button type="button" id="estadoModalClose" class="text-slate-500 hover:text-slate-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -539,7 +623,7 @@
                 <div class="px-6 py-6">
                     <form id="estadoModalForm" method="POST" action="">
                         @csrf
-                        @method('DELETE')
+                        @method('PATCH')
                         <div class="flex flex-col sm:flex-row items-center justify-end gap-2">
                             <button type="button" id="estadoModalCancel"
                                 class="w-full sm:w-auto px-4 py-2 rounded-md border border-gray-300 bg-white text-slate-700 hover:bg-gray-50 transition">
@@ -560,13 +644,20 @@
                 const modal = document.getElementById('estadoModal');
                 const form = document.getElementById('estadoModalForm');
                 const nameLabel = document.getElementById('estadoModalName');
+                const accionLabel = document.getElementById('estadoModalAccion');
+                const nota = document.getElementById('estadoModalNota');
                 const cancelBtn = document.getElementById('estadoModalCancel');
                 const closeBtn = document.getElementById('estadoModalClose');
 
                 document.querySelectorAll('.js-estado-btn').forEach((btn) => {
                     btn.addEventListener('click', () => {
+                        const desactivar = btn.dataset.accion === 'desactivar';
                         form.action = btn.dataset.action;
                         nameLabel.textContent = btn.dataset.name || 'este empleado';
+                        accionLabel.textContent = desactivar ? 'desactivar a' : 'reactivar a';
+                        nota.textContent = desactivar
+                            ? 'Se registrará la fecha de salida de hoy y dejará de recibir acreditaciones de vacaciones.'
+                            : 'Volverá a recibir acreditaciones por aniversario.';
                         modal.classList.remove('hidden');
                         modal.classList.add('flex');
                     });

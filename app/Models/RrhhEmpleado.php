@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Services\Rrhh\VacacionesService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 class RrhhEmpleado extends Model
 {
@@ -29,6 +29,7 @@ class RrhhEmpleado extends Model
     protected $casts = [
         'fecha_contratacion' => 'date',
         'fecha_salida' => 'date',
+        'vacaciones_acumuladas' => 'decimal:2',
     ];
 
     /*
@@ -39,7 +40,7 @@ class RrhhEmpleado extends Model
 
     public function periodosVacaciones()
     {
-        return $this->hasMany(RrhhVacacionesPeriodo::class, 'empleado_id');
+        return $this->hasMany(RrhhVacacionesPeriodo::class, 'empleado_id')->orderBy('numero_periodo');
     }
 
     public function movimientosVacaciones()
@@ -47,72 +48,32 @@ class RrhhEmpleado extends Model
         return $this->hasMany(RrhhVacacionesMovimiento::class, 'empleado_id');
     }
 
+    public function bitacoraVacaciones()
+    {
+        return $this->hasMany(RrhhVacacionesBitacora::class, 'empleado_id');
+    }
+
     /*
     |--------------------------------------------------------------------------
-    | FUNCIONES DE NEGOCIO
+    | FUNCIONES DE NEGOCIO (ver App\Services\Rrhh\VacacionesService)
     |--------------------------------------------------------------------------
     */
 
-    public function calcularAntiguedad()
+    /**
+     * Años completos de servicio a la fecha.
+     */
+    public function aniosServicio(): int
     {
-        return Carbon::parse($this->fecha_contratacion)->diffInYears(now());
+        return app(VacacionesService::class)->aniosServicio($this);
     }
 
-    public function diasVacacionesPorAntiguedad()
+    /**
+     * Días que corresponden por ley según los años de servicio cumplidos.
+     */
+    public function vacacionesPorLey(): int
     {
-        $anios = $this->calcularAntiguedad();
+        $servicio = app(VacacionesService::class);
 
-        if ($anios >= 4) {
-            return 20;
-        }
-
-        if ($anios == 3) {
-            return 15;
-        }
-
-        if ($anios == 2) {
-            return 12;
-        }
-
-        if ($anios == 1) {
-            return 10;
-        }
-
-        return 0;
-    }
-
-    public function vacacionesPorLey()
-    {
-        $inicio = Carbon::parse($this->fecha_contratacion);
-        $hoy = Carbon::now();
-
-        $anios = $inicio->diffInYears($hoy);
-
-        if ($anios >= 4) {
-            return 20;
-        }
-
-        if ($anios >= 3) {
-            return 15;
-        }
-
-        if ($anios >= 2) {
-            return 12;
-        }
-
-        if ($anios >= 1) {
-            return 10;
-        }
-
-        return 0;
-    }
-    public function saldoVacacionesActual()
-    {
-        $vacacionesLey = $this->vacacionesPorLey();
-
-        $tomado = $this->movimientosVacaciones()
-            ->sum('dias_equivalentes');
-
-        return $vacacionesLey - $tomado;
+        return $servicio->diasPorAntiguedad($servicio->aniosServicio($this));
     }
 }
