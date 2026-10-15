@@ -5,8 +5,8 @@
     @php
         $vacaciones = app(\App\Services\Rrhh\VacacionesService::class);
         $historico = $estado->acumuladoHistorico;
-        $numeroActual = $estado->periodoActual['numero'] ?? null;
-        $fmt = fn ($n) => $n > 0 ? number_format($n, 2) : '—';
+        $sinVencimiento = $vacaciones->sinVencimiento($empleado);
+        $fmt = fn ($n) => $n > 0.00001 ? number_format($n, 2) : '—';
     @endphp
 
     <div class="vac-page">
@@ -72,62 +72,80 @@
                 <div class="vac-body">
                     @include('rrhh.vacaciones.partials.resumen_saldo')
 
-                    @if ($historico && $historico['restante'] > 0 && today()->lte($historico['vence']))
+                    @if ($historico && $historico['restante'] > 0 && $historico['vence'] && today()->lte($historico['vence']))
                         <div class="vac-alert is-warning" style="margin: 1.25rem 0 0;">
                             Quedan <strong>{{ number_format($historico['restante'], 2) }}</strong> día(s) de vacaciones
                             acumuladas. Se descuentan primero al registrar vacaciones y vencen el
-                            <strong>{{ $historico['vence']->format('d-m-Y') }}</strong>; desde el
-                            {{ $vacaciones->inicioSinAcumulacion()->format('d-m-Y') }} ya no se acumulan.
+                            <strong>{{ $historico['vence']->format('d-m-Y') }}</strong> junto con lo no tomado del año.
                         </div>
                     @endif
                 </div>
             </div>
 
-            {{-- Periodos --}}
+            {{-- Resumen por año --}}
             <div class="vac-card">
                 <div class="vac-card-title">
-                    <h3>Periodos laborales</h3>
-                    <p>Cada periodo va de un aniversario de contratación al siguiente.</p>
+                    <h3>Resumen por año</h3>
+                    <p>
+                        @if ($sinVencimiento)
+                            Su área no tiene vencimiento: el saldo de cada año pasa completo al siguiente.
+                        @else
+                            Los días se toman dentro del año: lo no tomado vence el 31 de diciembre; un saldo negativo
+                            (adelanto) pasa al año siguiente.
+                        @endif
+                    </p>
                 </div>
                 <div class="vac-table-wrap">
                     <table class="vac-table">
                         <thead>
                             <tr>
-                                <th>Periodo</th>
-                                <th>Vigencia</th>
-                                <th class="num">Arrastre</th>
-                                <th class="num">Días ley</th>
-                                <th class="num">Ajustes +</th>
+                                <th>Año</th>
+                                <th class="num" title="Saldo que pasa del año anterior (solo adelantos, o todo en áreas sin vencimiento)">Inicial</th>
+                                <th title="Días por ley acreditados en el aniversario">Aniversario</th>
+                                <th class="num" title="Ajustes a favor y vacaciones acumuladas">Otros</th>
                                 <th class="num">Tomado</th>
-                                <th class="num">Vencido</th>
-                                <th class="num">Saldo</th>
-                                <th>Días vencen</th>
+                                <th class="num" title="Días no tomados que vencieron el 31 de diciembre">Vencido</th>
+                                <th class="num">Saldo final</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($estado->periodos as $periodo)
-                                <tr class="{{ $periodo['numero'] === $numeroActual ? 'is-actual' : '' }}">
+                            @forelse (array_reverse($estado->anios, true) as $anio => $resumenAnio)
+                                @php
+                                    $leyAnio = collect($resumenAnio['acreditaciones'])->sum('dias');
+                                    $otros = $resumenAnio['acreditado'] - $leyAnio + $resumenAnio['acumulado'];
+                                @endphp
+                                <tr class="{{ $anio === today()->year ? 'is-actual' : '' }}">
                                     <td class="nowrap">
-                                        <strong>{{ $periodo['etiqueta'] }}</strong>
-                                        <div class="vac-small">
-                                            {{ $periodo['numero'] === 0 ? 'Antes del primer aniversario' : $periodo['numero'] . ' año(s) de servicio' }}
-                                            @if ($periodo['numero'] === $numeroActual)
-                                                · <span class="vac-badge is-info">Actual</span>
-                                            @endif
-                                        </div>
+                                        <strong>{{ $anio }}</strong>
+                                        @if ($anio === today()->year)
+                                            <span class="vac-badge is-info">Actual</span>
+                                        @endif
                                     </td>
-                                    <td class="nowrap">{{ $periodo['inicio']->format('d-m-Y') }} al {{ $periodo['fin']->format('d-m-Y') }}</td>
-                                    <td class="num">{{ number_format($periodo['saldo_inicial'], 2) }}</td>
-                                    <td class="num">{{ \App\Services\Rrhh\VacacionesService::numero($periodo['dias_ley']) }}</td>
-                                    <td class="num">{{ $fmt($periodo['acreditado'] - $periodo['dias_ley']) }}</td>
-                                    <td class="num">{{ $fmt($periodo['tomado']) }}</td>
-                                    <td class="num {{ $periodo['vencido'] > 0 ? 'vac-neg' : '' }}">{{ $fmt($periodo['vencido']) }}</td>
-                                    <td class="num {{ $periodo['saldo_final'] < 0 ? 'vac-neg' : '' }}"><strong>{{ number_format($periodo['saldo_final'], 2) }}</strong></td>
-                                    <td class="nowrap">{{ $periodo['dias_ley'] > 0 ? $periodo['vence']->format('d-m-Y') : '—' }}</td>
+                                    <td class="num {{ $resumenAnio['saldo_inicial'] < 0 ? 'vac-neg' : '' }}">{{ $resumenAnio['saldo_inicial'] != 0 ? number_format($resumenAnio['saldo_inicial'], 2) : '—' }}</td>
+                                    <td class="nowrap">
+                                        @forelse ($resumenAnio['acreditaciones'] as $acreditacion)
+                                            <strong>+{{ \App\Services\Rrhh\VacacionesService::numero($acreditacion['dias']) }}</strong>
+                                            el {{ $acreditacion['fecha']->format('d-m-Y') }}
+                                        @empty
+                                            <span class="vac-muted">—</span>
+                                        @endforelse
+                                    </td>
+                                    <td class="num">{{ $fmt($otros) }}</td>
+                                    <td class="num">{{ $fmt($resumenAnio['tomado']) }}</td>
+                                    <td class="num {{ $resumenAnio['vencido'] > 0 ? 'vac-neg' : '' }}">
+                                        @if ($resumenAnio['cierre'] && $resumenAnio['cierre']->gte(today()))
+                                            <span class="vac-muted">Cierra el {{ $resumenAnio['cierre']->format('d-m') }}</span>
+                                        @else
+                                            {{ $fmt($resumenAnio['vencido']) }}
+                                        @endif
+                                    </td>
+                                    <td class="num {{ $resumenAnio['saldo_final'] < 0 ? 'vac-neg' : '' }}">
+                                        <strong>{{ number_format($resumenAnio['saldo_final'], 2) }}</strong>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="vac-empty">Aún no hay periodos laborales registrados.</td>
+                                    <td colspan="7" class="vac-empty">Aún no hay acreditaciones ni movimientos.</td>
                                 </tr>
                             @endforelse
                         </tbody>

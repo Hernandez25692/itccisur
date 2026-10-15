@@ -370,6 +370,11 @@
         color: var(--crit);
     }
 
+    .is-tone-info svg,
+    svg.is-tone-info {
+        color: var(--serie-periodo);
+    }
+
     /* ── Filtros ── */
     .rh-filters {
         display: flex;
@@ -416,6 +421,36 @@
 
     .rh .rh-input {
         padding-left: 2.25rem;
+    }
+
+    .rh .rh-input.is-plain {
+        padding-left: 0.85rem;
+    }
+
+    .rh .rh-input.is-invalid,
+    .rh .rh-select.is-invalid {
+        border-color: var(--crit);
+    }
+
+    .rh-label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--ink-2);
+        margin-bottom: 0.35rem;
+    }
+
+    .rh-hint {
+        margin: 0.35rem 0 0;
+        font-size: 0.78rem;
+        color: var(--ink-3);
+    }
+
+    .rh-error {
+        display: block;
+        margin-top: 0.3rem;
+        font-size: 0.78rem;
+        color: var(--crit-ink);
     }
 
     .rh .rh-select {
@@ -681,6 +716,12 @@
     .rh-chip.is-crit {
         background: var(--crit-wash);
         color: var(--crit-ink);
+    }
+
+    /* Adelantos: es normal tenerlos, se muestran como información */
+    .rh-chip.is-info {
+        background: #e8f0fb;
+        color: #1c4f8f;
     }
 
     .rh-status {

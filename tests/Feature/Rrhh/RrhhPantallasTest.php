@@ -9,6 +9,9 @@ use Illuminate\Http\UploadedFile;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
+    // Fecha fija para que el cierre anual no dependa del día en que corre la prueba
+    $this->travelTo(Carbon::parse('2026-10-15 09:00:00'));
+
     foreach (['admin_ti', 'rrhh', 'cobranza'] as $rol) {
         Role::findOrCreate($rol);
     }
@@ -45,7 +48,7 @@ it('registra empleados con identidad y teléfono normalizados y acredita su peri
         'nombre_completo' => 'Luis Prueba',
         'identidad' => '0801199912345',
         'telefono' => '99998888',
-        'cargo' => 'Contador',
+        'cargo' => 'Auxiliar Contable',
         'area' => 'Dirección Ejecutiva',
         'fecha_contratacion' => now()->subYears(2)->subDays(10)->toDateString(),
     ])->assertSessionHasNoErrors()->assertRedirect(route('empleados.index'));
@@ -127,7 +130,7 @@ it('registra, edita y anula vacaciones recalculando el saldo', function () {
     // Mismas fechas: traslape
     $this->post(route('vacaciones.guardar'), $datos)->assertSessionHasErrors('fecha_inicio');
 
-    // 4 semanas (25 días sin domingos) superan el saldo: requiere autorizar adelanto
+    // 4 semanas (25 días sin domingos) superan el saldo: se permite y queda como adelanto
     $largo = [
         'empleado_id' => $empleado->id,
         'tipo_movimiento' => 'vacacion_dias',
@@ -135,13 +138,12 @@ it('registra, edita y anula vacaciones recalculando el saldo', function () {
         'fecha_fin' => $lunes->copy()->addWeeks(6)->toDateString(),
     ];
 
-    $this->post(route('vacaciones.guardar'), $largo)->assertSessionHasErrors('adelanto');
-    $this->post(route('vacaciones.guardar'), $largo + ['adelanto' => '1'])->assertSessionHasNoErrors();
+    $this->post(route('vacaciones.guardar'), $largo)->assertSessionHasNoErrors();
 
     expect(rrhhSaldo($empleado))->toBe(-8.0)
         ->and(RrhhVacacionesMovimiento::where('es_adelanto', true)->count())->toBe(1);
 
-    // Reducir el primer movimiento a 2 días no exige autorizar adelanto
+    // Reducir el primer movimiento a 2 días no lo marca como adelanto
     $this->get(route('vacaciones.editar', $primero))->assertOk();
     $this->put(route('vacaciones.actualizar', $primero), $datos + ['dias_manual' => '2'])->assertSessionHasNoErrors();
 
@@ -217,4 +219,49 @@ it('registra ajustes administrativos y exige motivo', function () {
     expect(rrhhSaldo($empleado))->toBe(17.5);
 
     $this->post(route('vacaciones.procesar'))->assertRedirect()->assertSessionHas('success');
+});
+
+it('registra días colectivos a los seleccionados y omite a quien ya tiene esas fechas', function () {
+    $this->actingAs(rrhhUsuario('rrhh'));
+
+    foreach (['Ana Colectivo', 'Beto Colectivo', 'Caro Colectivo'] as $nombre) {
+        $this->post(route('empleados.store'), [
+            'nombre_completo' => $nombre,
+            'fecha_contratacion' => '2020-09-15',
+        ])->assertSessionHasNoErrors();
+    }
+
+    [$ana, $beto, $caro] = RrhhEmpleado::orderBy('nombre_completo')->get()->all();
+
+    // Ana ya tiene registrado el jueves santo
+    $this->post(route('vacaciones.guardar'), [
+        'empleado_id' => $ana->id,
+        'tipo_movimiento' => 'vacacion_dias',
+        'fecha_inicio' => '2027-03-25',
+        'fecha_fin' => '2027-03-25',
+    ])->assertSessionHasNoErrors();
+
+    $this->get(route('vacaciones.colectivos.crear'))
+        ->assertOk()
+        ->assertSee('Semana Santa 2027')
+        ->assertSee('Beto Colectivo');
+
+    $this->post(route('vacaciones.colectivos.guardar'), [
+        'motivo' => 'Semana Santa 2027',
+        'fecha_inicio' => '2027-03-24',
+        'fecha_fin' => '2027-03-26',
+        'empleados' => [$ana->id, $beto->id],
+    ])->assertRedirect(route('vacaciones.index', ['anio' => 2027]))->assertSessionHas('omitidos');
+
+    $movimiento = $beto->movimientosVacaciones()->sole();
+
+    // Los días de 2026 vencen el 31-dic: en marzo de 2027 queda como adelanto
+    expect((float) $movimiento->dias_equivalentes)->toBe(3.0)
+        ->and($movimiento->motivo)->toBe('Semana Santa 2027')
+        ->and($movimiento->es_adelanto)->toBeTrue()
+        ->and($ana->movimientosVacaciones()->count())->toBe(1)
+        ->and($caro->movimientosVacaciones()->count())->toBe(0)
+        ->and($beto->bitacoraVacaciones()->where('accion', 'REGISTRO_COLECTIVO')->exists())->toBeTrue();
+
+    $this->get(route('vacaciones.index', ['anio' => 2027]))->assertOk()->assertSee('Ana Colectivo');
 });

@@ -10,10 +10,15 @@ return [
     | dias_por_antiguedad: días que se acreditan al cumplir cada aniversario
     | laboral (años cumplidos => días). Del 4.º año en adelante: 20 días.
     |
-    | inicio_sin_acumulacion: desde esta fecha las vacaciones ya no se
-    | acumulan. Los días de cada periodo vencen al siguiente aniversario y
-    | todo lo acumulado antes de esta fecha vence el día anterior
-    | (31-dic-2026).
+    | Año calendario: los días acreditados en un año deben tomarse dentro de
+    | ese año; lo no tomado vence el 31 de diciembre y el 1 de enero todos
+    | empiezan en cero. Se pueden adelantar (saldo negativo) y lo adelantado
+    | se descuenta de la siguiente acreditación, aunque sea del año siguiente.
+    |
+    | primer_cierre: primer 31 de diciembre en que se aplica el cierre. Lo
+    | acreditado antes (incluidas las vacaciones acumuladas) vence ese día.
+    |
+    | areas_sin_vencimiento: sus días nunca vencen (se acumulan).
     |
     */
 
@@ -25,7 +30,11 @@ return [
             4 => 20,
         ],
 
-        'inicio_sin_acumulacion' => '2027-01-01',
+        'primer_cierre' => '2026-12-31',
+
+        'areas_sin_vencimiento' => [
+            'Dirección Ejecutiva',
+        ],
 
         // Saldo a partir del cual el empleado se considera "crítico"
         'saldo_critico' => 15,

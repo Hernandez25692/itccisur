@@ -56,7 +56,7 @@ class RrhhVacacionesController extends Controller
         $hoy = CarbonImmutable::today();
         $critico = config('rrhh.vacaciones.saldo_critico');
         $alerta = config('rrhh.vacaciones.alerta_vencimiento_dias');
-        $venceAcumuladas = $this->vacaciones->vencimientoAcumuladoHistorico();
+        $venceAcumuladas = $this->vacaciones->primerCierre();
 
         $query = RrhhEmpleado::where('estado', 'activo')
             ->with(['periodosVacaciones', 'movimientosVacaciones']);
@@ -74,7 +74,7 @@ class RrhhVacacionesController extends Controller
             $query->where('area', $request->area);
         }
 
-        $filas = $query->orderBy('nombre_completo')->get()->map(function ($empleado) use ($anio, $hoy, $critico, $alerta, $venceAcumuladas) {
+        $filas = $query->orderBy('nombre_completo')->get()->map(function ($empleado) use ($anio, $hoy, $critico, $alerta) {
             $estado = $this->vacaciones->estadoCuenta($empleado, null, $hoy);
             $meses = $this->resumenMensual($empleado, $anio);
             $proximo = $estado->proximoVencimiento;
@@ -85,7 +85,7 @@ class RrhhVacacionesController extends Controller
                 'estado' => $estado,
                 'meses' => $meses,
                 'tomado_anio' => array_sum(array_column($meses, 'dias')),
-                'medidor' => $estado->medidor($hoy, $venceAcumuladas),
+                'medidor' => $estado->medidor($hoy),
                 'dias_para_vencer' => $diasParaVencer,
                 'vence_pronto' => $proximo && $diasParaVencer <= $alerta,
                 'debe_salir' => $estado->saldo > $critico,
@@ -222,7 +222,7 @@ class RrhhVacacionesController extends Controller
                 $empleado->id,
                 'REGISTRO_MOVIMIENTO',
                 'Registrado: ' . $movimiento->descripcion()
-                    . ($movimiento->es_adelanto ? ' — autorizado como vacaciones adelantadas' : '')
+                    . ($movimiento->es_adelanto ? ' — registrado como adelanto (saldo negativo)' : '')
                     . '. Saldo después del registro: ' . VacacionesService::formatoDias($estado->saldo) . '.',
                 $movimiento->id
             );
@@ -388,7 +388,6 @@ class RrhhVacacionesController extends Controller
             'operacion' => ['nullable', 'required_if:tipo_movimiento,ajuste_manual', 'in:sumar,restar'],
             'motivo' => ['nullable', 'required_if:tipo_movimiento,ajuste_manual', 'string', 'max:1000'],
             'archivo' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
-            'adelanto' => ['nullable', 'boolean'],
         ], self::MENSAJES, self::ATRIBUTOS);
 
         $tipo = $datos['tipo_movimiento'];
@@ -430,60 +429,18 @@ class RrhhVacacionesController extends Controller
             'mes_referencia' => CarbonImmutable::parse($datos['fecha_inicio'])->format('m'),
         ]);
 
-        if ($traslape = $this->buscarTraslape($empleado, $movimiento)) {
+        if ($traslape = $this->vacaciones->buscarTraslape($empleado, $movimiento)) {
             throw ValidationException::withMessages([
                 'fecha_inicio' => 'Ya existe un movimiento registrado en esas fechas: ' . $traslape->descripcion() . '.',
             ]);
         }
 
-        // Vacaciones adelantadas: se permiten solo si se autorizan explícitamente
+        // Se permite adelantar: si no hay saldo queda negativo y se marca como
+        // adelanto; se compensa con la siguiente acreditación por aniversario.
         $empleado->load(['periodosVacaciones', 'movimientosVacaciones']);
         $adelanto = $this->vacaciones->evaluarAdelanto($empleado, $movimiento);
 
-        if ($adelanto['requiere'] > 0 && ! $request->boolean('adelanto')) {
-            throw ValidationException::withMessages([
-                'adelanto' => 'El empleado no tiene saldo suficiente para esta solicitud (faltan '
-                    . VacacionesService::formatoDias($adelanto['requiere']) . '). Marque «Autorizar como vacaciones adelantadas» '
-                    . 'para registrarla; el saldo quedará negativo y se compensará con la próxima acreditación.',
-            ]);
-        }
-
         $movimiento->es_adelanto = $adelanto['requiere'] > 0 || $adelanto['propio'] > 0;
-    }
-
-    private function buscarTraslape(RrhhEmpleado $empleado, RrhhVacacionesMovimiento $movimiento): ?RrhhVacacionesMovimiento
-    {
-        if ($movimiento->tipo_movimiento === 'ajuste_manual') {
-            return null;
-        }
-
-        $inicio = $movimiento->fecha_inicio->toDateString();
-        $fin = ($movimiento->fecha_fin ?? $movimiento->fecha_inicio)->toDateString();
-
-        $candidatos = RrhhVacacionesMovimiento::where('empleado_id', $empleado->id)
-            ->where('estado', 'aprobado')
-            ->where('tipo_movimiento', '!=', 'ajuste_manual')
-            ->when($movimiento->exists, fn ($q) => $q->where('id', '!=', $movimiento->id))
-            ->whereDate('fecha_inicio', '<=', $fin)
-            ->where(fn ($q) => $q->whereDate('fecha_fin', '>=', $inicio)
-                ->orWhere(fn ($q) => $q->whereNull('fecha_fin')->whereDate('fecha_inicio', '>=', $inicio)))
-            ->get();
-
-        foreach ($candidatos as $existente) {
-            // Dos movimientos por horas el mismo día solo chocan si se cruzan las horas
-            if ($movimiento->esPorHoras() && $existente->esPorHoras()) {
-                if ($movimiento->horaInicioCorta() < $existente->horaFinCorta()
-                    && $movimiento->horaFinCorta() > $existente->horaInicioCorta()) {
-                    return $existente;
-                }
-
-                continue;
-            }
-
-            return $existente;
-        }
-
-        return null;
     }
 
     /**

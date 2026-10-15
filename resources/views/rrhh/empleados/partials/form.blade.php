@@ -122,7 +122,8 @@
                 @if ($empleado)
                     Si la cambia, se recalculan los periodos y acreditaciones por aniversario.
                 @else
-                    Los días por ley se acreditan en cada aniversario laboral (10, 12, 15 y 20 días).
+                    Los días por ley se acreditan en cada aniversario (10, 12, 15 y 20 días) y vencen el 31 de
+                    diciembre de ese año.
                 @endif
             </p>
         </div>
@@ -145,7 +146,8 @@
                         <path d="M12 16v-4M12 8h.01" />
                     </svg>
                     Días no tomados de periodos anteriores al registro. Se descuentan primero y vencen el
-                    {{ $venceHistorico->format('d-m-Y') }}.
+                    {{ $venceHistorico->format('d-m-Y') }}
+                    ({{ implode(', ', config('rrhh.vacaciones.areas_sin_vencimiento')) }}: no vencen).
                 </p>
             </div>
         @endif

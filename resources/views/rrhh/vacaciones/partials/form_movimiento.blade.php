@@ -33,12 +33,16 @@
     $saldoBase = $estado->saldo
         + ($movimiento->exists && $movimiento->estado === 'aprobado' ? $vacaciones->diasADescontar($movimiento) : 0);
 
-    $mostrarAdelanto = $errors->has('adelanto') || old('adelanto') || ($movimiento->exists && $movimiento->es_adelanto);
+    $siguienteAcreditacion = $vacaciones->proximaAcreditacion($empleado);
 
     $configuracionJs = [
         'jornada' => $jornada,
         'noDescontables' => $jornada['dias_no_descontables'] ?? [0],
         'saldo' => round($saldoBase, 4),
+        'acreditacion' => [
+            'fecha' => $siguienteAcreditacion['fecha']->format('d-m-Y'),
+            'dias' => $siguienteAcreditacion['dias'],
+        ],
     ];
 @endphp
 
@@ -207,24 +211,10 @@
     </div>
 </div>
 
-{{-- Vacaciones adelantadas --}}
-<div class="vac-alert is-warning" id="aviso-saldo" data-forzar="{{ $mostrarAdelanto ? '1' : '0' }}"
-    style="{{ $mostrarAdelanto ? '' : 'display:none;' }}">
-    <div class="vac-alert-title">Saldo insuficiente</div>
-    <p id="aviso-saldo-texto" style="margin: 0 0 0.75rem;">
-        La solicitud supera el saldo disponible del empleado.
-    </p>
-    <label class="vac-check">
-        <input type="hidden" name="adelanto" value="0">
-        <input type="checkbox" name="adelanto" value="1" @checked(old('adelanto', $movimiento->es_adelanto))>
-        <span>
-            <strong>Autorizar como vacaciones adelantadas.</strong>
-            El saldo quedará negativo y se compensará con la próxima acreditación por aniversario.
-        </span>
-    </label>
-    @error('adelanto')
-        <p class="vac-error" style="margin-top: 0.5rem;">{{ $message }}</p>
-    @enderror
+{{-- Vacaciones adelantadas: se permiten, solo se informa --}}
+<div class="vac-alert" id="aviso-saldo" data-forzar="0" style="display:none;">
+    <div class="vac-alert-title">Quedará como adelanto</div>
+    <p id="aviso-saldo-texto" style="margin: 0;"></p>
 </div>
 
 <script>
@@ -340,10 +330,11 @@
 
             if (descuento > 0 && queda < -0.0001) {
                 aviso.style.display = '';
-                $('aviso-saldo-texto').innerHTML = 'Saldo disponible: <strong>' + fmt(cfg.saldo) +
-                    '</strong> día(s). Con esta solicitud quedaría en <strong>' + fmt(queda) +
-                    '</strong>. Para registrarla debe autorizarla como vacaciones adelantadas.';
-            } else if (aviso.dataset.forzar !== '1') {
+                $('aviso-saldo-texto').innerHTML = 'Disponible hoy: <strong>' + fmt(cfg.saldo) +
+                    '</strong> día(s). Con esta solicitud el saldo quedará en <strong>' + fmt(queda) +
+                    '</strong> y se completará con la acreditación del ' + cfg.acreditacion.fecha +
+                    ' (+' + cfg.acreditacion.dias + ' días).';
+            } else {
                 aviso.style.display = 'none';
             }
         }

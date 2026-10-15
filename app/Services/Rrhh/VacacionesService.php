@@ -14,16 +14,18 @@ use Illuminate\Support\Facades\DB;
 /**
  * Lógica de vacaciones de CCISUR.
  *
- * - Periodo laboral: de un aniversario de contratación al siguiente. Al cumplir
- *   cada aniversario se acreditan los días por ley (10, 12, 15, 20).
+ * - Al cumplir cada aniversario de contratación se acreditan los días por ley
+ *   (10, 12, 15, 20). Los periodos laborales (de aniversario a aniversario)
+ *   son el registro de esas acreditaciones.
  * - El saldo se calcula a partir de los movimientos, nunca de un campo guardado:
  *   acreditaciones y acumulado histórico suman; vacaciones por días/horas y
  *   ajustes negativos restan; los permisos especiales solo se registran.
+ * - Año calendario: lo acreditado en un año vence el 31 de diciembre de ese
+ *   año (lo acreditado antes del primer cierre, el 31-dic-2026, vence ese día).
+ *   Las áreas sin vencimiento (Dirección Ejecutiva) acumulan siempre.
  * - Al tomar vacaciones se descuentan primero los días que vencen antes.
- * - Si no hay saldo suficiente el movimiento queda como adelanto (saldo
- *   negativo) y se compensa con la siguiente acreditación.
- * - Desde el 01-ene-2027 no hay acumulación: los días de cada periodo vencen al
- *   siguiente aniversario y lo acumulado antes vence el 31-dic-2026.
+ * - Se puede adelantar: si no hay saldo, queda negativo y se compensa con la
+ *   siguiente acreditación, aunque sea del año siguiente (la deuda no vence).
  */
 class VacacionesService
 {
@@ -91,27 +93,65 @@ class VacacionesService
     |--------------------------------------------------------------------------
     */
 
-    public function inicioSinAcumulacion(): CarbonImmutable
+    /**
+     * Primer cierre anual (31-dic-2026).
+     */
+    public function primerCierre(): CarbonImmutable
     {
-        return $this->fecha(config('rrhh.vacaciones.inicio_sin_acumulacion'));
-    }
-
-    public function vencimientoAcumuladoHistorico(): CarbonImmutable
-    {
-        return $this->inicioSinAcumulacion()->subDay();
+        return $this->fecha(config('rrhh.vacaciones.primer_cierre'));
     }
 
     /**
-     * Último día para tomar los días acreditados en el periodo $numero.
-     * Si el siguiente aniversario cae desde 2027 vencen ese día; si cae antes,
-     * pasan a ser acumulado y vencen el 31-dic-2026.
+     * Los empleados de estas áreas no pierden días: se les acumulan.
      */
-    public function vencimientoPeriodo(RrhhEmpleado $empleado, int $numero): CarbonImmutable
+    public function sinVencimiento(RrhhEmpleado $empleado): bool
     {
-        $siguiente = $this->aniversario($empleado, $numero + 1);
-        $corte = $this->inicioSinAcumulacion();
+        return in_array($empleado->area, config('rrhh.vacaciones.areas_sin_vencimiento', []), true);
+    }
 
-        return ($siguiente->gte($corte) ? $siguiente : $corte)->subDay();
+    /**
+     * Último día para tomar días acreditados en $fecha: el 31 de diciembre de
+     * ese año (o el primer cierre si se acreditaron antes). Null = no vencen.
+     */
+    public function vencimientoCredito(RrhhEmpleado $empleado, DateTimeInterface|string $fecha): ?CarbonImmutable
+    {
+        if ($this->sinVencimiento($empleado)) {
+            return null;
+        }
+
+        $cierre = $this->fecha($fecha)->endOfYear()->startOfDay();
+
+        return $cierre->max($this->primerCierre());
+    }
+
+    /**
+     * Vencimiento de las vacaciones acumuladas (histórico): el primer cierre.
+     */
+    public function vencimientoAcumuladoHistorico(?RrhhEmpleado $empleado = null): ?CarbonImmutable
+    {
+        return $empleado && $this->sinVencimiento($empleado) ? null : $this->primerCierre();
+    }
+
+    /**
+     * Último día para tomar los días acreditados al cumplir el aniversario $numero.
+     */
+    public function vencimientoPeriodo(RrhhEmpleado $empleado, int $numero): ?CarbonImmutable
+    {
+        return $this->vencimientoCredito($empleado, $this->aniversario($empleado, $numero));
+    }
+
+    /**
+     * Próxima acreditación por aniversario: [fecha, dias, anios].
+     */
+    public function proximaAcreditacion(RrhhEmpleado $empleado, ?CarbonImmutable $hoy = null): array
+    {
+        $numero = max(0, $this->numeroPeriodoEn($empleado, $hoy ?? CarbonImmutable::today())) + 1;
+
+        return [
+            'fecha' => $this->aniversario($empleado, $numero),
+            'dias' => $this->diasPorAntiguedad($numero),
+            'anios' => $numero,
+        ];
     }
 
     /*
@@ -256,7 +296,9 @@ class VacacionesService
                     'Acreditación por aniversario: +' . self::numero($periodo->dias_correspondientes) . ' días por '
                         . "{$periodo->numero_periodo} año(s) de servicio. Periodo "
                         . $periodo->fecha_inicio->format('d-m-Y') . ' al ' . $periodo->fecha_fin->format('d-m-Y')
-                        . '. Vencen el ' . $periodo->fecha_vencimiento->format('d-m-Y') . '.',
+                        . ($periodo->fecha_vencimiento
+                            ? '. Vencen el ' . $periodo->fecha_vencimiento->format('d-m-Y') . ' si no se toman.'
+                            : '. Su área no tiene vencimiento: se acumulan.'),
                     null,
                     $usuario
                 );
@@ -383,10 +425,11 @@ class VacacionesService
                 // los que siguen vigentes en la fecha del movimiento.
                 $vigentes = array_filter(
                     array_keys($bolsas),
-                    fn ($id) => $bolsas[$id]['restante'] > self::EPSILON && $bolsas[$id]['vence']->gte($evento['fecha'])
+                    fn ($id) => $bolsas[$id]['restante'] > self::EPSILON
+                        && ($bolsas[$id]['vence'] === null || $bolsas[$id]['vence']->gte($evento['fecha']))
                 );
-                usort($vigentes, fn ($a, $b) => [$bolsas[$a]['vence']->toDateString(), $a]
-                    <=> [$bolsas[$b]['vence']->toDateString(), $b]);
+                usort($vigentes, fn ($a, $b) => [$bolsas[$a]['vence']?->toDateString() ?? '9999-12-31', $a]
+                    <=> [$bolsas[$b]['vence']?->toDateString() ?? '9999-12-31', $b]);
 
                 foreach ($vigentes as $id) {
                     $toma = min($bolsas[$id]['restante'], $pendiente);
@@ -421,6 +464,17 @@ class VacacionesService
                 $bolsas[$evento['bolsa']]['restante'] = 0.0;
                 $bolsas[$evento['bolsa']]['vencido'] = $vencido;
                 $saldo -= $vencido;
+
+                // Un solo renglón por cierre aunque venzan varias acreditaciones
+                $ultimo = array_key_last($kardex);
+
+                if ($ultimo !== null && $kardex[$ultimo]['tipo'] === 'vencimiento'
+                    && $kardex[$ultimo]['fecha']->equalTo($evento['fecha'])) {
+                    $kardex[$ultimo]['vencido'] = round($kardex[$ultimo]['vencido'] + $vencido, 4);
+                    $kardex[$ultimo]['saldo'] = round($saldo, 4);
+
+                    continue;
+                }
             }
 
             $kardex[] = [
@@ -437,7 +491,8 @@ class VacacionesService
             ];
         }
 
-        $resumen = $this->resumirPeriodos($periodos, $kardex);
+        $resumen = $this->resumirPeriodos($empleado, $periodos, $kardex);
+        $anios = $this->resumirAnios($empleado, $periodos, $kardex, $hoy);
 
         $bolsas = array_values(array_map(fn ($b) => [
             'origen' => $b['origen'],
@@ -450,7 +505,7 @@ class VacacionesService
             'restante' => round($b['restante'], 4),
         ], $bolsas));
 
-        $vigentes = array_filter($bolsas, fn ($b) => $b['restante'] > self::EPSILON);
+        $vigentes = array_filter($bolsas, fn ($b) => $b['restante'] > self::EPSILON && $b['vence'] !== null);
         $proximo = null;
 
         if ($vigentes) {
@@ -474,6 +529,7 @@ class VacacionesService
             kardex: $kardex,
             bolsas: $bolsas,
             periodos: $resumen,
+            anios: $anios,
             periodoActual: $actual,
             acumuladoHistorico: collect($bolsas)->firstWhere('origen', 'historico'),
             proximoVencimiento: $proximo,
@@ -523,6 +579,45 @@ class VacacionesService
             'requiere' => max(0.0, round($despues->deudaGenerada - $antes->deudaGenerada, 4)),
             'propio' => $fila['adelanto'] ?? 0.0,
         ];
+    }
+
+    /**
+     * Movimiento aprobado que se cruza en fechas (u horas, si ambos son por
+     * horas) con $movimiento. Los ajustes no se cruzan con nada.
+     */
+    public function buscarTraslape(RrhhEmpleado $empleado, RrhhVacacionesMovimiento $movimiento): ?RrhhVacacionesMovimiento
+    {
+        if ($movimiento->tipo_movimiento === 'ajuste_manual') {
+            return null;
+        }
+
+        $inicio = $movimiento->fecha_inicio->toDateString();
+        $fin = ($movimiento->fecha_fin ?? $movimiento->fecha_inicio)->toDateString();
+
+        $candidatos = RrhhVacacionesMovimiento::where('empleado_id', $empleado->id)
+            ->where('estado', 'aprobado')
+            ->where('tipo_movimiento', '!=', 'ajuste_manual')
+            ->when($movimiento->exists, fn ($q) => $q->where('id', '!=', $movimiento->id))
+            ->whereDate('fecha_inicio', '<=', $fin)
+            ->where(fn ($q) => $q->whereDate('fecha_fin', '>=', $inicio)
+                ->orWhere(fn ($q) => $q->whereNull('fecha_fin')->whereDate('fecha_inicio', '>=', $inicio)))
+            ->get();
+
+        foreach ($candidatos as $existente) {
+            // Dos movimientos por horas el mismo día solo chocan si se cruzan las horas
+            if ($movimiento->esPorHoras() && $existente->esPorHoras()) {
+                if ($movimiento->horaInicioCorta() < $existente->horaFinCorta()
+                    && $movimiento->horaFinCorta() > $existente->horaInicioCorta()) {
+                    return $existente;
+                }
+
+                continue;
+            }
+
+            return $existente;
+        }
+
+        return null;
     }
 
     /**
@@ -643,7 +738,7 @@ class VacacionesService
                 'anio' => $inicio->year,
                 'fecha_inicio' => $inicio->toDateString(),
                 'fecha_fin' => $this->aniversario($empleado, $numero + 1)->subDay()->toDateString(),
-                'fecha_vencimiento' => $this->vencimientoPeriodo($empleado, $numero)->toDateString(),
+                'fecha_vencimiento' => $this->vencimientoPeriodo($empleado, $numero)?->toDateString(),
                 'dias_correspondientes' => $this->diasPorAntiguedad($numero),
             ];
         }
@@ -711,23 +806,28 @@ class VacacionesService
     /**
      * Arma la línea de tiempo: acreditaciones (con su evento de vencimiento),
      * descuentos y permisos. Orden dentro de un mismo día: primero lo que suma,
-     * luego lo que resta y al final los vencimientos.
+     * luego lo que resta y al final los vencimientos (cierre del año).
+     * Los vencimientos se calculan con la regla vigente, no con lo guardado.
      */
     private function construirEventos(RrhhEmpleado $empleado, Collection $periodos, Collection $movimientos): array
     {
         $eventos = [];
         $definiciones = [];
 
-        $agregarCredito = function (string $origen, string $etiqueta, string $concepto, CarbonImmutable $fecha, float $dias, CarbonImmutable $vence, ?int $movimientoId = null) use (&$eventos, &$definiciones) {
+        $agregarCredito = function (string $origen, string $etiqueta, string $concepto, CarbonImmutable $fecha, float $dias, ?CarbonImmutable $vence, ?int $movimientoId = null) use (&$eventos, &$definiciones) {
             $id = count($definiciones);
-            $vence = $vence->lt($fecha) ? $fecha : $vence;
+            $vence = $vence && $vence->lt($fecha) ? $fecha : $vence;
 
             $definiciones[$id] = compact('origen', 'etiqueta', 'fecha', 'vence');
 
             $eventos[] = ['fecha' => $fecha, 'orden' => 0, 'accion' => 'credito', 'bolsa' => $id, 'dias' => $dias,
                 'tipo' => $origen, 'concepto' => $concepto, 'movimiento_id' => $movimientoId];
-            $eventos[] = ['fecha' => $vence, 'orden' => 2, 'accion' => 'vencimiento', 'bolsa' => $id, 'dias' => 0.0,
-                'tipo' => 'vencimiento', 'concepto' => 'Vencen días no tomados: ' . $etiqueta, 'movimiento_id' => null];
+
+            if ($vence) {
+                $eventos[] = ['fecha' => $vence, 'orden' => 2, 'accion' => 'vencimiento', 'bolsa' => $id, 'dias' => 0.0,
+                    'tipo' => 'vencimiento', 'concepto' => 'Cierre del año ' . $vence->year . ': vencen los días no tomados',
+                    'movimiento_id' => null];
+            }
         };
 
         $acumulado = (float) $empleado->vacaciones_acumuladas;
@@ -739,7 +839,7 @@ class VacacionesService
                 'Vacaciones acumuladas antes de iniciar el control en el sistema',
                 $this->fecha($periodos->first()->fecha_inicio),
                 $acumulado,
-                $this->vencimientoAcumuladoHistorico()
+                $this->vencimientoAcumuladoHistorico($empleado)
             );
         }
 
@@ -748,14 +848,15 @@ class VacacionesService
                 continue;
             }
 
+            $fecha = $this->fecha($periodo->fecha_inicio);
+
             $agregarCredito(
                 'periodo',
-                'periodo ' . $this->etiquetaPeriodo($periodo),
-                "Acreditación por {$periodo->numero_periodo} año(s) de servicio (periodo "
-                    . $this->etiquetaPeriodo($periodo) . ')',
-                $this->fecha($periodo->fecha_inicio),
+                'días acreditados el ' . $fecha->format('d-m-Y'),
+                "Acreditación por {$periodo->numero_periodo} año(s) de servicio (aniversario)",
+                $fecha,
                 (float) $periodo->dias_correspondientes,
-                $this->fecha($periodo->fecha_vencimiento)
+                $this->vencimientoPeriodo($empleado, (int) $periodo->numero_periodo)
             );
         }
 
@@ -770,7 +871,7 @@ class VacacionesService
                     $movimiento->descripcion(),
                     $fecha,
                     abs($dias),
-                    $this->vencimientoParaFecha($empleado, $periodos, $fecha),
+                    $this->vencimientoCredito($empleado, $fecha),
                     $movimiento->id
                 );
 
@@ -792,22 +893,79 @@ class VacacionesService
         return [$eventos, $definiciones];
     }
 
-    private function vencimientoParaFecha(RrhhEmpleado $empleado, Collection $periodos, CarbonImmutable $fecha): CarbonImmutable
+    /**
+     * Totales por año calendario (el periodo de vacaciones). El acumulado
+     * histórico se muestra aparte; lo negativo al cierre pasa al año siguiente.
+     */
+    private function resumirAnios(RrhhEmpleado $empleado, Collection $periodos, array $kardex, CarbonImmutable $hoy): array
     {
-        $periodo = $periodos->first(fn ($p) => $this->fecha($p->fecha_inicio)->lte($fecha) && $this->fecha($p->fecha_fin)->gte($fecha));
-
-        if ($periodo) {
-            return $this->fecha($periodo->fecha_vencimiento);
+        if (! $kardex && $periodos->isEmpty()) {
+            return [];
         }
 
-        return $this->vencimientoPeriodo($empleado, max(0, $this->numeroPeriodoEn($empleado, $fecha)));
+        $inicios = array_map(fn ($fila) => $fila['fecha']->year, $kardex);
+
+        if ($periodos->isNotEmpty()) {
+            $inicios[] = $this->fecha($periodos->first()->fecha_inicio)->year;
+        }
+
+        $desde = min($inicios);
+        $hasta = max(max($inicios), $hoy->year);
+        $anios = [];
+
+        for ($anio = $desde; $anio <= $hasta; $anio++) {
+            $anios[$anio] = [
+                'anio' => $anio,
+                'saldo_inicial' => 0.0,
+                'acumulado' => 0.0,
+                'acreditado' => 0.0,
+                'tomado' => 0.0,
+                'vencido' => 0.0,
+                'saldo_final' => 0.0,
+                'acreditaciones' => [],
+                // Antes del primer cierre el saldo pasa al año siguiente
+                'cierre' => $this->sinVencimiento($empleado) || $anio < $this->primerCierre()->year
+                    ? null
+                    : CarbonImmutable::create($anio, 12, 31)->startOfDay(),
+            ];
+        }
+
+        foreach ($kardex as $fila) {
+            $anio = $fila['fecha']->year;
+
+            if ($fila['tipo'] === 'historico') {
+                $anios[$anio]['acumulado'] += $fila['credito'];
+            } else {
+                $anios[$anio]['acreditado'] += $fila['credito'];
+            }
+
+            if ($fila['tipo'] === 'periodo') {
+                $anios[$anio]['acreditaciones'][] = ['fecha' => $fila['fecha'], 'dias' => $fila['credito']];
+            }
+
+            $anios[$anio]['tomado'] += $fila['debito'];
+            $anios[$anio]['vencido'] += $fila['vencido'];
+        }
+
+        $anterior = 0.0;
+
+        foreach ($anios as $anio => $datos) {
+            $final = $anterior + $datos['acumulado'] + $datos['acreditado'] - $datos['tomado'] - $datos['vencido'];
+
+            $anios[$anio]['saldo_inicial'] = round($anterior, 4);
+            $anios[$anio]['saldo_final'] = round($final, 4);
+
+            $anterior = $final;
+        }
+
+        return $anios;
     }
 
     /**
-     * Totales por periodo. Cada línea del kardex se asigna al periodo que
-     * contiene su fecha; el acumulado histórico cuenta como saldo inicial.
+     * Totales por periodo laboral (de aniversario a aniversario). Se guardan en
+     * rrhh_vacaciones_periodos como referencia.
      */
-    private function resumirPeriodos(Collection $periodos, array $kardex): array
+    private function resumirPeriodos(RrhhEmpleado $empleado, Collection $periodos, array $kardex): array
     {
         $resumen = [];
 
@@ -817,7 +975,7 @@ class VacacionesService
                 'numero' => (int) $periodo->numero_periodo,
                 'inicio' => $this->fecha($periodo->fecha_inicio),
                 'fin' => $this->fecha($periodo->fecha_fin),
-                'vence' => $this->fecha($periodo->fecha_vencimiento),
+                'vence' => $this->vencimientoPeriodo($empleado, (int) $periodo->numero_periodo),
                 'etiqueta' => $this->etiquetaPeriodo($periodo),
                 'dias_ley' => (float) $periodo->dias_correspondientes,
                 'saldo_inicial' => 0.0,

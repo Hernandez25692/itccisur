@@ -13,12 +13,13 @@ function rrhhServicio(): VacacionesService
     return app(VacacionesService::class);
 }
 
-function rrhhEmpleado(string $contratacion, string $registro, float $acumuladas = 0): RrhhEmpleado
+function rrhhEmpleado(string $contratacion, string $registro, float $acumuladas = 0, ?string $area = null): RrhhEmpleado
 {
     $empleado = RrhhEmpleado::create([
         'nombre_completo' => 'Empleado Prueba',
         'fecha_contratacion' => $contratacion,
         'vacaciones_acumuladas' => $acumuladas,
+        'area' => $area,
         'estado' => 'activo',
     ]);
 
@@ -145,7 +146,7 @@ it('permite vacaciones adelantadas y las compensa con la acreditación', functio
         ->and($despues->deuda)->toBe(0.0);
 });
 
-it('descuenta primero el acumulado, lo vence el 31-dic-2026 y vence los días del periodo al siguiente aniversario', function () {
+it('vence lo no tomado el 31 de diciembre y en enero empieza en cero', function () {
     $empleado = rrhhEmpleado('2018-08-10', '2026-03-20', 5);
     rrhhSincronizar($empleado, '2026-11-01');
 
@@ -159,19 +160,24 @@ it('descuenta primero el acumulado, lo vence el 31-dic-2026 y vence los días de
         'horas_equivalentes' => 24,
     ]);
 
+    // Lo acreditado en 2025 (antes del primer cierre) vence en el cierre de 2026
     $noviembre = rrhhEstado($empleado, '2026-11-01');
 
     expect($noviembre->saldo)->toBe(42.0)
         ->and($noviembre->acumuladoRestante())->toBe(2.0)
         ->and($noviembre->proximoVencimiento['fecha']->toDateString())->toBe('2026-12-31')
-        ->and($noviembre->proximoVencimiento['dias'])->toBe(22.0);
+        ->and($noviembre->proximoVencimiento['dias'])->toBe(42.0);
 
-    // El 31-dic-2026 vencen el acumulado restante y lo que quedaba del periodo 7
     $enero = rrhhEstado($empleado, '2027-01-02');
+    $cierres = collect($enero->kardex)->where('tipo', 'vencimiento');
 
-    expect($enero->saldo)->toBe(20.0)
-        ->and($enero->acumuladoHistorico['vencido'])->toBe(2.0);
+    expect($enero->saldo)->toBe(0.0)
+        ->and($enero->acumuladoHistorico['vencido'])->toBe(2.0)
+        ->and($enero->anio(2026)['vencido'])->toBe(42.0)
+        ->and($enero->anio(2027)['saldo_inicial'])->toBe(0.0)
+        ->and($cierres)->toHaveCount(1);
 
+    // En 2027 adelanta 5 días en febrero; el aniversario de agosto (+20) los compensa
     rrhhMovimiento($empleado, [
         'tipo_movimiento' => 'vacacion_dias',
         'fecha_inicio' => '2027-02-01',
@@ -180,15 +186,64 @@ it('descuenta primero el acumulado, lo vence el 31-dic-2026 y vence los días de
         'horas_equivalentes' => 40,
     ]);
 
+    expect(rrhhEstado($empleado, '2027-03-01')->saldo)->toBe(-5.0);
+
     rrhhSincronizar($empleado, '2027-08-10');
     $agosto = rrhhEstado($empleado, '2027-08-10');
-    $bolsaPeriodo8 = collect($agosto->bolsas)->first(fn ($b) => $b['fecha']->toDateString() === '2026-08-10');
 
-    // Desde 2027 no hay acumulación: los 15 días no tomados del periodo 8 se pierden
-    expect($agosto->saldo)->toBe(20.0)
-        ->and($bolsaPeriodo8['usado'])->toBe(5.0)
-        ->and($bolsaPeriodo8['vencido'])->toBe(15.0)
-        ->and($bolsaPeriodo8['vence']->toDateString())->toBe('2027-08-09');
+    expect($agosto->saldo)->toBe(15.0)
+        ->and($agosto->proximoVencimiento['fecha']->toDateString())->toBe('2027-12-31')
+        ->and(rrhhEstado($empleado, '2028-01-02')->saldo)->toBe(0.0);
+});
+
+it('no vence los días de Dirección Ejecutiva', function () {
+    $empleado = rrhhEmpleado('2018-08-10', '2026-03-20', 5, 'Dirección Ejecutiva');
+    rrhhSincronizar($empleado, '2026-11-01');
+
+    rrhhMovimiento($empleado, [
+        'tipo_movimiento' => 'vacacion_dias',
+        'fecha_inicio' => '2026-09-07',
+        'fecha_fin' => '2026-09-09',
+        'dias_equivalentes' => 3,
+        'horas_equivalentes' => 24,
+    ]);
+
+    $enero = rrhhEstado($empleado, '2027-01-02');
+
+    expect($enero->saldo)->toBe(42.0)
+        ->and($enero->proximoVencimiento)->toBeNull()
+        ->and($enero->acumuladoHistorico['vence'])->toBeNull();
+
+    rrhhSincronizar($empleado, '2027-08-10');
+
+    expect(rrhhEstado($empleado, '2028-01-02')->saldo)->toBe(62.0);
+});
+
+it('permite adelantar en el primer año y el negativo pasa al año siguiente', function () {
+    $empleado = rrhhEmpleado('2026-11-15', '2026-11-15');
+    rrhhSincronizar($empleado, '2026-11-20');
+
+    rrhhMovimiento($empleado, ['tipo_movimiento' => 'vacacion_dias', 'fecha_inicio' => '2026-12-24', 'fecha_fin' => '2026-12-24', 'dias_equivalentes' => 1, 'horas_equivalentes' => 8]);
+    rrhhMovimiento($empleado, ['tipo_movimiento' => 'vacacion_dias', 'fecha_inicio' => '2026-12-31', 'fecha_fin' => '2026-12-31', 'dias_equivalentes' => 1, 'horas_equivalentes' => 8]);
+
+    $enero = rrhhEstado($empleado, '2027-01-02');
+
+    expect($enero->saldo)->toBe(-2.0)
+        ->and($enero->anio(2026)['saldo_final'])->toBe(-2.0)
+        ->and($enero->anio(2027)['saldo_inicial'])->toBe(-2.0);
+
+    rrhhSincronizar($empleado, '2027-11-15');
+    $aniversario = rrhhEstado($empleado, '2027-11-15');
+
+    expect($aniversario->saldo)->toBe(8.0)
+        ->and($aniversario->proximoVencimiento['fecha']->toDateString())->toBe('2027-12-31');
+});
+
+it('calcula la Semana Santa de cada año', function () {
+    $jornada = new JornadaLaboral;
+
+    expect($jornada->domingoDeResurreccion(2026)->toDateString())->toBe('2026-04-05')
+        ->and($jornada->domingoDeResurreccion(2027)->toDateString())->toBe('2027-03-28');
 });
 
 it('no descuenta permisos especiales ni movimientos anulados; los ajustes suman o restan', function () {

@@ -109,7 +109,6 @@ class RrhhEmpleadoController extends Controller
             'conteo' => $conteo,
             'estadoFiltro' => $estadoFiltro,
             'hoy' => $hoy,
-            'venceAcumuladas' => $this->vacaciones->vencimientoAcumuladoHistorico(),
         ]);
     }
 
@@ -126,15 +125,18 @@ class RrhhEmpleadoController extends Controller
         $datos = $this->validar($request);
 
         $empleado = RrhhEmpleado::create($datos + ['estado' => 'activo']);
+        $venceAcumuladas = $this->vacaciones->vencimientoAcumuladoHistorico($empleado);
 
         RrhhVacacionesBitacora::registrar(
             $empleado->id,
             'ALTA_EMPLEADO',
             'Empleado registrado. Fecha de contratación: ' . $empleado->fecha_contratacion->format('d-m-Y')
                 . '. Vacaciones acumuladas (histórico): ' . VacacionesService::numero($empleado->vacaciones_acumuladas) . ' días'
-                . ($empleado->vacaciones_acumuladas > 0
-                    ? ', vencen el ' . $this->vacaciones->vencimientoAcumuladoHistorico()->format('d-m-Y') . '.'
-                    : '.')
+                . match (true) {
+                    $empleado->vacaciones_acumuladas <= 0 => '.',
+                    $venceAcumuladas === null => ', no vencen (área sin vencimiento).',
+                    default => ', vencen el ' . $venceAcumuladas->format('d-m-Y') . '.',
+                }
         );
 
         // Crea el periodo laboral vigente y acredita los días por ley
@@ -165,6 +167,16 @@ class RrhhEmpleadoController extends Controller
         if ($empleado->isDirty('fecha_contratacion')) {
             $cambios[] = 'fecha de contratación ' . $empleado->getOriginal('fecha_contratacion')?->format('d-m-Y')
                 . ' → ' . $empleado->fecha_contratacion->format('d-m-Y') . ' (se recalcularon los periodos)';
+        }
+
+        $areasSinVencimiento = config('rrhh.vacaciones.areas_sin_vencimiento', []);
+
+        if ($empleado->isDirty('area')
+            && in_array($empleado->getOriginal('area'), $areasSinVencimiento, true) !== in_array($empleado->area, $areasSinVencimiento, true)) {
+            $cambios[] = 'área ' . ($empleado->getOriginal('area') ?: 'sin área') . ' → ' . ($empleado->area ?: 'sin área')
+                . (in_array($empleado->area, $areasSinVencimiento, true)
+                    ? ' (sus días ya no vencen)'
+                    : ' (sus días vencen el 31 de diciembre de cada año)');
         }
 
         if ($empleado->isDirty('vacaciones_acumuladas')) {

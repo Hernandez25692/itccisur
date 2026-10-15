@@ -249,6 +249,11 @@
                         Procesar acreditaciones
                     </button>
                 </form>
+                <a href="{{ route('vacaciones.colectivos.crear') }}" class="rh-btn"
+                    title="Registrar Semana Santa, Semana Morazánica, 24 o 31 de diciembre a varios empleados a la vez">
+                    @include('rrhh.partials.icono', ['i' => 'calendario'])
+                    Días colectivos
+                </a>
                 <a href="{{ route('empleados.index') }}" class="rh-btn is-quiet">Empleados</a>
             </div>
         </header>
@@ -257,6 +262,19 @@
         @if (session('success'))
             <div class="rh-notice is-good" role="status">
                 <span class="rh-notice-text">@include('rrhh.partials.icono', ['i' => 'ok']){{ session('success') }}</span>
+            </div>
+        @endif
+
+        @if (session('omitidos'))
+            <div class="rh-notice is-warn">
+                <span class="rh-notice-text">
+                    @include('rrhh.partials.icono', ['i' => 'alerta'])
+                    <span>
+                        No se registró a {{ count(session('omitidos')) }}
+                        {{ count(session('omitidos')) === 1 ? 'empleado' : 'empleados' }}:
+                        {{ implode('; ', session('omitidos')) }}.
+                    </span>
+                </span>
             </div>
         @endif
 
@@ -307,7 +325,7 @@
             @if ($resumen['adelanto'] > 0)
                 <li>
                     <a href="{{ $enlace(['pendiente' => $pendiente === 'adelanto' ? null : 'adelanto']) }}"
-                        class="rh-attn-item is-tone-crit {{ $pendiente === 'adelanto' ? 'is-active' : '' }}"
+                        class="rh-attn-item is-tone-info {{ $pendiente === 'adelanto' ? 'is-active' : '' }}"
                         aria-pressed="{{ $pendiente === 'adelanto' ? 'true' : 'false' }}">
                         @include('rrhh.partials.icono', ['i' => 'menos'])
                         <span><strong>{{ $resumen['adelanto'] }}</strong> con vacaciones adelantadas (saldo negativo)</span>
@@ -386,7 +404,7 @@
             <div class="rh-legend" aria-hidden="true">
                 <span class="rh-legend-item"><span class="rh-key is-bar" style="background: var(--serie-periodo)"></span> Disponible del periodo</span>
                 @if ($hayAcumuladas)
-                    <span class="rh-legend-item"><span class="rh-key is-bar" style="background: var(--serie-acum)"></span> Acumuladas, vencen el {{ $venceAcumuladas->format('d-m-Y') }}</span>
+                    <span class="rh-legend-item"><span class="rh-key is-bar" style="background: var(--serie-acum)"></span> Acumuladas (histórico)</span>
                 @endif
                 <span class="rh-legend-item"><span class="rh-key is-bar" style="background: var(--pista)"></span> Ya tomado</span>
             </div>
@@ -401,7 +419,7 @@
                 <thead>
                     <tr>
                         <th scope="col" class="c-nombre">Colaborador</th>
-                        <th scope="col" class="c-saldo">Saldo disponible</th>
+                        <th scope="col" class="c-saldo">Vacaciones Disponible</th>
                         @foreach ($meses as $i => $mes)
                             <th scope="col" class="c-mes {{ $mesActual === $i + 1 ? 'is-hoy' : '' }}">
                                 <abbr title="{{ ucfirst($mes) }}">{{ ucfirst(mb_substr($mes, 0, 3)) }}</abbr>
@@ -431,10 +449,14 @@
                                 @include('rrhh.partials.saldo', ['saldo' => $estado->saldo])
                                 @include('rrhh.partials.medidor', ['medidor' => $fila['medidor']])
 
+                                @php
+                                    $siguiente = $servicio->proximaAcreditacion($empleado, $hoy);
+                                @endphp
+
                                 @if ($fila['adelanto'] || $fila['vence_pronto'] || $fila['debe_salir'])
                                     <div class="rh-chips">
                                         @if ($fila['adelanto'])
-                                            <span class="rh-chip is-crit">@include('rrhh.partials.icono', ['i' => 'menos']) Adelanto de {{ $corto(abs($estado->saldo)) }}</span>
+                                            <span class="rh-chip is-info">@include('rrhh.partials.icono', ['i' => 'menos']) Adelanto de {{ $corto(abs($estado->saldo)) }}</span>
                                         @endif
                                         @if ($fila['vence_pronto'])
                                             <span class="rh-chip is-warn">@include('rrhh.partials.icono', ['i' => 'reloj-arena']) {{ $corto($proximo['dias']) }} vencen el {{ $proximo['fecha']->format('d-m') }}</span>
@@ -443,12 +465,19 @@
                                             <span class="rh-chip is-serious">@include('rrhh.partials.icono', ['i' => 'bandera']) Programar vacaciones</span>
                                         @endif
                                     </div>
-                                @elseif ($proximo)
-                                    <span class="rh-saldo-note">Vencen el {{ $proximo['fecha']->format('d-m-Y') }}</span>
-                                @elseif ($actual)
+                                @endif
+
+                                @if ($fila['adelanto'])
                                     <span class="rh-saldo-note">
-                                        Acredita {{ $servicio->diasPorAntiguedad($actual['numero'] + 1) }} días el
-                                        {{ $actual['fin']->addDay()->format('d-m-Y') }}
+                                        Se compensa el {{ $siguiente['fecha']->format('d-m-Y') }} (+{{ $siguiente['dias'] }} días)
+                                    </span>
+                                @elseif ($proximo && ! $fila['vence_pronto'])
+                                    <span class="rh-saldo-note">Vencen el {{ $proximo['fecha']->format('d-m-Y') }}</span>
+                                @elseif (! $proximo && $estado->saldo > 0)
+                                    <span class="rh-saldo-note">No vencen (área sin vencimiento)</span>
+                                @elseif (! $proximo)
+                                    <span class="rh-saldo-note">
+                                        Acredita {{ $siguiente['dias'] }} días el {{ $siguiente['fecha']->format('d-m-Y') }}
                                     </span>
                                 @endif
                             </td>
@@ -513,11 +542,11 @@
         </div>
 
         <p class="rh-foot">
-            Los días por ley se acreditan en cada aniversario laboral (10, 12, 15 y 20 días según los años de servicio).
-            Desde el {{ $servicio->inicioSinAcumulacion()->format('d-m-Y') }} no se acumulan: los días de cada periodo
-            vencen al siguiente aniversario y las vacaciones acumuladas vencen el {{ $venceAcumuladas->format('d-m-Y') }}.
-            Al registrar vacaciones se descuentan primero los días que vencen antes. Los domingos no se descuentan y
-            8 horas equivalen a 1 día.
+            Los días por ley se acreditan en cada aniversario laboral (10, 12, 15 y 20 días según los años de servicio)
+            y deben tomarse dentro del año: lo no tomado vence el 31 de diciembre y en enero todos empiezan en cero.
+            Se pueden adelantar; el saldo negativo se descuenta de la siguiente acreditación, aunque sea del año
+            siguiente. {{ implode(', ', config('rrhh.vacaciones.areas_sin_vencimiento')) }} no tiene vencimiento.
+            Los domingos no se descuentan y 8 horas equivalen a 1 día.
         </p>
 
         <div class="rh-tip" id="rh-tip" role="tooltip" hidden></div>

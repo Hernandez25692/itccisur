@@ -18,6 +18,7 @@
     use App\Http\Controllers\RrhhEmpleadoController;
     use App\Http\Controllers\RrhhVacacionesPeriodoController;
     use App\Http\Controllers\RrhhVacacionesController;
+    use App\Http\Controllers\RrhhVacacionesColectivasController;
     use App\Http\Controllers\ValidacionQrController;
     use App\Http\Controllers\DashboardTIController;
 
@@ -378,6 +379,13 @@
             // Acreditación por aniversario (también corre a diario: rrhh:acreditar-vacaciones)
             Route::post('vacaciones/procesar-acreditaciones', [RrhhVacacionesPeriodoController::class, 'procesar'])
                 ->name('vacaciones.procesar');
+
+            // Días colectivos (Semana Santa, Semana Morazánica, 24 y 31 de diciembre)
+            Route::get('vacaciones/colectivos/crear', [RrhhVacacionesColectivasController::class, 'crear'])
+                ->name('vacaciones.colectivos.crear');
+
+            Route::post('vacaciones/colectivos', [RrhhVacacionesColectivasController::class, 'guardar'])
+                ->name('vacaciones.colectivos.guardar');
 
             Route::get('vacaciones/solicitud/{empleado}', [RrhhVacacionesController::class, 'crearSolicitud'])
                 ->name('vacaciones.crear');

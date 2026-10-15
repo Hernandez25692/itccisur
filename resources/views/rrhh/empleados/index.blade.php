@@ -272,7 +272,7 @@
                         @foreach ($miembros as $empleado)
                             @php
                                 $estado = $estados[$empleado->id];
-                                $medidor = $estado->medidor($hoy, $venceAcumuladas);
+                                $medidor = $estado->medidor($hoy);
                                 $proximo = $estado->proximoVencimiento;
                                 $venceProntoDias = $proximo ? (int) $hoy->diffInDays($proximo['fecha']) : null;
                                 $activo = $empleado->estado === 'activo';
@@ -309,7 +309,7 @@
                                     @include('rrhh.partials.saldo', ['saldo' => $estado->saldo])
                                     @include('rrhh.partials.medidor', ['medidor' => $medidor])
                                     @if ($estado->saldo < 0)
-                                        <span class="rh-chip is-crit">@include('rrhh.partials.icono', ['i' => 'menos']) Adelanto</span>
+                                        <span class="rh-chip is-info">@include('rrhh.partials.icono', ['i' => 'menos']) Adelanto</span>
                                     @elseif ($activo && $proximo && $venceProntoDias <= $alerta)
                                         <span class="rh-chip is-warn">@include('rrhh.partials.icono', ['i' => 'reloj-arena']) {{ \App\Services\Rrhh\VacacionesService::formatoDias($proximo['dias']) }} vencen el {{ $proximo['fecha']->format('d-m') }}</span>
                                     @elseif ($activo && $estado->saldo > $critico)
