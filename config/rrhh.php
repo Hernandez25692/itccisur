@@ -86,6 +86,7 @@ return [
         'Auxiliar de Limpieza',
         'Ejecutivo de Marketing',
         'Digitalizador de Documentos',
+        'Ejecutivo de Control y Producción',
     ],
 
 ];
