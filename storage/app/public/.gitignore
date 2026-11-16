@@ -1,2 +1,5 @@
 *
 !.gitignore
+# Los logos institucionales sí se versionan (login, menú y PDFs)
+!logos/
+!logos/*
