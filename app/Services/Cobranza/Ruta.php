@@ -30,10 +30,6 @@ class Ruta extends Model
         'confirmado_en' => 'datetime',
     ];
 
-    // =====================
-    // RELACIONES
-    // =====================
-
     public function gestor()
     {
         return $this->belongsTo(\App\Models\User::class, 'gestor_id');

@@ -3,7 +3,6 @@
 
         <div class="max-w-xl mx-auto bg-white rounded-xl shadow p-6 space-y-6">
 
-            <!-- TÍTULO -->
             <div class="text-center">
                 <h1 class="text-xl font-bold text-gray-800">
                     Editar Antecedente Registral
@@ -13,7 +12,6 @@
                 </p>
             </div>
 
-            <!-- ERRORES -->
             @if ($errors->any())
                 <div class="bg-red-100 text-red-700 p-3 rounded text-sm">
                     <ul class="list-disc pl-4">
@@ -30,7 +28,6 @@
                 @csrf
                 @method('PUT')
 
-                <!-- CIRCUNSCRIPCIÓN -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Circunscripción Registral
@@ -51,7 +48,6 @@
                     </div>
                 </div>
 
-                <!-- FECHA -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
                         Fecha de Recepción
@@ -60,7 +56,6 @@
                         class="mt-1 w-full rounded-lg border-gray-300" required>
                 </div>
 
-                <!-- DATOS SOLICITANTE -->
                 <div class="border-t pt-4">
                     <h2 class="font-semibold text-gray-700 mb-3">
                         Datos del Solicitante
@@ -74,7 +69,6 @@
                     </div>
                 </div>
 
-                <!-- DATOS REGISTRALES -->
                 <div class="border-t pt-4 space-y-4">
                     <input type="text" name="numero_exequatur" value="{{ $registro->numero_exequatur }}"
                         placeholder="Número de Exequátur" class="w-full rounded-lg border-gray-300">
@@ -86,14 +80,12 @@
                         placeholder="Tipo de libro" class="w-full rounded-lg border-gray-300">
                 </div>
 
-                <!-- MOTIVO -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
                         Motivo
                     </label>
                     <textarea name="motivo" rows="4" class="mt-1 w-full rounded-lg border-gray-300">{{ $registro->motivo }}</textarea>
                 </div>
-                <!-- COMPROBANTE -->
                 <div class="border-t pt-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Comprobante
@@ -116,7 +108,6 @@
                     </p>
                 </div>
 
-                <!-- BOTONES -->
                 <div class="pt-4 space-y-3">
                     <button type="submit"
                         class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg">

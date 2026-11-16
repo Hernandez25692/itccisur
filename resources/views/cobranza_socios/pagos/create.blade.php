@@ -1,7 +1,6 @@
 <x-app-layout>
     <div class="max-w-5xl mx-auto py-8 px-4 space-y-6">
 
-        {{-- HEADER --}}
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Registrar pago</h1>
@@ -16,7 +15,6 @@
             </a>
         </div>
 
-        {{-- ERRORES --}}
         @if ($errors->any())
             <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800">
                 <ul class="list-disc pl-5">
@@ -34,7 +32,6 @@
             <input type="hidden" name="empresa_id" value="{{ $empresa->id }}">
             <input type="hidden" name="monto" id="monto_total">
 
-            {{-- DATOS GENERALES --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="text-sm font-semibold text-gray-700">Fecha pago</label>
@@ -60,7 +57,6 @@
                 </div>
             </div>
 
-            {{-- REFERENCIA Y COMENTARIO --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="text-sm font-semibold text-gray-700">Referencia (opcional)</label>
@@ -73,7 +69,6 @@
                 </div>
             </div>
 
-            {{-- CARGOS PENDIENTES --}}
             <div class="bg-gray-50 border rounded-2xl p-4">
                 <p class="font-semibold text-gray-900">Cargos pendientes</p>
                 <p class="text-sm text-gray-500">
@@ -120,7 +115,6 @@
                 </div>
             </div>
 
-            {{-- ACCIONES --}}
             <div class="flex items-center justify-end gap-2">
                 <a href="{{ route('cobranza.empresas.show', $empresa) }}"
                     class="px-4 py-2 rounded-xl border hover:bg-gray-50">
@@ -133,7 +127,6 @@
         </form>
     </div>
 
-    {{-- SCRIPT --}}
     <script>
         function recalcularMonto() {
             let total = 0;

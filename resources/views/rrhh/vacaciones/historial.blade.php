@@ -12,7 +12,6 @@
     <div class="vac-page">
         <div class="vac-container is-wide">
 
-            {{-- Breadcrumb --}}
             <nav class="vac-breadcrumb">
                 <a href="{{ route('dashboard') }}">Inicio</a>
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -37,7 +36,6 @@
                 </div>
             @endif
 
-            {{-- Encabezado y saldo --}}
             <div class="vac-card">
                 <div class="vac-header">
                     <div class="vac-header-icon">
@@ -82,7 +80,6 @@
                 </div>
             </div>
 
-            {{-- Resumen por año --}}
             <div class="vac-card">
                 <div class="vac-card-title">
                     <h3>Resumen por año</h3>
@@ -153,7 +150,6 @@
                 </div>
             </div>
 
-            {{-- Estado de cuenta --}}
             <div class="vac-card">
                 <div class="vac-card-title">
                     <h3>Estado de cuenta</h3>
@@ -199,7 +195,6 @@
                 </div>
             </div>
 
-            {{-- Movimientos --}}
             <div class="vac-card">
                 <div class="vac-card-title">
                     <h3>Movimientos registrados</h3>
@@ -308,7 +303,6 @@
                 </div>
             </div>
 
-            {{-- Bitácora --}}
             <div class="vac-card">
                 <div class="vac-card-title">
                     <h3>Bitácora de cambios</h3>
@@ -345,7 +339,6 @@
         </div>
     </div>
 
-    {{-- Modal anular --}}
     <div class="vac-modal" id="modalAnular">
         <div class="vac-modal-box">
             <div class="vac-modal-head">Anular movimiento</div>

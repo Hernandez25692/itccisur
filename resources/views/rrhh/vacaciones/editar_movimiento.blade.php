@@ -5,7 +5,6 @@
     <div class="vac-page">
         <div class="vac-container">
 
-            {{-- Breadcrumb --}}
             <nav class="vac-breadcrumb">
                 <a href="{{ route('dashboard') }}">Inicio</a>
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -26,7 +25,6 @@
 
             <div class="vac-card">
 
-                {{-- Header --}}
                 <div class="vac-header">
                     <div class="vac-header-icon">
                         <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">

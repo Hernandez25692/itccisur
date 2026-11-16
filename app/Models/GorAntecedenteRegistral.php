@@ -27,10 +27,6 @@ class GorAntecedenteRegistral extends Model
         'updated_by',
     ];
 
-    /* =========================
-       RELACIONES (AUDITORÍA)
-       ========================= */
-
     public function creador()
     {
         return $this->belongsTo(User::class, 'created_by');

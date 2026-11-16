@@ -52,7 +52,6 @@
         max-width: 1200px;
     }
 
-    /* ── Breadcrumb ── */
     .vac-breadcrumb {
         display: flex;
         flex-wrap: wrap;
@@ -79,7 +78,6 @@
         font-weight: 500;
     }
 
-    /* ── Card ── */
     .vac-card {
         width: 100%;
         background: var(--bg-card);
@@ -157,7 +155,6 @@
         padding: 0;
     }
 
-    /* ── Section ── */
     .vac-section {
         margin-bottom: 1.75rem;
     }
@@ -204,7 +201,6 @@
         color: var(--gray-500);
     }
 
-    /* ── Grid ── */
     .vac-grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -217,7 +213,6 @@
         gap: 1rem;
     }
 
-    /* ── Field ── */
     .vac-field {
         display: flex;
         flex-direction: column;
@@ -334,7 +329,6 @@
         flex-shrink: 0;
     }
 
-    /* ── Alerts ── */
     .vac-alert {
         background: var(--info-light);
         border: 1px solid rgba(37, 99, 235, 0.2);
@@ -390,7 +384,6 @@
         color: var(--info);
     }
 
-    /* ── Stats ── */
     .vac-stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -453,7 +446,6 @@
         color: #fca5a5;
     }
 
-    /* ── Tables ── */
     .vac-table-wrap {
         width: 100%;
         overflow-x: auto;
@@ -545,7 +537,6 @@
         font-size: 0.85rem;
     }
 
-    /* ── Badges ── */
     .vac-badge {
         display: inline-block;
         padding: 0.15rem 0.55rem;
@@ -578,7 +569,6 @@
         color: var(--error);
     }
 
-    /* ── Buttons ── */
     .vac-footer {
         display: flex;
         justify-content: flex-end;
@@ -669,7 +659,6 @@
         flex-wrap: wrap;
     }
 
-    /* ── Manual adjustment box ── */
     .vac-adjustment {
         background: var(--gray-50);
         border-radius: 0.75rem;
@@ -678,7 +667,6 @@
         border: 1px solid var(--border-light);
     }
 
-    /* ── Modal ── */
     .vac-modal {
         position: fixed;
         inset: 0;
@@ -714,7 +702,6 @@
         padding: 1.25rem;
     }
 
-    /* ── Responsive ── */
     @media (max-width: 700px) {
         .vac-header {
             padding: 1.4rem 1.25rem;

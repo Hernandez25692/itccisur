@@ -2,7 +2,6 @@
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <!-- Header -->
             <div class="mb-8">
                 <div class="flex items-center gap-3 mb-2">
                     <a href="{{ route('calendario-editorial.index') }}"
@@ -26,14 +25,12 @@
                 <p class="text-gray-600">Modifique los detalles de la publicación en redes sociales</p>
             </div>
 
-            <!-- Form Card -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <form method="POST" action="{{ route('calendario-editorial.update', $calendarioEditorial) }}"
                     enctype="multipart/form-data" class="divide-y divide-gray-200">
                     @csrf
                     @method('PUT')
 
-                    <!-- Sección 1: Programación -->
                     <div class="p-6 md:p-8">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="p-2 bg-blue-50 rounded-lg">
@@ -48,7 +45,6 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <!-- Semana -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
                                     <span class="text-red-500">*</span> Semana
@@ -70,7 +66,6 @@
                                 <p class="text-xs text-gray-500">Número de semana del año (1-52)</p>
                             </div>
 
-                            <!-- Día -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
                                     <span class="text-red-500">*</span> Día
@@ -101,7 +96,6 @@
                                 </div>
                             </div>
 
-                            <!-- Fecha Publicación -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
                                     <span class="text-red-500">*</span> Fecha de publicación
@@ -122,7 +116,6 @@
                                 </div>
                             </div>
 
-                            <!-- Hora -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
                                     Hora de publicación
@@ -144,7 +137,6 @@
                         </div>
                     </div>
 
-                    <!-- Sección 2: Contenido -->
                     <div class="p-6 md:p-8">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="p-2 bg-blue-50 rounded-lg">
@@ -159,7 +151,6 @@
                         </div>
 
                         <div class="space-y-6">
-                            <!-- Tema / Título -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
                                     <span class="text-red-500">*</span> Tema / Título
@@ -180,7 +171,6 @@
                                 <p class="text-xs text-gray-500">Título visible en redes sociales</p>
                             </div>
 
-                            <!-- Área -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
                                     Área / Categoría
@@ -212,7 +202,6 @@
                                 </div>
                             </div>
 
-                            <!-- Encabezado -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
                                     Encabezado / Descripción
@@ -236,7 +225,6 @@
                         </div>
                     </div>
 
-                    <!-- Sección 3: Tipo de contenido -->
                     <div class="p-6 md:p-8">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="p-2 bg-blue-50 rounded-lg">
@@ -318,7 +306,6 @@
                         </div>
                     </div>
 
-                    <!-- Sección 4: Publicar en -->
                     <div class="p-6 md:p-8">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="p-2 bg-blue-50 rounded-lg">
@@ -392,7 +379,6 @@
                         </div>
                     </div>
 
-                    <!-- Sección 5: Extras -->
                     <div class="p-6 md:p-8">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="p-2 bg-blue-50 rounded-lg">
@@ -407,7 +393,6 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Etiquetas -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
                                     Etiquetas (páginas a etiquetar)
@@ -429,7 +414,6 @@
                                 <p class="text-xs text-gray-500">Separe con comas</p>
                             </div>
 
-                            <!-- Archivos adjuntos -->
                             <div class="space-y-3">
                                 <label class="block text-sm font-medium text-gray-700">
                                     Adjuntos (uno o varios archivos)
@@ -457,7 +441,6 @@
                                     Puede agregar uno o varios archivos. Los existentes no se eliminan.
                                 </p>
 
-                                {{-- Adjuntos actuales --}}
                                 @if ($calendarioEditorial->adjunto_path || $calendarioEditorial->adjuntos->count())
                                     <div class="mt-4 space-y-2">
 
@@ -467,7 +450,6 @@
 
                                         
 
-                                        {{-- Adjuntos múltiples --}}
                                         @foreach ($calendarioEditorial->adjuntos as $adjunto)
                                             <div
                                                 class="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
@@ -507,7 +489,6 @@
 
                         </div>
 
-                        <!-- Comentario -->
                         <div class="mt-6 space-y-2">
                             <label class="block text-sm font-medium text-gray-700">
                                 Comentarios adicionales
@@ -529,7 +510,6 @@
                         </div>
                     </div>
 
-                    <!-- SOLO ADMIN TI -->
                     @role('admin_ti')
                         <div class="p-6 md:p-8 border-t">
                             <div class="flex items-center gap-3 mb-6">
@@ -603,14 +583,12 @@
                         </div>
                     @endrole
 
-                    <!-- Sección 6: Acciones -->
                     <div class="p-6 md:p-8 bg-gray-50">
                         <div class="flex flex-col sm:flex-row justify-between gap-4">
                             <div class="text-sm text-gray-500">
                                 <p class="mb-1"><span class="text-red-500">*</span> Campos obligatorios</p>
                             </div>
                             <div class="flex gap-3">
-                                <!-- Volver -->
                                 <a href="{{ route('calendario-editorial.index') }}"
                                     class="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -621,7 +599,6 @@
                                     Volver
                                 </a>
 
-                                <!-- Actualizar -->
                                 <button type="submit"
                                     class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 shadow-sm hover:shadow-md">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -641,7 +618,6 @@
         </div>
     </div>
 
-    <!-- Script para validación y mejoras -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -693,7 +669,6 @@
                     return response.json();
                 })
                 .then(() => {
-                    // Recargar la página para reflejar cambios
                     location.reload();
                 })
                 .catch(error => {

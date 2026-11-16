@@ -31,7 +31,6 @@
             color:var(--text-light);
         }
 
-        /* Fondo */
         .tech-grid{
             position:absolute; inset:0;
             background-image:
@@ -62,7 +61,6 @@
         .data-particle{position:absolute;width:2px;background:linear-gradient(to bottom, transparent, var(--gold-light), transparent);opacity:0;animation:dataFlow 4s linear infinite}
         @keyframes dataFlow{0%{transform:translateY(-100px);opacity:0}10%{opacity:0.8}90%{opacity:0.8}100%{transform:translateY(100vh);opacity:0}}
 
-        /* Card */
         .login-wrapper{display:flex;align-items:center;justify-content:center;min-height:100vh;position:relative;z-index:10;padding:1rem}
         .login-card{
             background:var(--glass-bg);backdrop-filter:blur(18px) saturate(170%);
@@ -154,7 +152,6 @@
     </div>
 
     <script>
-        // Partículas de datos
         function createDataParticles() {
             const stream = document.getElementById('dataStream');
             const particleCount = 18;
@@ -173,7 +170,6 @@
             }
         }
 
-        // Nodos/cableado (decorativo)
         function createCircuitNodes() {
             const nodes = [
                 {top: '12%', left: '8%'},
@@ -194,7 +190,6 @@
                 node.style.zIndex = '2';
                 document.body.appendChild(node);
             });
-            // conexiones simples
             const conn = document.createElement('div');
             conn.style.position = 'absolute';
             conn.style.top = '20%';
@@ -207,7 +202,6 @@
             document.body.appendChild(conn);
         }
 
-        // Toggle contraseña
         document.addEventListener('DOMContentLoaded', function () {
             const toggle = document.getElementById('togglePassword');
             const pwd = document.getElementById('password');
@@ -225,11 +219,9 @@
                 }
             });
 
-            // Animaciones de fondo
             createDataParticles();
             createCircuitNodes();
 
-            // focus inicial
             setTimeout(()=>{ document.getElementById('email').focus() }, 500);
 
             // Mostrar spinner al enviar, pero permitir que el formulario se envíe normalmente
@@ -237,9 +229,6 @@
                 submitBtn.disabled = true;
                 const original = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:8px"></i> Verificando...';
-                // dejaremos que la petición real al servidor continúe
-                // si quieres restaurar el botón en caso de error por JS, manejalo en la respuesta del servidor
-                // setTimeout(()=>{ submitBtn.disabled = false; submitBtn.innerHTML = original }, 5000);
             });
         });
     </script>

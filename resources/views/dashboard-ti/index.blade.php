@@ -47,7 +47,6 @@
             font-weight: 400;
         }
 
-        /* Alertas */
         .alert-container {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%);
             border: 1px solid rgba(239, 68, 68, 0.2);
@@ -135,7 +134,6 @@
             margin-left: 0.5rem;
         }
 
-        /* Tarjetas de métricas */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -198,7 +196,6 @@
             color: var(--success);
         }
 
-        /* Gráficas */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -247,7 +244,6 @@
             border-radius: 2px;
         }
 
-        /* Timeline */
         .timeline-container {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
@@ -268,7 +264,6 @@
             font-weight: 600;
         }
 
-        /* Actividades recientes */
         .activities-container {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
@@ -360,7 +355,6 @@
             line-height: 1.5;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .dashboard-container {
                 padding: 1rem;
@@ -379,7 +373,6 @@
             }
         }
 
-        /* Color utility classes */
         .border-gold {
             border-color: var(--gold-primary);
         }
@@ -404,7 +397,6 @@
             background: var(--primary-medium);
         }
 
-        /* Filtros del dashboard */
         .filters-card {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
@@ -525,7 +517,6 @@
             <h1 class="dashboard-title">Dashboard TI – Resumen Gerencial</h1>
             <p class="dashboard-subtitle">Panel de control del Departamento de Sistemas y TI - CCISUR</p>
         </div>
-        {{-- Filtros del Dashboard TI --}}
         <div class="filters-card">
             <h2 class="filters-title">Filtros del Resumen Gerencial</h2>
 
@@ -614,7 +605,6 @@
                 </div>
             </form>
         </div>
-        {{-- 🔔 Alertas de vencimiento de licencias / dominios / servicios --}}
         @if ($alertas->count() > 0)
             <div class="alert-container">
                 <div class="alert-header">
@@ -641,7 +631,6 @@
             </div>
         @endif
 
-        {{-- Tarjetas resumen --}}
         <div class="metrics-grid">
             <div class="metric-card" style="--accent-color: #3B82F6;">
                 <h3 class="metric-label">Actividades del período</h3>
@@ -696,7 +685,6 @@
 
         </div>
 
-        {{-- Gráficas --}}
         <div class="charts-grid">
             <div class="chart-container">
                 <div class="chart-header">
@@ -737,7 +725,6 @@
             </div>
         </div>
 
-        {{-- Línea de tiempo mensual --}}
         <div class="timeline-container">
             <div class="timeline-header">
                 <h3 class="timeline-title">Actividades por Día del Mes</h3>
@@ -745,7 +732,6 @@
             <canvas id="porDiaChart"></canvas>
         </div>
 
-        {{-- Últimas actividades --}}
         <div class="activities-container">
             <div class="activities-header">
                 <h3 class="activities-title">Últimas Actividades</h3>
@@ -779,11 +765,9 @@
         </div>
     </div>
 
-    {{-- Script Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // Prioridades - Doughnut con estilo institucional
         new Chart(document.getElementById('prioridadesChart'), {
             type: 'doughnut',
             data: {
@@ -828,7 +812,6 @@
             }
         });
 
-        // Fallas por tipo - Barra con estilo institucional
         new Chart(document.getElementById('fallasChart'), {
             type: 'bar',
             data: {
@@ -882,7 +865,6 @@
             }
         });
 
-        // Por día - Línea con estilo Excel avanzado
         new Chart(document.getElementById('porDiaChart'), {
             type: 'line',
             data: {

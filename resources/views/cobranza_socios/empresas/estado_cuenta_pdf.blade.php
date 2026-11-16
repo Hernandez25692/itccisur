@@ -19,7 +19,6 @@
             padding: 0;
         }
 
-        /* ================= HEADER ================= */
         .header {
             width: 100%;
             margin-bottom: 10px;
@@ -48,7 +47,6 @@
             text-transform: uppercase;
         }
 
-        /* ================= INFO EMPRESA ================= */
         .info-box {
             width: 100%;
             border: 1px solid #000;
@@ -72,7 +70,6 @@
             width: 140px;
         }
 
-        /* ================= TABLA ================= */
         table.data-table {
             width: 100%;
             border-collapse: collapse;
@@ -114,7 +111,6 @@
             color: #8B0000;
         }
 
-        /* ================= TOTALES ================= */
         .totales-table {
             width: 100%;
             border-collapse: collapse;
@@ -132,7 +128,6 @@
             font-weight: bold;
         }
 
-        /* ================= FOOTER ================= */
         .footer {
             margin-top: 15px;
             font-size: 8pt;
@@ -159,7 +154,6 @@
 
 <body>
 
-    {{-- ================= HEADER ================= --}}
     <div class="header">
         <table class="header-table">
             <tr>
@@ -181,7 +175,6 @@
         ESTADO DE CUENTA
     </div>
 
-    {{-- ================= INFO EMPRESA ================= --}}
     <div class="info-box">
         <table class="info-table">
             <tr>
@@ -207,7 +200,6 @@
         </table>
     </div>
 
-    {{-- ================= TABLA DETALLE ================= --}}
     <table class="data-table">
         <thead>
             <tr>
@@ -235,7 +227,6 @@
         </tbody>
     </table>
 
-    {{-- ================= TOTALES ================= --}}
     <table class="totales-table">
         <tr>
             <td class="totales-label" width="80%">TOTAL ADEUDA (L)</td>
@@ -243,7 +234,6 @@
         </tr>
     </table>
 
-    {{-- ================= FIRMAS ================= --}}
     <div class="firmas">
         <div class="firma-box">
             <div class="linea-firma"></div>
@@ -256,7 +246,6 @@
         </div>
     </div>
 
-    {{-- ================= FOOTER ================= --}}
     <div class="footer">
         Documento generado automáticamente por el sistema CCISUR<br>
         Válido sin firma ni sello

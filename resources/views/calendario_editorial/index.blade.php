@@ -2,7 +2,6 @@
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 sm:py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <!-- Header Section - Rediseñado -->
             <div class="mb-10">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                     <div class="space-y-3">
@@ -26,7 +25,6 @@
                         </div>
                     </div>
 
-                    <!-- Estadísticas Rápidas -->
                     <div class="flex flex-wrap gap-4">
                         <div class="flex-1 min-w-[140px] bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                             <div class="flex items-center justify-between">
@@ -72,7 +70,6 @@
                     </div>
                 </div>
 
-                <!-- Filtros y Estados -->
                 <div class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
@@ -100,10 +97,8 @@
                 </div>
             </div>
 
-            <!-- Filtros de Búsqueda Mejorados -->
             <form method="GET" class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <!-- Estado -->
                     <select name="estado" class="border rounded-lg p-2 text-sm">
                         <option value="">Todos los estados</option>
                         @foreach (['publicado', 'pendiente', 'reprogramado', 'cancelado'] as $e)
@@ -113,11 +108,9 @@
                         @endforeach
                     </select>
 
-                    <!-- Semana -->
                     <input type="number" name="semana" value="{{ request('semana') }}" placeholder="Semana"
                         class="border rounded-lg p-2 text-sm">
 
-                    <!-- Mes -->
                     <select name="mes" class="border rounded-lg p-2 text-sm">
                         <option value="">Todos los meses</option>
                         @foreach (range(1, 12) as $m)
@@ -127,7 +120,6 @@
                         @endforeach
                     </select>
 
-                    <!-- Botones -->
                     <div class="flex gap-2">
                         <button class="flex-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700">
                             🔍 Filtrar
@@ -141,7 +133,6 @@
                 </div>
             </form>
 
-            <!-- Desktop Table View - Mejorado -->
             <div class="hidden lg:block mt-8">
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                     <div class="overflow-x-auto">
@@ -277,7 +268,6 @@
                                         data-contenido="{{ strtolower($item->tema) }}"
                                         data-estado="{{ strtolower($item->estado) }}">
 
-                                        <!-- Semana -->
                                         <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
                                             <div class="flex flex-col items-center justify-center">
                                                 <span
@@ -286,7 +276,6 @@
                                             </div>
                                         </td>
 
-                                        <!-- Fecha y Hora -->
                                         <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
                                             <div class="space-y-2">
                                                 <div class="flex items-center gap-2">
@@ -319,10 +308,8 @@
                                             </div>
                                         </td>
 
-                                        <!-- Contenido Principal -->
                                         <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
                                             <div class="space-y-4">
-                                                <!-- Tema -->
                                                 <div>
                                                     <h3
                                                         class="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">
@@ -333,9 +320,7 @@
                                                     </p>
                                                 </div>
 
-                                                <!-- Metadata -->
                                                 <div class="space-y-3">
-                                                    <!-- Área -->
                                                     @if ($item->area)
                                                         <div class="flex items-center gap-2">
                                                             <span
@@ -347,7 +332,6 @@
                                                         </div>
                                                     @endif
 
-                                                    <!-- Redes Sociales -->
                                                     @if (!empty($item->publicar_en))
                                                         <div class="flex items-center gap-2">
                                                             <span
@@ -368,7 +352,6 @@
                                                         </div>
                                                     @endif
 
-                                                    <!-- Enlace -->
                                                     @if ($item->enlace)
                                                         <div class="flex items-center gap-2">
                                                             <a href="{{ $item->enlace }}" target="_blank"
@@ -388,7 +371,6 @@
                                             </div>
                                         </td>
 
-                                        <!-- Estado -->
                                         <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
                                             <div class="flex flex-col items-center gap-3">
                                                 <span
@@ -400,10 +382,8 @@
                                             </div>
                                         </td>
 
-                                        <!-- Acciones -->
                                         <td class="px-8 py-6 align-top">
                                             <div class="flex flex-col gap-3 min-w-[140px]">
-                                                <!-- Ver -->
                                                 <a href="{{ route('calendario-editorial.show', $item) }}"
                                                     class="group/btn inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:shadow-sm hover:border-gray-400">
                                                     <svg class="w-4 h-4 text-gray-600 group-hover/btn:text-blue-600 transition-colors"
@@ -419,7 +399,6 @@
                                                     <span>Detalles</span>
                                                 </a>
 
-                                                <!-- Editar -->
                                                 <a href="{{ route('calendario-editorial.edit', $item) }}"
                                                     class="group/btn inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-all duration-200 hover:shadow-sm hover:border-blue-300">
                                                     <svg class="w-4 h-4 group-hover/btn:text-blue-800 transition-colors"
@@ -432,7 +411,6 @@
                                                     <span>Editar</span>
                                                 </a>
 
-                                                <!-- Publicar (solo admin_ti) -->
                                                 @role('admin_ti')
                                                     @if ($item->estado !== 'publicado')
                                                         <form id="publicar-form-{{ $item->id }}"
@@ -504,12 +482,10 @@
                             };
 
                             function toggleSort(column) {
-                                // Reset other columns
                                 Object.keys(sortState).forEach(key => {
                                     if (key !== column) sortState[key] = null;
                                 });
 
-                                // Cycle through sort states: null -> asc -> desc -> null
                                 if (sortState[column] === null) {
                                     sortState[column] = 'asc';
                                 } else if (sortState[column] === 'asc') {
@@ -564,7 +540,6 @@
                         </script>
                     </div>
 
-                    <!-- Paginación Desktop -->
                     <div class="bg-white px-8 py-6 border-t border-gray-200">
                         <div class="flex items-center justify-between">
                             <div class="text-sm text-gray-600">
@@ -580,7 +555,6 @@
                 </div>
             </div>
 
-            <!-- Mobile Card View - Mejorado -->
             <div class="lg:hidden space-y-4 mt-8">
                 @forelse ($registros as $item)
                     @php
@@ -630,7 +604,6 @@
 
                     <div
                         class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden {{ $estadoConfig['border'] }} border-l-4">
-                        <!-- Card Header -->
                         <div class="p-5 {{ $estadoConfig['bg'] }}">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="space-y-1">
@@ -670,7 +643,6 @@
                                 </div>
                             </div>
 
-                            <!-- Tema Principal -->
                             <div class="mb-4">
                                 <h3 class="text-xl font-bold text-gray-900 mb-2">
                                     {{ $item->tema }}
@@ -680,7 +652,6 @@
                                 </p>
                             </div>
 
-                            <!-- Metadata Chips -->
                             <div class="space-y-3">
                                 @if ($item->area)
                                     <div class="flex items-center gap-2">
@@ -710,10 +681,8 @@
                             </div>
                         </div>
 
-                        <!-- Card Footer - Acciones -->
                         <div class="bg-white p-4 border-t border-gray-100">
                             <div class="grid grid-cols-2 gap-2">
-                                <!-- Ver -->
                                 <a href="{{ route('calendario-editorial.show', $item) }}"
                                     class="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -726,7 +695,6 @@
                                     Ver
                                 </a>
 
-                                <!-- Editar -->
                                 <a href="{{ route('calendario-editorial.edit', $item) }}"
                                     class="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -737,7 +705,6 @@
                                     Editar
                                 </a>
 
-                                <!-- Enlace (si existe) -->
                                 @if ($item->enlace)
                                     <div class="col-span-2 mt-2">
                                         <a href="{{ $item->enlace }}" target="_blank"
@@ -753,7 +720,6 @@
                                     </div>
                                 @endif
 
-                                <!-- Publicar (solo admin_ti) -->
                                 @role('admin_ti')
                                     @if ($item->estado !== 'publicado')
                                         <div class="col-span-2 mt-2">
@@ -807,7 +773,6 @@
                     </div>
                 @endforelse
 
-                <!-- Paginación Mobile -->
                 @if ($registros->hasPages())
                     <div class="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
                         <div class="flex flex-col items-center gap-4">
@@ -824,7 +789,6 @@
                 @endif
             </div>
 
-            <!-- SweetAlert2 Script -->
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             <script>
                 function confirmarPublicacion(id) {

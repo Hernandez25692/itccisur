@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <!-- Header del formulario -->
         <div class="mb-8">
             
             
@@ -17,9 +16,7 @@
             </div>
         </div>
 
-        <!-- Tarjeta del formulario -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <!-- Encabezado de la tarjeta -->
             <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] px-8 py-6">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -34,7 +31,6 @@
                         </div>
                     </div>
                     
-                    <!-- Estado actual -->
                     <div class="text-right">
                         <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold
                             @if($actividad->estado == 'finalizado') bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200
@@ -55,12 +51,10 @@
                 </div>
             </div>
 
-            <!-- Formulario -->
             <form method="POST" action="{{ route('plan-actividad.update', $actividad->id) }}" class="p-8">
                 @csrf
                 @method('PUT')
 
-                <!-- Mensajes de validación -->
                 @if($errors->any())
                     <div class="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl">
                         <div class="flex items-center gap-3 mb-3">
@@ -84,9 +78,7 @@
                     </div>
                 @endif
 
-                <!-- Grid de campos -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <!-- Código -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -108,7 +100,6 @@
                         @enderror
                     </div>
 
-                    <!-- Sección -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -130,7 +121,6 @@
                         @enderror
                     </div>
 
-                    <!-- Actividad -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -152,7 +142,6 @@
                         @enderror
                     </div>
 
-                    <!-- Objetivo -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -173,7 +162,6 @@
                         @enderror
                     </div>
 
-                    <!-- Frecuencia -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -193,7 +181,6 @@
                         @enderror
                     </div>
 
-                    <!-- Responsable -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -213,7 +200,6 @@
                         @enderror
                     </div>
 
-                    <!-- Mes previsto -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -244,7 +230,6 @@
                         @enderror
                     </div>
 
-                    <!-- Fecha de ejecución -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -264,7 +249,6 @@
                         @enderror
                     </div>
 
-                    <!-- Métrica de éxito -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -284,7 +268,6 @@
                         @enderror
                     </div>
 
-                    <!-- Observaciones -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -303,7 +286,6 @@
                         @enderror
                     </div>
 
-                    <!-- Estado -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -325,7 +307,6 @@
                     </div>
                 </div>
 
-                <!-- Botones de acción -->
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-200">
                    
                     

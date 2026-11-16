@@ -46,7 +46,6 @@
     ];
 @endphp
 
-{{-- SECCIÓN 1: Tipo de movimiento --}}
 <div class="vac-section">
     <div class="vac-section-label">Tipo de solicitud</div>
     <div class="vac-grid-2">
@@ -77,7 +76,6 @@
     </div>
 </div>
 
-{{-- SECCIÓN 2: Fechas y horas --}}
 <div class="vac-section">
     <div class="vac-section-label">Período solicitado</div>
     <div class="vac-grid-2">
@@ -141,7 +139,6 @@
     </div>
 </div>
 
-{{-- SECCIÓN 3: Detalles --}}
 <div class="vac-section">
     <div class="vac-section-label">Detalles de la solicitud</div>
     <div class="vac-grid-1">
@@ -174,7 +171,6 @@
     </div>
 </div>
 
-{{-- Resumen --}}
 <div class="vac-alert">
     <div class="vac-alert-title">Resumen de solicitud</div>
     <div class="vac-summary" id="resultadoSolicitud">
@@ -182,7 +178,6 @@
     </div>
 </div>
 
-{{-- Cantidad manual --}}
 <div class="vac-adjustment">
     <div class="vac-grid-2">
         <div class="vac-field" id="campo-dias-manual">
@@ -211,7 +206,6 @@
     </div>
 </div>
 
-{{-- Vacaciones adelantadas: se permiten, solo se informa --}}
 <div class="vac-alert" id="aviso-saldo" data-forzar="0" style="display:none;">
     <div class="vac-alert-title">Quedará como adelanto</div>
     <p id="aviso-saldo-texto" style="margin: 0;"></p>

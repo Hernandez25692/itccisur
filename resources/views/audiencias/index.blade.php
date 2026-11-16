@@ -2,7 +2,6 @@
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6">
         <div class="max-w-7xl mx-auto space-y-6">
 
-            <!-- ALERTA MODERNA -->
             @if (session('success'))
                 <div
                     class="relative bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-4 md:py-3 rounded-2xl shadow-lg overflow-hidden animate-slide-down">
@@ -22,7 +21,6 @@
                 </div>
             @endif
 
-            <!-- ENCABEZADO MEJORADO -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <div class="flex items-center gap-3">
@@ -52,9 +50,7 @@
                 </a>
             </div>
 
-            <!-- RESUMEN / KPIs MODERNOS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                <!-- Total -->
                 <div
                     class="bg-white rounded-2xl shadow-lg p-5 border-l-4 border-blue-500 hover:shadow-xl transition-shadow duration-300">
                     <div class="flex items-center justify-between">
@@ -77,7 +73,6 @@
                     </div>
                 </div>
 
-                <!-- Atendidas -->
                 <div
                     class="bg-white rounded-2xl shadow-lg p-5 border-l-4 border-green-500 hover:shadow-xl transition-shadow duration-300">
                     <div class="flex items-center justify-between">
@@ -106,7 +101,6 @@
                     </div>
                 </div>
 
-                <!-- Pendientes -->
                 <div
                     class="bg-white rounded-2xl shadow-lg p-5 border-l-4 border-amber-500 hover:shadow-xl transition-shadow duration-300">
                     <div class="flex items-center justify-between">
@@ -136,7 +130,6 @@
                 </div>
             </div>
 
-            <!-- FILTROS MODERNOS -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <div class="p-5 border-b border-gray-100">
                     <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -216,7 +209,6 @@
                 </form>
             </div>
 
-            <!-- LISTADO MEJORADO -->
             <div class="space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="text-lg font-semibold text-gray-900">
@@ -399,7 +391,6 @@
                 @endforelse
             </div>
 
-            <!-- PAGINACIÓN MEJORADA -->
             @if ($audiencias->hasPages())
                 <div class="bg-white rounded-2xl shadow-md p-4">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -419,7 +410,6 @@
         </div>
     </div>
 
-    <!-- Estilos personalizados para mejoras adicionales -->
     <style>
         .animate-slide-down {
             animation: slideDown 0.5s ease-out;
@@ -444,7 +434,6 @@
             overflow: hidden;
         }
 
-        /* Mejoras para el estado de enfoque en formularios */
         input:focus,
         select:focus,
         textarea:focus {
@@ -452,12 +441,10 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        /* Transiciones suaves */
         * {
             transition: background-color 0.2s ease, border-color 0.2s ease;
         }
 
-        /* Estilos para la paginación personalizada si es necesario */
         .pagination .page-link {
             padding: 0.5rem 0.75rem;
             border-radius: 0.5rem;

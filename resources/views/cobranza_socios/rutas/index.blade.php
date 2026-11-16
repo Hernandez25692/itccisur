@@ -1,7 +1,6 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 space-y-6">
 
-        {{-- ================= HEADER ================= --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Rutas de Cobranza</h1>
@@ -11,7 +10,6 @@
             </div>
         </div>
 
-        {{-- ================= GENERADOR DE RUTA ================= --}}
         @role('admin_ti|gerencia|cobranza')
             <form method="POST" action="{{ route('cobranza.rutas.sugerir') }}"
                 class="bg-white border rounded-2xl p-5 grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
@@ -74,7 +72,6 @@
             </form>
         @endrole
 
-        {{-- ================= MENSAJES ================= --}}
         @if (session('success'))
             <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">
                 {{ session('success') }}
@@ -87,7 +84,6 @@
             </div>
         @endif
 
-        {{-- ================= TABLA DE RUTAS ================= --}}
         <div class="bg-white rounded-2xl border overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
@@ -118,24 +114,20 @@
 
                         <tr class="hover:bg-gray-50">
 
-                            {{-- Fecha --}}
                             <td class="px-3 py-2">
                                 {{ $ruta->fecha_ruta->format('d/m/Y') }}
                             </td>
 
-                            {{-- Nombre --}}
                             <td class="font-semibold text-gray-900">
                                 {{ $ruta->nombre ?? '—' }}
                             </td>
 
-                            {{-- Estado --}}
                             <td>
                                 <span class="px-3 py-1 text-xs rounded-full border {{ $badge }}">
                                     {{ strtoupper(str_replace('_', ' ', $ruta->estado)) }}
                                 </span>
                             </td>
 
-                            {{-- Gestores --}}
                             <td>
                                 @if ($ruta->estado === 'sugerida')
                                     <span class="text-gray-400">— SIN ASIGNAR —</span>
@@ -150,12 +142,10 @@
                                 @endif
                             </td>
 
-                            {{-- Empresas --}}
                             <td class="text-center font-semibold">
                                 {{ $ruta->empresas_count }}
                             </td>
 
-                            {{-- Acciones --}}
                             <td class="text-right space-x-3">
                                 <a href="{{ route('cobranza.rutas.show', $ruta) }}"
                                     class="text-blue-600 hover:underline">
@@ -185,7 +175,6 @@
             </table>
         </div>
 
-        {{-- ================= PAGINACIÓN ================= --}}
         <div>
             {{ $rutas->links() }}
         </div>

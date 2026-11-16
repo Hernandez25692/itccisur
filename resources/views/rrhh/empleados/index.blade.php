@@ -160,7 +160,6 @@
 
     <div class="rh">
 
-        {{-- Encabezado --}}
         <header class="rh-head">
             <div class="rh-head-main">
                 <h1 class="rh-title">Empleados</h1>
@@ -182,7 +181,6 @@
             </div>
         </header>
 
-        {{-- Mensajes --}}
         @if (session('success'))
             <div class="rh-notice is-good" role="status">
                 <span class="rh-notice-text">@include('rrhh.partials.icono', ['i' => 'ok']){{ session('success') }}</span>
@@ -195,7 +193,6 @@
             </div>
         @endif
 
-        {{-- Filtros --}}
         <form method="GET" class="rh-filters" id="filtros" role="search">
             <input type="hidden" name="estado" value="{{ $estadoFiltro }}">
 
@@ -245,7 +242,6 @@
             </nav>
         </form>
 
-        {{-- Directorio --}}
         <div class="rh-table-wrap">
             <table class="rh-table rh-roster">
                 <caption class="sr-only">Empleados agrupados por área, con su saldo de vacaciones</caption>
@@ -371,7 +367,6 @@
             </div>
         @endif
 
-        {{-- Confirmación de cambio de estado --}}
         <dialog class="rh-dialog" id="dialogo-estado" aria-labelledby="dialogo-estado-titulo">
             <form method="POST" action="" id="form-estado">
                 @csrf

@@ -1,7 +1,6 @@
 <x-app-layout>
     <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
-        <!-- Header Principal -->
         <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] rounded-2xl p-8 text-white shadow-xl mb-8">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div class="flex-1">
@@ -20,7 +19,6 @@
                         </div>
                     </div>
 
-                    <!-- Estado y Progreso -->
                     <div class="flex flex-wrap items-center gap-6">
                         <div
                             class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold
@@ -49,7 +47,6 @@
                     </div>
                 </div>
 
-                <!-- Botón Editar -->
                 <a href="{{ route('plan-actividad.edit', $actividad->id) }}"
                     class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold rounded-xl hover:shadow-lg transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,11 +59,8 @@
             </div>
         </div>
 
-        <!-- Información Principal en Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <!-- Columna 1: Información Básica -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Tarjeta de Información Principal -->
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
                     <div class="space-y-6">
                         <div class="flex items-start gap-4">
@@ -104,7 +98,6 @@
                     </div>
                 </div>
 
-                <!-- Tarjeta de Detalles -->
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
                     <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
                         <svg class="w-5 h-5 text-[#C5A049]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,9 +171,7 @@
                 </div>
             </div>
 
-            <!-- Columna 2: Progreso y Avance -->
             <div class="space-y-8">
-                <!-- Tarjeta de Estado Completo -->
                 @if ($actividad->progreso == 100)
                     <div
                         class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-8 text-center">
@@ -197,7 +188,6 @@
                         </p>
                     </div>
                 @else
-                    <!-- Formulario de Avance -->
                     @role('admin_ti')
                         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
                             <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
@@ -214,7 +204,6 @@
                                 @csrf
 
                                 <div class="space-y-6">
-                                    <!-- Avance -->
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                                             <span class="flex items-center gap-2">
@@ -239,7 +228,6 @@
                                         </p>
                                     </div>
 
-                                    <!-- Comentario -->
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-900 mb-3">Comentario</label>
                                         <textarea name="comentario" rows="3"
@@ -247,7 +235,6 @@
                                             placeholder="Describe el avance realizado..."></textarea>
                                     </div>
 
-                                    <!-- Fecha -->
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                                             <span class="flex items-center gap-2">
@@ -260,7 +247,6 @@
                                             required>
                                     </div>
 
-                                    <!-- Evidencia -->
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-900 mb-3">Evidencia
                                             (opcional)</label>
@@ -279,7 +265,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Botón -->
                                     <button type="submit"
                                         class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white font-semibold px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,7 +279,6 @@
                     @endrole
                 @endif
 
-                <!-- Tarjeta de Resumen de Progreso -->
                 <div class="bg-gradient-to-br from-[#0C1C3C] to-[#1A2A4F] rounded-2xl p-8 text-white">
                     <h3 class="text-lg font-bold mb-6">Resumen de Progreso</h3>
 
@@ -318,7 +302,6 @@
             </div>
         </div>
 
-        <!-- Historial de Ejecución -->
         @if ($actividad->ejecuciones->count() > 0)
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
                 <div class="flex items-center justify-between mb-8">

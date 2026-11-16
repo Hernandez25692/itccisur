@@ -15,7 +15,6 @@
 
             <div class="flex gap-2 flex-wrap items-center">
 
-                {{-- ✅ SOLO SI ES SUGERIDA: asignar gestores --}}
                 @if ($ruta->estado === 'sugerida')
                     <form method="POST" action="{{ route('cobranza.rutas.asignar', $ruta) }}">
                         @csrf
@@ -62,7 +61,6 @@
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                         <div>
 
-                            {{-- ✅ AQUÍ SE VE A QUIÉN LE TOCA --}}
                             <p class="font-bold text-gray-900">
                                 {{ $e->pivot->orden }}. {{ $e->nombre_empresa }}
                             </p>
@@ -159,7 +157,6 @@
 
                         <h2 class="text-lg font-bold">Agregar empresa a la ruta</h2>
 
-                        {{-- Empresa --}}
                         <div>
                             <label class="text-sm text-gray-600">Empresa</label>
                             <select name="empresa_id" class="w-full rounded-xl border-gray-300" required>
@@ -175,7 +172,6 @@
                             </select>
                         </div>
 
-                        {{-- Gestor --}}
                         <div>
                             <label class="text-sm text-gray-600">Asignar a gestor</label>
                             <select name="gestor_id" class="w-full rounded-xl border-gray-300">

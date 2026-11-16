@@ -1,7 +1,6 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 space-y-6">
 
-        {{-- HEADER --}}
         <div class="flex items-center justify-between gap-3 flex-wrap">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">{{ $ruta->nombre }}</h1>
@@ -21,7 +20,6 @@
             </a>
         </div>
 
-        {{-- EMPRESAS --}}
         <div class="space-y-4">
             @foreach ($empresas as $e)
                 @php
@@ -30,7 +28,6 @@
 
                 <div class="bg-white rounded-2xl border p-5 space-y-4">
 
-                    {{-- ENCABEZADO --}}
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                         <div>
                             <p class="font-bold text-gray-900">
@@ -46,7 +43,6 @@
                         </span>
                     </div>
 
-                    {{-- FORM ESTADO VISITA --}}
                     <form method="POST"
                         action="{{ !$yaPagadoHoy ? route('cobranza.rutas.check', [$ruta, $e]) : '#' }}"
                         class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -71,7 +67,6 @@
                         </button>
                     </form>
 
-                    {{-- BLOQUE PAGO (SOLO SI VISITADO) --}}
                     @if ($e->pivot->estado_visita === 'visitado' && !$yaPagadoHoy)
                         <form method="POST" action="{{ route('cobranza.pagos.store') }}"
                             class="bg-gray-50 border rounded-xl p-4 space-y-4 pago-form"
@@ -85,7 +80,6 @@
                                 Estado de cuenta – seleccione cuotas a pagar
                             </p>
 
-                            {{-- CARGOS --}}
                             <table class="w-full text-sm">
                                 <thead class="text-gray-500">
                                     <tr>
@@ -122,7 +116,6 @@
                                 </tbody>
                             </table>
 
-                            {{-- TOTAL DINÁMICO --}}
                             <div class="flex justify-between items-center border-t pt-3">
                                 <span class="font-semibold text-gray-700">
                                     Total a cobrar
@@ -132,7 +125,6 @@
                                 </span>
                             </div>
 
-                            {{-- MÉTODO --}}
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <select name="metodo" class="rounded-xl border-gray-300">
                                     @foreach (['efectivo', 'transferencia', 'deposito', 'cheque', 'otro'] as $m)
@@ -153,7 +145,6 @@
                         </form>
                     @endif
 
-                    {{-- YA PAGADO --}}
                     @if ($yaPagadoHoy)
                         <div class="bg-green-50 border border-green-200 rounded-xl p-4">
                             <span class="text-green-800 font-semibold">
@@ -175,7 +166,6 @@
         </div>
     </div>
 
-    {{-- SCRIPT TOTAL DINÁMICO --}}
     <script>
         document.querySelectorAll('.pago-form').forEach(form => {
             const checks = form.querySelectorAll('.cargo-check');

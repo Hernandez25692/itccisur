@@ -15,9 +15,6 @@ class CalendarioEditorialController extends Controller
         $this->middleware(['auth', 'role:admin_ti|gerencia|usuario|calendario']);
     }
 
-    /* =========================
-     |  LISTADO
-     ========================= */
     public function index(Request $request)
     {
         $query = CalendarioEditorial::query()
@@ -40,17 +37,11 @@ class CalendarioEditorialController extends Controller
         return view('calendario_editorial.index', compact('registros'));
     }
 
-    /* =========================
-     |  FORM CREAR
-     ========================= */
     public function create()
     {
         return view('calendario_editorial.create');
     }
 
-    /* =========================
-     |  GUARDAR
-     ========================= */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -66,7 +57,6 @@ class CalendarioEditorialController extends Controller
             'etiquetas'         => 'nullable|string',
             'comentario'        => 'nullable|string',
 
-            // UN SOLO SELECTOR, múltiples archivos
             'adjuntos'          => 'nullable|array',
             'adjuntos.*'        => 'file|max:20480',
         ]);
@@ -77,9 +67,6 @@ class CalendarioEditorialController extends Controller
         // Crear publicación
         $calendario = CalendarioEditorial::create($data);
 
-        /* =========================
-         |  GUARDAR ADJUNTOS
-         ========================= */
         if ($request->hasFile('adjuntos')) {
             foreach ($request->file('adjuntos') as $index => $file) {
 
@@ -108,9 +95,6 @@ class CalendarioEditorialController extends Controller
             ->with('success', 'Actividad registrada correctamente');
     }
 
-    /* =========================
-     |  FORM EDITAR
-     ========================= */
     public function edit(CalendarioEditorial $calendarioEditorial)
     {
         if (
@@ -123,9 +107,6 @@ class CalendarioEditorialController extends Controller
         return view('calendario_editorial.edit', compact('calendarioEditorial'));
     }
 
-    /* =========================
-     |  ACTUALIZAR
-     ========================= */
     public function update(Request $request, CalendarioEditorial $calendarioEditorial)
     {
         $data = $request->validate([
@@ -158,10 +139,6 @@ class CalendarioEditorialController extends Controller
         // Actualizar datos principales
         $calendarioEditorial->update($data);
 
-        /* =========================
-     |  GUARDAR NUEVOS ADJUNTOS
-     |  (SIN TOCAR LOS EXISTENTES)
-     ========================= */
         if ($request->hasFile('adjuntos')) {
             foreach ($request->file('adjuntos') as $file) {
 
@@ -190,7 +167,7 @@ class CalendarioEditorialController extends Controller
 
     public function destroyAdjunto(CalendarioEditorialAdjunto $adjunto)
     {
-        $cal = $adjunto->calendarioEditorial; // relación inversa (la ponemos en el modelo adjunto abajo)
+        $cal = $adjunto->calendarioEditorial;
 
         // Seguridad:
         // - admin_ti puede borrar cualquiera
@@ -209,9 +186,6 @@ class CalendarioEditorialController extends Controller
     }
 
 
-    /* =========================
-     |  MARCAR COMO PUBLICADO (ADMIN TI)
-     ========================= */
     public function marcarPublicado(CalendarioEditorial $calendarioEditorial)
     {
         abort_unless(Auth::user()->hasRole('admin_ti'), 403);

@@ -16,7 +16,6 @@
     </div>
 @endif
 
-{{-- SECCIÓN 1: Información personal --}}
 <div class="emp-section">
     <div class="emp-section-label">Información personal</div>
     <div class="emp-grid-2">
@@ -69,7 +68,6 @@
     </div>
 </div>
 
-{{-- SECCIÓN 2: Información laboral --}}
 <div class="emp-section">
     <div class="emp-section-label">Información laboral</div>
     <div class="emp-grid-2">

@@ -6,13 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CCISUR TI - Sistema de Tecnologías de Información</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800|instrument-sans:400,500,600"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Styles -->
     <style>
         :root {
             --primary-dark: #0c1c3c;
@@ -45,7 +43,6 @@
             position: relative;
         }
 
-        /* Fondo tecnológico */
         .background-tech {
             position: fixed;
             top: 0;
@@ -124,7 +121,6 @@
             }
         }
 
-        /* Header */
         .header-container {
             width: 100%;
             padding: 1.5rem 2rem;
@@ -182,7 +178,6 @@
             font-weight: 500;
         }
 
-        /* Navegación */
         .nav-links {
             display: flex;
             gap: 2rem;
@@ -267,7 +262,6 @@
             box-shadow: 0 8px 20px rgba(183, 154, 55, 0.4);
         }
 
-        /* Contenido principal */
         .main-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -276,7 +270,6 @@
             z-index: 10;
         }
 
-        /* Hero Section */
         .hero-section {
             text-align: center;
             padding: 4rem 0;
@@ -328,7 +321,6 @@
             font-size: 1rem;
         }
 
-        /* Tarjetas de características */
         .features-section {
             margin: 6rem 0;
         }
@@ -433,7 +425,6 @@
             font-weight: bold;
         }
 
-        /* Panel de estadísticas */
         .stats-section {
             background: rgba(12, 28, 60, 0.5);
             border: 1px solid var(--glass-border);
@@ -467,7 +458,6 @@
             font-weight: 500;
         }
 
-        /* Footer */
         .footer {
             margin-top: 6rem;
             padding-top: 3rem;
@@ -539,7 +529,6 @@
             border-top: 1px solid var(--glass-border);
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -593,7 +582,6 @@
             }
         }
 
-        /* Animaciones de entrada */
         .fade-in {
             opacity: 0;
             transform: translateY(20px);
@@ -622,14 +610,12 @@
 </head>
 
 <body>
-    <!-- Fondo tecnológico -->
     <div class="background-tech">
         <div class="tech-grid"></div>
         <div class="circuit-lines"></div>
         <div class="data-stream" id="dataStream"></div>
     </div>
 
-    <!-- Header -->
     <header class="header-container fade-in">
         <div class="header-content">
             <div class="logo-section">
@@ -659,9 +645,7 @@
         </div>
     </header>
 
-    <!-- Contenido principal -->
     <main class="main-container">
-        <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-badge fade-in">
                 SISTEMA INSTITUCIONAL DE TECNOLOGÍAS
@@ -682,7 +666,6 @@
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="main-container">
             <div class="footer-content">
@@ -709,7 +692,6 @@
     </footer>
 
     <script>
-        // Crear partículas de datos animadas
         function createDataParticles() {
             const stream = document.getElementById('dataStream');
             const particleCount = 30;
@@ -718,7 +700,6 @@
                 const particle = document.createElement('div');
                 particle.className = 'data-particle';
 
-                // Posición aleatoria
                 const left = Math.random() * 100;
                 const delay = Math.random() * 5;
                 const duration = 4 + Math.random() * 3;
@@ -733,7 +714,6 @@
             }
         }
 
-        // Efectos de scroll para animaciones
         function handleScrollAnimations() {
             const elements = document.querySelectorAll('.fade-in');
 
@@ -747,21 +727,17 @@
             });
         }
 
-        // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
             createDataParticles();
             handleScrollAnimations();
 
-            // Aplicar animaciones de entrada
             const fadeElements = document.querySelectorAll('.fade-in');
             fadeElements.forEach((el, index) => {
                 el.style.animationDelay = `${index * 0.2}s`;
             });
 
-            // Efecto de scroll
             window.addEventListener('scroll', handleScrollAnimations);
 
-            // Efecto de hover en tarjetas
             const cards = document.querySelectorAll('.feature-card');
             cards.forEach(card => {
                 card.addEventListener('mouseenter', function() {
@@ -773,7 +749,6 @@
                 });
             });
 
-            // Actualizar año en copyright
             const yearSpan = document.querySelector('.copyright p');
             if (yearSpan) {
                 yearSpan.innerHTML = yearSpan.innerHTML.replace('2023', new Date().getFullYear());

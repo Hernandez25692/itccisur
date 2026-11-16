@@ -14,19 +14,13 @@ class CalendarioEditorialDashboardController extends Controller
 
         $base = CalendarioEditorial::query();
 
-        // 👉 SOLO filtrar si mes y año vienen definidos
         if ($mes && $anio) {
             $base->whereMonth('fecha_publicacion', $mes)
                 ->whereYear('fecha_publicacion', $anio);
         }
 
-        /* =========================
-         | KPIs
-         ========================= */
-
         $excluirEstados = ['reprogramado', 'reprogramada', 'cancelado', 'cancelada'];
 
-        // ✅ KPIs SOLO con los que “cuentan” (sin reprogramados/cancelados)
         $baseKpi = (clone $base)->whereNotIn('estado', $excluirEstados);
 
         $totalMes = (clone $baseKpi)->count();
@@ -43,10 +37,6 @@ class CalendarioEditorialDashboardController extends Controller
             ? round(($publicadas / $totalMes) * 100, 1)
             : 0;
 
-
-        /* =========================
-         | GRÁFICAS
-         ========================= */
 
         $porSemana = (clone $base)
             ->select('semana')
@@ -68,10 +58,6 @@ class CalendarioEditorialDashboardController extends Controller
             ->countBy()
             ->sortDesc();
 
-        /* =========================
-         | TABLA: PUBLICACIONES POR DÍA DE LA SEMANA
-         ========================= */
-
         $diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
         $tablaPorDiaSemana = [];
@@ -87,10 +73,6 @@ class CalendarioEditorialDashboardController extends Controller
             }
             $tablaPorDiaSemana[] = $fila;
         }
-
-        /* =========================
-         | TABLA: CONTENIDO POR SEMANA
-         ========================= */
 
         $tiposContenido = [
             'EN VIVO'  => 'VIV',

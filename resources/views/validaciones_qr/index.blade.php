@@ -1,7 +1,6 @@
 <x-app-layout>
     <div class="vqr-page">
 
-        {{-- Header --}}
         <div class="vqr-header">
             <div>
                 <h2 class="vqr-title">Validaciones QR</h2>
@@ -17,12 +16,10 @@
             </a>
         </div>
 
-        {{-- Alert --}}
         @if (session('success'))
             <div class="vqr-alert">✓ {{ session('success') }}</div>
         @endif
 
-        {{-- Tabla --}}
         <div class="vqr-card">
             <table class="vqr-table">
                 <thead>

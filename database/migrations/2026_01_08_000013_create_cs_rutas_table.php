@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('nombre');
             $table->date('fecha_ruta');
 
-            // 🔑 Gestor (puede ser NULL mientras la ruta es sugerida)
+            // NULL mientras la ruta está sugerida
             $table->foreignId('gestor_id')
                 ->nullable()
                 ->constrained('users')
@@ -58,9 +58,6 @@ return new class extends Migration {
             $table->index('gestor_id');
         });
 
-        // ===============================
-        // TABLA PIVOTE RUTA ↔ EMPRESAS
-        // ===============================
         Schema::create('cs_ruta_empresas', function (Blueprint $table) {
             $table->id();
 

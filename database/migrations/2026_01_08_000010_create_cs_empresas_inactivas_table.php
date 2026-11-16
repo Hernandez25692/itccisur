@@ -15,7 +15,6 @@ return new class extends Migration {
             $table->string('motivo_inactivacion')->nullable();
             $table->foreignId('inactivado_por')->nullable()->constrained('users')->nullOnDelete();
 
-            // snapshot mínimo (puedes ampliar si deseas)
             $table->string('nombre_empresa');
             $table->string('rtn_empresa');
             $table->string('ciudad')->nullable();

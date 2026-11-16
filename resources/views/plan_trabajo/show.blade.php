@@ -1,7 +1,6 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
 
-        <!-- Encabezado del Plan -->
         <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] rounded-2xl p-8 text-white shadow-xl">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div class="flex-1">
@@ -19,7 +18,6 @@
                         </div>
                     </div>
 
-                    <!-- Estado del Plan -->
                     <div class="flex flex-wrap items-center gap-4 mt-6">
                         <div
                             class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold
@@ -59,7 +57,6 @@
                     </div>
                 </div>
 
-                <!-- Acciones del Plan -->
                 <div class="flex flex-wrap gap-3">
                     @role('admin_ti')
                         @if ($plan->estado === 'borrador' || $plan->estado === 'rechazado')
@@ -92,7 +89,6 @@
             </div>
         </div>
 
-        <!-- Descripción General -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
             <div class="flex items-center gap-3 mb-6">
                 <div class="p-3 bg-gradient-to-r from-[#0C1C3C]/10 to-[#1A2A4F]/10 rounded-xl">
@@ -113,7 +109,6 @@
             </div>
         </div>
 
-        <!-- Actividades del Plan -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <div class="p-8">
                 <div class="flex items-center justify-between mb-8">
@@ -183,7 +178,6 @@
                                 @endphp
 
                                 @foreach ($agrupadas as $seccion => $actividades)
-                                    <!-- Encabezado bonito por sección -->
                                     <tr class="bg-[#0C1C3C]/10">
                                         <td colspan="7"
                                             class="px-4 py-3 text-left font-bold text-[#0C1C3C] text-lg tracking-wide">
@@ -198,7 +192,6 @@
                                     @foreach ($actividades as $act)
                                         <tr class="hover:bg-gray-50 transition-colors">
 
-                                            <!-- NUMERACIÓN DINÁMICA -->
                                             <td class="p-4">
                                                 <span
                                                     class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#0C1C3C]/10 text-[#0C1C3C]">
@@ -206,7 +199,6 @@
                                                 </span>
                                             </td>
 
-                                            <!-- ACTIVIDAD -->
                                             <td class="p-4">
                                                 <div>
                                                     <p class="font-medium text-gray-900">{{ $act->actividad }}</p>
@@ -214,7 +206,6 @@
                                                 </div>
                                             </td>
 
-                                            <!-- RESPONSABLE -->
                                             <td class="p-4">
                                                 <div class="flex items-center gap-2">
                                                     <div
@@ -226,7 +217,6 @@
                                                 </div>
                                             </td>
 
-                                            <!-- FECHAS -->
                                             <td class="p-4">
                                                 <div class="text-sm">
                                                     <div class="font-medium text-gray-900">{{ $act->fecha_ejecucion }}
@@ -235,7 +225,6 @@
                                                 </div>
                                             </td>
 
-                                            <!-- ESTADO -->
                                             <td class="p-4">
                                                 <span
                                                     class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
@@ -251,7 +240,6 @@
                                                 </span>
                                             </td>
 
-                                            <!-- AVANCE -->
                                             <td class="p-4">
                                                 <div class="space-y-2 w-32">
                                                     <div class="flex justify-between text-xs">
@@ -268,7 +256,6 @@
                                                 </div>
                                             </td>
 
-                                            <!-- ACCIONES -->
                                             <td class="p-4">
                                                 <a href="{{ route('plan-actividad.show', $act->id) }}"
                                                     class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white text-sm font-medium rounded-xl hover:shadow-md transition-shadow">
@@ -296,7 +283,6 @@
             </div>
         </div>
 
-        <!-- Revisión de Gerencia -->
         @role('gerencia')
             @if ($plan->estado === 'enviado')
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
@@ -312,7 +298,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- Aprobar -->
                         <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
                             <form action="{{ route('plan-trabajo.aprobar', $plan) }}" method="POST">
                                 @csrf
@@ -334,7 +319,6 @@
                             </form>
                         </div>
 
-                        <!-- Rechazar -->
                         <div class="bg-gradient-to-br from-red-50 to-pink-50 border border-red-200 rounded-xl p-6">
                             <form action="{{ route('plan-trabajo.rechazar', $plan) }}" method="POST">
                                 @csrf
@@ -362,7 +346,6 @@
             @endif
         @endrole
 
-        <!-- Comentario de Gerencia -->
         @if ($plan->comentario_gerencia && $plan->estado !== 'enviado')
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
                 <div class="flex items-center gap-3 mb-6">
@@ -383,7 +366,6 @@
             </div>
         @endif
 
-        <!-- Historial de Revisiones -->
         @if ($plan->revisiones->count() > 0)
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
                 <div class="flex items-center gap-3 mb-6">

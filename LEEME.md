@@ -1,82 +1,44 @@
-# CCISUR ITMS — Guía de instalación local
+# CCISUR ITMS
 
-Sistema interno de CCISUR: plan de trabajo y actividades de TI, bitácora, recordatorios, calendario editorial, control de audiencias, GOR (antecedentes registrales), cobranza de socios, RRHH (empleados y vacaciones) y validación de certificados por QR.
+Sistema interno de la Cámara (CCISUR) que manejamos desde TI. Aquí está el plan de trabajo y la bitácora de TI, los recordatorios de vencimientos, el calendario editorial de redes, las audiencias y antecedentes registrales del GOR, la cobranza de socios, las vacaciones de RRHH y la validación de certificados por QR que se conecta con ccisur.org.
 
-**Stack:** Laravel 12 · PHP 8.2 · MySQL · Breeze (login) · Spatie Permission (roles) · Vite + Tailwind + Alpine · DomPDF · QR (endroid / simple-qrcode).
+Está hecho en Laravel 12 con MySQL. En local lo corro con XAMPP.
 
----
+## Lo que hay que tener instalado
 
-## 1. Requisitos en la máquina nueva (Windows)
+- Git
+- XAMPP con PHP 8.2 o más nuevo (de ahí se usa PHP y MySQL)
+- Composer: al instalarlo pide la ruta de PHP, se le pone `C:\xampp\php\php.exe`
+- Node.js LTS
+- VS Code
 
-| Programa | Versión | Descarga |
-|---|---|---|
-| Git | cualquiera reciente | https://git-scm.com/download/win |
-| XAMPP (PHP + MySQL) | PHP **8.2 o superior** | https://www.apachefriends.org |
-| Composer | 2.x | https://getcomposer.org/Composer-Setup.exe |
-| Node.js | LTS (20 o superior) | https://nodejs.org |
-| Visual Studio Code | — | ya instalado |
+En `C:\xampp\php\php.ini` revisar que estas extensiones no estén comentadas con `;`: `gd`, `intl`, `zip`, `fileinfo`, `pdo_mysql`, `mbstring`. La de `gd` es la que más falta hace porque sin ella no salen los QR ni los PDF.
 
-Al instalar Composer, cuando pida la ruta de PHP, selecciona `C:\xampp\php\php.exe`.
+## Levantarlo en otra máquina
 
-### Extensiones de PHP
+Primero abrir XAMPP y darle Start a MySQL. Apache no hace falta.
 
-Abre `C:\xampp\php\php.ini` y verifica que estas líneas **no** empiecen con `;`:
-
-```ini
-extension=fileinfo
-extension=gd
-extension=intl
-extension=mbstring
-extension=pdo_mysql
-extension=zip
-```
-
-Comprueba en una terminal nueva:
+Mejor clonarlo fuera de OneDrive, porque OneDrive se pone a sincronizar `node_modules` y `vendor` y da problemas.
 
 ```powershell
-php -v
-composer -V
-node -v
-npm -v
-git --version
-php -m
-```
-
-`php -m` debe listar `gd`, `intl`, `pdo_mysql`, `zip`, `fileinfo` y `openssl`.
-
----
-
-## 2. Instalación paso a paso
-
-Abre **XAMPP Control Panel** e inicia **MySQL** (Apache no es necesario).
-
-Abre VS Code, después una terminal (**Terminal → New Terminal**, PowerShell) y ejecuta:
-
-```powershell
-# 1. Clonar (mejor en una carpeta fuera de OneDrive, p. ej. C:\proyectos)
-mkdir C:\proyectos -Force
 cd C:\proyectos
 git clone https://github.com/Hernandez25692/itccisur.git ccisur_itms
 cd ccisur_itms
 code .
+```
 
-# 2. Dependencias de PHP y de JavaScript
+Ya dentro de VS Code, en la terminal:
+
+```powershell
 composer install
 npm install
-
-# 3. Archivo de entorno y clave de la aplicación
 copy .env.example .env
 php artisan key:generate
 ```
 
-### 2.1 Configurar `.env`
-
-Abre `.env` en VS Code y reemplaza el bloque de base de datos (en el ejemplo viene comentado con `#`) por:
+En el `.env` que se acaba de crear, la parte de la base viene comentada. Dejarla así:
 
 ```env
-APP_NAME="CCISUR ITMS"
-APP_URL=http://127.0.0.1:8000
-
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -85,150 +47,94 @@ DB_USERNAME=root
 DB_PASSWORD=
 
 ADMIN_EMAIL=admin@gmail.com
-ADMIN_PASSWORD=pon_aqui_una_contraseña_segura
+ADMIN_PASSWORD=
 ```
 
-- `DB_PASSWORD` se deja vacío si el usuario `root` de XAMPP no tiene contraseña.
-- `ADMIN_EMAIL` / `ADMIN_PASSWORD` son las credenciales del primer usuario administrador (`admin_ti`). Si dejas `ADMIN_PASSWORD` vacío, el seeder genera una contraseña aleatoria y la muestra **una sola vez** en la terminal: cópiala.
-- `WORDPRESS_API_KEY` solo hace falta si vas a probar el envío de certificados QR al sitio ccisur.org.
+En `ADMIN_PASSWORD` poner la contraseña que va a tener el usuario administrador. Si se deja vacía, el seeder inventa una y la muestra una sola vez en la terminal; hay que copiarla en ese momento.
 
-### 2.2 Crear la base de datos
+`WORDPRESS_API_KEY` solo se ocupa para probar el envío de certificados a ccisur.org. Para lo demás se puede dejar vacía.
 
-Opción A, desde la terminal:
+Crear la base y cargar todo:
 
 ```powershell
 C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE ccisur_itms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-```
-
-Opción B: entra a http://localhost/phpmyadmin (requiere Apache encendido) y crea la base `ccisur_itms` con cotejamiento `utf8mb4_unicode_ci`.
-
-### 2.3 Tablas, datos iniciales, enlace de archivos y compilación
-
-```powershell
 php artisan migrate --seed
 php artisan storage:link
 npm run build
+php artisan serve
 ```
 
-`migrate --seed` crea todas las tablas y carga:
-- **Roles:** `admin_ti`, `gerencia`, `usuario`, `calendario`, `GOR`, `GOR_Gerencia`, `cobranza`, `rrhh`.
-- **Catálogos de cobranza:** cortes (5, 12, 20, 28), tipos de empresa y rubros.
-- **Usuario administrador** con los datos de `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+Y entrar a http://127.0.0.1:8000 con el `ADMIN_EMAIL` y la contraseña.
 
-### 2.4 Logos
+El `--seed` crea los roles (`admin_ti`, `gerencia`, `usuario`, `calendario`, `GOR`, `GOR_Gerencia`, `cobranza`, `rrhh`), los cortes de cobranza (5, 12, 20 y 28), los rubros y el admin. No hay registro público: los demás usuarios se crean desde el sistema con el admin, en el menú Usuarios.
 
-Los logos vienen en el repositorio, en `storage\app\public\logos\` (`Logo.png`, `logo1.png`, `logo2.png`, `logop.png`). Se ven en el navegador gracias a `php artisan storage:link` (paso 2.3). Si falta ese enlace, el login, el menú y los PDF salen sin logo.
+El `storage:link` es para que se vean los logos. Los logos sí vienen en el repo, en `storage/app/public/logos`.
 
-El resto de `storage\app\public\` (evidencias, adjuntos, comprobantes) sigue fuera de Git.
+## Para trabajar
 
----
-
-## 3. Levantar el sistema
+Si voy a tocar estilos o JavaScript abro dos terminales:
 
 ```powershell
 php artisan serve
 ```
 
-Abre http://127.0.0.1:8000 e inicia sesión con el `ADMIN_EMAIL` y la contraseña del administrador.
-
-### Modo desarrollo (cambios de CSS/JS al instante)
-
-Usa **dos terminales** en VS Code:
-
 ```powershell
-# Terminal 1
-php artisan serve
-
-# Terminal 2
 npm run dev
 ```
 
-> No uses `composer run dev` en Windows: incluye `php artisan pail`, que necesita la extensión `pcntl` (no existe en Windows), y al fallar detiene los demás procesos.
+Si solo toco PHP o Blade basta con `php artisan serve`.
 
-Si solo cambias código PHP o Blade, basta con `php artisan serve` (más un `npm run build` cuando cambien estilos).
+`composer run dev` no funciona en Windows. Trae `php artisan pail`, que no corre en Windows, y al caerse tumba lo demás.
 
----
-
-## 4. Tareas programadas (RRHH)
-
-El sistema acredita vacaciones por aniversario laboral todos los días a las 00:30. En local puedes:
+Después de cada `git pull`:
 
 ```powershell
-# Ejecutarlo a mano cuando lo necesites
-php artisan rrhh:acreditar-vacaciones
-
-# O dejar el programador corriendo en otra terminal
-php artisan schedule:work
+composer install
+npm install
+php artisan migrate
+npm run build
 ```
 
----
+## Vacaciones (RRHH)
 
-## 5. Traer los datos reales (opcional)
+Las vacaciones se acreditan solas por aniversario laboral todos los días a las 00:30. En local no hay nada programado, así que cuando ocupo probarlo lo corro a mano:
 
-Con el clonado solo obtienes el código y una base vacía. Para tener los mismos datos que la máquina original:
+```powershell
+php artisan rrhh:acreditar-vacaciones
+```
 
-**En la máquina original:**
+Se puede correr las veces que sea, no duplica. Los días por año de servicio y la fecha del primer cierre están en `config/rrhh.php`.
+
+## Pasar los datos reales
+
+El repo solo trae el código; la base sale vacía. Si quiero los mismos datos que en la máquina de la oficina, allá saco el respaldo:
 
 ```powershell
 C:\xampp\mysql\bin\mysqldump.exe -u root ccisur_itms > ccisur_itms.sql
 ```
 
-Copia también la carpeta `storage\app\` completa (evidencias, adjuntos y comprobantes; los logos ya vienen con el repositorio).
-
-**En la máquina nueva** (en lugar de `migrate --seed`):
+Y en la otra máquina, en vez del `migrate --seed`:
 
 ```powershell
 C:\xampp\mysql\bin\mysql.exe -u root ccisur_itms -e "source ccisur_itms.sql"
 ```
 
-Pega la carpeta `storage\app\` en el proyecto y ejecuta `php artisan storage:link`.
+Las evidencias, los adjuntos del calendario y los comprobantes del GOR y de RRHH no están en Git, así que hay que copiar a mano toda la carpeta `storage/app`. Lo nuevo se guarda en `storage/app/private`, pero todavía quedan archivos viejos en `storage/app/public`. Para pasarlos a privado está `php artisan archivos:privatizar`.
 
-> El `.sql` y la carpeta `storage` contienen datos personales de socios y empleados: no los subas a Git ni los compartas por canales públicos.
+El `.sql` y esa carpeta tienen datos de socios y empleados, así que no van al repo ni se mandan por WhatsApp.
 
----
+## Cuando algo falla
 
-## 6. Actualizar después de un `git pull`
+- `could not find driver`: falta activar `pdo_mysql` en el `php.ini`. Después de cambiarlo hay que cerrar y abrir la terminal.
+- `SQLSTATE[HY000] [2002]`: MySQL no está encendido en XAMPP.
+- `Vite manifest not found`: falta `npm run build`.
+- No salen los logos: falta `php artisan storage:link`.
+- Cambié algo en el `.env` y no agarra: `php artisan optimize:clear`.
 
-```powershell
-git pull
-composer install
-npm install
-php artisan migrate
-npm run build
-php artisan optimize:clear
-```
-
----
-
-## 7. Problemas comunes
-
-| Síntoma | Solución |
-|---|---|
-| `could not find driver` | Activa `extension=pdo_mysql` en `php.ini` y reinicia la terminal. |
-| `SQLSTATE[HY000] [2002]` (conexión rechazada) | MySQL no está iniciado en XAMPP, o el puerto en `.env` no es 3306. |
-| `Unknown database 'ccisur_itms'` | Falta crear la base (paso 2.2). |
-| `Vite manifest not found` | Ejecuta `npm run build` (o deja `npm run dev` corriendo). |
-| Imágenes o logos rotos | Ejecuta `php artisan storage:link` (paso 2.3). |
-| `No application encryption key` | Ejecuta `php artisan key:generate`. |
-| Composer pide `ext-gd` o `ext-zip` | Activa la extensión en `php.ini`. |
-| Cambié el `.env` y no se nota | `php artisan optimize:clear` |
-| Errores raros de archivos en OneDrive | Mueve el proyecto fuera de OneDrive (p. ej. `C:\proyectos`). |
-
----
-
-## 8. Pruebas
+## Pruebas
 
 ```powershell
 php artisan test
 ```
 
-Usan SQLite en memoria (ver `phpunit.xml`), así que no tocan la base MySQL. Requieren `extension=pdo_sqlite` y `extension=sqlite3` activas en `php.ini`.
-
----
-
-## Extensiones recomendadas de VS Code
-
-- PHP Intelephense (`bmewburn.vscode-intelephense-client`)
-- Laravel Blade Snippets (`onecentlab.laravel-blade`)
-- Tailwind CSS IntelliSense (`bradlc.vscode-tailwindcss`)
-- DotENV (`mikestead.dotenv`)
+Corren con SQLite en memoria, no tocan la base de MySQL. Para eso tienen que estar activas `pdo_sqlite` y `sqlite3` en el `php.ini`.

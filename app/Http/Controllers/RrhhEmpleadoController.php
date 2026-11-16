@@ -42,7 +42,6 @@ class RrhhEmpleadoController extends Controller
     {
         $query = RrhhEmpleado::query()->with(['periodosVacaciones', 'movimientosVacaciones']);
 
-        // 🔍 BUSQUEDA (nombre o identidad)
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('nombre_completo', 'like', '%' . $request->search . '%')
@@ -50,7 +49,6 @@ class RrhhEmpleadoController extends Controller
             });
         }
 
-        // 📌 AREA
         if ($request->filled('area')) {
             $query->where('area', $request->area);
         }
@@ -63,7 +61,6 @@ class RrhhEmpleadoController extends Controller
         ];
         $conteo['todos'] = $conteo['activo'] + $conteo['inactivo'];
 
-        // 📌 ESTADO (por defecto solo activos)
         $estadoFiltro = in_array($request->input('estado'), ['activo', 'inactivo', 'todos'], true)
             ? $request->input('estado')
             : 'activo';

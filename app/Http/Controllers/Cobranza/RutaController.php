@@ -84,7 +84,6 @@ class RutaController extends Controller
                 ]);
         }]);
 
-        // ✅ Inyectar nombre del gestor en el pivote (sin romper relaciones)
         $gestores = DB::table('users')
             ->select('id', 'name')
             ->pluck('name', 'id');
@@ -205,7 +204,6 @@ class RutaController extends Controller
 
         return DB::transaction(function () use ($data) {
 
-            // 1️⃣ Crear la ruta
             $ruta = Ruta::create([
                 'nombre' => 'Ruta sugerida ' . $data['fecha_ruta'],
                 'fecha_ruta' => $data['fecha_ruta'],
@@ -217,14 +215,12 @@ class RutaController extends Controller
                 'creado_por' => Auth::id(),
             ]);
 
-            // 2️⃣ Definir ventana de cobro
             $ventana = (int) $data['ventana_dias_cobro'];
 
             $desde = now()->subDays($ventana);
             $hasta = now()->addDays($ventana);
 
 
-            // 3️⃣ Buscar empresas candidatas
             $empresas = Empresa::query()
                 ->where('estado_empresa', 'activo')
                 ->when($data['solo_con_coordenadas'] ?? true, function ($q) {
@@ -243,7 +239,7 @@ class RutaController extends Controller
 
             // punto base (oficina CCISUR o primera empresa)
             if ($data['punto_base'] === 'oficina') {
-                $baseLat = config('app.ccisur_lat'); // define esto en config/app.php
+                $baseLat = config('app.ccisur_lat');
                 $baseLng = config('app.ccisur_lng');
             } else {
                 $primera = $empresas->first();
@@ -257,7 +253,6 @@ class RutaController extends Controller
                 $this->dist($baseLat, $baseLng, $e->latitud, $e->longitud)
             )->take($max);
 
-            // 4️⃣ Insertar empresas en la ruta
             $orden = 1;
             foreach ($empresas as $empresa) {
                 DB::table('cs_ruta_empresas')->insert([
@@ -298,7 +293,6 @@ class RutaController extends Controller
             return back()->with('error', 'Solo se pueden asignar gestores a rutas sugeridas.');
         }
 
-        // 1️⃣ Obtener gestores de cobranza
         $gestores = \App\Models\User::role('Cobranza')->get();
 
 
@@ -306,14 +300,12 @@ class RutaController extends Controller
             return back()->with('error', 'No hay gestores disponibles.');
         }
 
-        // 2️⃣ Empresas de la ruta
         $empresas = $ruta->empresas()->orderBy('orden')->get();
 
         if ($empresas->isEmpty()) {
             return back()->with('error', 'La ruta no tiene empresas.');
         }
 
-        // 3️⃣ Reparto equitativo (round-robin)
         $totalGestores = $gestores->count();
         $i = 0;
 
@@ -415,12 +407,10 @@ class RutaController extends Controller
     {
         $user = auth()->user();
 
-        // 🔐 Solo admin/gerencia pueden reasignar
         if (!$user->hasRole(['admin_ti', 'gerencia'])) {
             abort(403, 'No autorizado.');
         }
 
-        // Solo permitir cambios mientras NO esté en ruta/finalizada (regla sana)
         if (!in_array($ruta->estado, ['sugerida', 'asignada'])) {
             return back()->with('error', 'No se puede reasignar: la ruta ya está en proceso o finalizada.');
         }
@@ -507,7 +497,6 @@ class RutaController extends Controller
                 ->withPivot('gestor_id', 'estado_visita', 'nota_visita');
         }]);
 
-        // 🔐 SEGURIDAD CORRECTA
         if ($user->hasRole(['admin_ti', 'gerencia'])) {
             // acceso total
         } elseif ($user->hasRole('cobranza')) {
@@ -521,8 +510,7 @@ class RutaController extends Controller
                 abort(403, 'No tienes empresas asignadas en esta ruta.');
             }
 
-            // 👉 Opcional (recomendado):
-            // Filtrar el PDF solo con SUS empresas
+            // El gestor solo ve sus empresas en el PDF
             $ruta->setRelation(
                 'empresas',
                 $ruta->empresas->filter(

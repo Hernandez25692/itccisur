@@ -8,14 +8,11 @@
 
     <title>CCISUR TI – Sistema de Tecnología</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -88,15 +85,12 @@
 <body class="font-sans antialiased bg-gradient-to-b from-slate-50 via-white to-slate-100 text-gray-800">
     <div class="flex h-screen overflow-hidden">
 
-        <!-- Overlay para menú móvil -->
         <div class="sidebar-mobile-overlay" :class="{ 'active': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
 
-        <!-- Sidebar Desktop -->
         <aside
             class="sidebar-desktop lg:w-64 bg-gradient-to-b from-[#0C1C3C] to-[#1A2A4F] shadow-2xl flex flex-col overflow-y-auto"
             :class="{ 'lg:w-20': !sidebarOpen, 'lg:w-64': sidebarOpen }">
 
-            <!-- Logo/Branding -->
             <div class="px-6 py-4 border-b border-blue-900/30 bg-gradient-to-r from-blue-900/40 to-transparent flex-shrink-0"
                 :class="{ 'px-3': !sidebarOpen }">
                 <div class="flex flex-col items-center justify-center space-y-1">
@@ -110,9 +104,7 @@
                 </div>
             </div>
 
-            <!-- Menú de Navegación Desktop -->
             <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                <!-- Sección Principal -->
                 <div class="mb-6">
                     <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
                         :class="{ 'hidden': !sidebarOpen }">Principal</p>
@@ -179,7 +171,6 @@
                     @endrole
 
                     @role('admin_ti|gerencia')
-                        {{-- DASHBOARD TI --}}
                         <a href="{{ route('dashboard.ti') }}"
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
         {{ request()->routeIs('dashboard.ti') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
@@ -196,7 +187,6 @@
                             @endif
                         </a>
 
-                        {{-- REPORTE DE PAGOS --}}
                         <a href="{{ route('cobranza.reportes.pagos') }}"
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
         {{ request()->routeIs('cobranza.reportes.pagos') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
@@ -217,7 +207,6 @@
 
                 </div>
 
-                <!-- Sección Gestión -->
                 <div class="mb-6">
 
 
@@ -237,7 +226,6 @@
                     @endrole
                     @role('GOR|admin_ti|gerencia|GOR_Gerencia')
 
-                        <!-- Gerencia de Operaciones Registrales -->
                         <div class="mb-2">
                             <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
                                 :class="{ 'hidden': !sidebarOpen }">GOR</p>
@@ -257,7 +245,6 @@
                         </div>
                     @endrole
                     @role('GOR_Gerencia|admin_ti|gerencia')
-                        <!-- Control de Audiencias -->
                         <a href="{{ route('audiencias.index') }}"
                             class="flex items-center px-4 py-3 text-blue-100 rounded-lg transition-all duration-200
        {{ request()->routeIs('audiencias.*') ? 'bg-[#C5A049] text-white shadow-lg' : 'hover:bg-blue-900/30' }}"
@@ -278,7 +265,6 @@
                     @endrole
                     @role('admin_ti|rrhh')
 
-                        <!-- Recursos Humanos -->
                         <div class="mb-2">
 
                             <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
@@ -326,7 +312,6 @@
                     @endrole
 
                 </div>
-                <!-- Sección Cobranza -->
                 <div class="mb-6">
 
 
@@ -361,7 +346,6 @@
 
 
 
-                <!-- Sección Control -->
                 <div class="mb-6">
                     @role('admin_ti|gerencia')
                         <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide"
@@ -422,7 +406,6 @@
                 </div>
             </nav>
 
-            <!-- Usuario en Pie de Sidebar -->
             <div class="px-4 py-6 border-t border-blue-900/30 flex-shrink-0" :class="{ 'px-3': !sidebarOpen }">
                 <div class="flex items-center px-4 py-3 bg-blue-900/20 rounded-lg"
                     :class="{ 'justify-center px-2': !sidebarOpen }">
@@ -447,12 +430,10 @@
             </div>
         </aside>
 
-        <!-- Sidebar para móvil -->
         <aside
             class="lg:hidden fixed top-0 left-0 h-full w-80 bg-gradient-to-b from-[#0C1C3C] to-[#1A2A4F] shadow-2xl z-50 overflow-y-auto mobile-menu-container"
             :class="{ 'active': mobileMenuOpen }">
 
-            <!-- Header móvil -->
             <div class="sticky top-0 bg-gradient-to-b from-[#0C1C3C] to-[#1A2A4F] z-10 flex-shrink-0">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-blue-900/30">
                     <div class="flex items-center space-x-3 min-w-0">
@@ -470,7 +451,6 @@
                     </button>
                 </div>
 
-                <!-- Usuario en móvil -->
                 <div class="px-6 py-4 border-b border-blue-900/30">
                     <div class="flex items-center min-w-0">
                         <div
@@ -486,9 +466,7 @@
                 </div>
             </div>
 
-            <!-- Menú de Navegación Móvil -->
             <nav class="px-4 py-6 space-y-1">
-                <!-- Sección Principal -->
                 <div class="mb-6">
                     <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide">Principal</p>
 
@@ -539,7 +517,6 @@
                     @endrole
                 </div>
 
-                <!-- Sección Gestión -->
                 <div class="mb-6">
                     <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide">Gestión</p>
 
@@ -621,7 +598,6 @@
 
                 </div>
 
-                <!-- Sección Control -->
                 <div class="mb-6">
                     <p class="px-4 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wide">Control</p>
                     @role('admin_ti|gerencia')
@@ -647,7 +623,6 @@
                     @endrole
                 </div>
 
-                <!-- Cerrar sesión en móvil -->
                 <div class="mt-8 px-4 border-t border-blue-900/30 pt-6">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -661,25 +636,20 @@
             </nav>
         </aside>
 
-        <!-- Contenedor Principal -->
         <div class="flex-1 min-w-0 flex flex-col overflow-hidden main-container" :class="{ 'lg:ml-20': !sidebarOpen }">
 
-            <!-- Topbar -->
             <header class="bg-white shadow-sm border-b flex-shrink-0">
                 <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-2 sm:gap-4">
-                    <!-- Botón menú móvil -->
                     <button @click="mobileMenuOpen = !mobileMenuOpen"
                         class="lg:hidden text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
 
-                    <!-- Botón menú desktop -->
                     <button @click="sidebarOpen = !sidebarOpen"
                         class="hidden lg:block text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
 
-                    <!-- Título en móvil -->
                     <div class="lg:hidden flex items-center space-x-2 min-w-0">
                         <div class="w-8 h-8 bg-[#C5A049] rounded-lg flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-laptop-code text-white text-sm"></i>
@@ -687,7 +657,6 @@
                         <span class="font-bold text-gray-800 truncate text-sm">CCISUR-TI</span>
                     </div>
 
-                    <!-- Reloj y hora -->
                     <div class="text-sm text-gray-500 flex-shrink-0" x-data="{ time: '' }" x-init="const updateTime = () => {
                         time = new Date().toLocaleString('es-ES', {
                             year: 'numeric',
@@ -709,7 +678,6 @@
                         </div>
                     </div>
 
-                    <!-- Botón cerrar sesión desktop -->
                     <form method="POST" action="{{ route('logout') }}" class="hidden lg:block flex-shrink-0">
                         @csrf
                         <button type="submit"
@@ -719,7 +687,6 @@
                         </button>
                     </form>
 
-                    <!-- Botón cerrar sesión móvil (ícono pequeño) -->
                     <button @click="document.querySelector('#logout-form-mobile').submit()"
                         class="lg:hidden text-gray-600 hover:text-red-600 transition-colors flex-shrink-0">
                         <i class="fas fa-sign-out-alt text-lg"></i>
@@ -730,7 +697,6 @@
                 </div>
             </header>
 
-            <!-- Encabezado Condicional -->
             @isset($header)
                 <div class="px-4 sm:px-6 py-3 sm:py-6 flex-shrink-0">
                     <div class="bg-white shadow-sm rounded-xl p-4 sm:p-6 border border-gray-200">
@@ -744,7 +710,6 @@
                 </div>
             @endisset
 
-            <!-- Contenido Principal -->
             <main class="flex-1 overflow-auto px-4 sm:px-6 py-4 sm:py-6">
                 <div class="bg-white shadow-sm rounded-xl p-4 sm:p-6 lg:p-8 border border-gray-200 min-h-full">
                     <div class="prose prose-sm sm:prose prose-slate max-w-none">
@@ -753,7 +718,6 @@
                 </div>
             </main>
 
-            <!-- Pie de Página -->
             <footer class="bg-white border-t px-4 sm:px-6 py-3 sm:py-4 text-center flex-shrink-0">
                 <div class="text-xs sm:text-sm text-gray-500">
                     &copy; {{ date('Y') }} CCISUR-TI. Todos los derechos reservados.
@@ -768,7 +732,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Detectar clics fuera del menú móvil
             document.addEventListener('click', function(event) {
                 const mobileMenu = document.querySelector('.mobile-menu-container');
                 const overlay = document.querySelector('.sidebar-mobile-overlay');
@@ -781,7 +744,6 @@
                 }
             });
 
-            // Cerrar menú móvil al presionar ESC
             document.addEventListener('keydown', function(event) {
                 if (event.key === 'Escape') {
                     const mobileMenu = document.querySelector('.mobile-menu-container');

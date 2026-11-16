@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <!-- Header del formulario -->
         <div class="mb-8">
             <a href="{{ route('plan-trabajo.show', $plan->id) }}"
                 class="inline-flex items-center gap-2 text-[#0C1C3C] hover:text-[#1A2A4F] font-medium mb-6 group">
@@ -26,9 +25,7 @@
             </div>
         </div>
 
-        <!-- Tarjeta del formulario -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <!-- Encabezado de la tarjeta -->
             <div class="bg-gradient-to-r from-[#C5A049] to-[#D8B96E] px-8 py-6">
                 <div class="flex items-center gap-3">
                     <div class="p-2 bg-white/20 rounded-lg">
@@ -44,11 +41,9 @@
                 </div>
             </div>
 
-            <!-- Formulario -->
             <form action="{{ route('plan-actividad.store', $plan->id) }}" method="POST" class="p-8">
                 @csrf
 
-                <!-- Mensajes de validación -->
                 @if ($errors->any())
                     <div class="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl">
                         <div class="flex items-center gap-3 mb-3">
@@ -76,11 +71,9 @@
                     </div>
                 @endif
 
-                <!-- Grid de campos -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     
 
-                    <!-- Sección -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -119,7 +112,6 @@
                         @enderror
                     </div>
 
-                    <!-- Actividad -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -141,7 +133,6 @@
                         @enderror
                     </div>
 
-                    <!-- Objetivo Específico -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -162,7 +153,6 @@
                         @enderror
                     </div>
 
-                    <!-- Frecuencia -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -183,7 +173,6 @@
                         @enderror
                     </div>
 
-                    <!-- Responsable -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -204,7 +193,6 @@
                         @enderror
                     </div>
 
-                    <!-- Mes previsto -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -249,7 +237,6 @@
                         @enderror
                     </div>
 
-                    <!-- Fecha a ejecutar -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -270,7 +257,6 @@
                         @enderror
                     </div>
 
-                    <!-- Métrica de Éxito -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -291,7 +277,6 @@
                         @enderror
                     </div>
 
-                    <!-- Observaciones -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -313,7 +298,6 @@
                     </div>
                 </div>
 
-                <!-- Botones de acción -->
                 <div
                     class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-200">
                     <div class="text-sm text-gray-500">
@@ -342,7 +326,6 @@
             </form>
         </div>
 
-        <!-- Información de ayuda -->
         <div class="mt-8 bg-gradient-to-r from-[#0C1C3C]/5 to-[#1A2A4F]/5 rounded-2xl p-6 border border-gray-200">
             <h3 class="text-lg font-semibold text-[#0C1C3C] mb-4 flex items-center gap-2">
                 <svg class="w-5 h-5 text-[#C5A049]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -386,16 +369,13 @@
         </div>
     </div>
 
-    <!-- Scripts para mejoras de UX -->
     <script>
-        // Función para limpiar el formulario
         function resetForm() {
             if (confirm('¿Estás seguro de que deseas limpiar todos los campos del formulario?')) {
                 document.querySelector('form').reset();
             }
         }
 
-        // Sugerencias para frecuencia
         const frecuenciaInput = document.querySelector('input[name="frecuencia"]');
         if (frecuenciaInput) {
             frecuenciaInput.addEventListener('focus', function() {
@@ -417,7 +397,6 @@
             });
         }
 
-        // Sugerencias para responsables
         const responsableInput = document.querySelector('input[name="responsable"]');
         if (responsableInput) {
             responsableInput.addEventListener('focus', function() {

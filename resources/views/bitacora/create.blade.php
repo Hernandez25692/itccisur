@@ -186,7 +186,6 @@
             color: var(--gold-primary);
         }
 
-        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -510,7 +509,6 @@
         </div>
     </div>
 
-    <!-- Modal de Error -->
     <div class="modal-overlay" id="modalError">
         <div class="modal-content">
             <div class="modal-icon">⚠️</div>
@@ -555,7 +553,6 @@
             modalError.classList.remove('active');
         }
 
-        // Cerrar modal al hacer clic fuera
         modalError.addEventListener('click', (e) => {
             if (e.target === modalError) {
                 cerrarModal();

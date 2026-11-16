@@ -21,11 +21,6 @@ class CargosGeneratorService
      */
     public function generarCargoSiguiente(Empresa $empresa): Cargo
     {
-        /**
-         * =====================================================
-         * 1️⃣ MESES DEL PERÍODO SEGÚN TIPO DE PAGO
-         * =====================================================
-         */
         $mesesPorPeriodo = match ($empresa->tipo_pago) {
             'mensual'    => 1,
             'bimensual'  => 2,
@@ -35,11 +30,6 @@ class CargosGeneratorService
             default      => 1,
         };
 
-        /**
-         * =====================================================
-         * 2️⃣ ÚLTIMO CARGO VÁLIDO (SIN ANULADOS)
-         * =====================================================
-         */
         $ultimo = $empresa->cargos()
             ->whereIn('estado', ['pendiente', 'pagado'])
             ->orderBy('periodo_fin', 'desc')
@@ -56,20 +46,10 @@ class CargosGeneratorService
             }
         }
 
-        /**
-         * =====================================================
-         * 3️⃣ PERÍODO DEL CARGO
-         * =====================================================
-         */
         $fin = $inicio->copy()
             ->addMonthsNoOverflow($mesesPorPeriodo)
             ->subDay();
 
-        /**
-         * =====================================================
-         * 4️⃣ FECHA DE VENCIMIENTO (DÍA DE CORTE)
-         * =====================================================
-         */
         $empresa->loadMissing('corte');
 
         $diaCorte = (int) ($empresa->corte?->dia_corte ?? 1);
@@ -80,22 +60,10 @@ class CargosGeneratorService
             1
         )->day(min($diaCorte, $fin->daysInMonth));
 
-        /**
-         * =====================================================
-         * 5️⃣ MONTO REAL DEL CARGO
-         * =====================================================
-         * ⚠️ La cuota siempre es MENSUAL
-         */
         $cuotaMensual = (float) ($empresa->cuota_especial ?? $empresa->cuota_base);
 
-        // ✅ TOTAL CORRECTO DEL PERÍODO
         $total = $cuotaMensual * $mesesPorPeriodo;
 
-        /**
-         * =====================================================
-         * 6️⃣ CREAR CARGO
-         * =====================================================
-         */
         return Cargo::create([
             'empresa_id'        => $empresa->id,
             'periodo_inicio'    => $inicio->toDateString(),
@@ -105,7 +73,7 @@ class CargosGeneratorService
             // Referencias monetarias
             'monto_cuota'       => $cuotaMensual, // cuota mensual
             'monto_mora'        => 0,
-            'total'             => $total,        // TOTAL REAL
+            'total'             => $total,
 
             'estado'            => 'pendiente',
             'created_by'        => Auth::id(),

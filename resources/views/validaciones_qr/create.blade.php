@@ -1,7 +1,6 @@
 <x-app-layout>
     <div class="training-premium">
         <div class="container-premium">
-            <!-- Encabezado con estilo -->
             <div class="header-premium">
                 <span class="overline">Gestión de Accesos</span>
                 <h2 class="title-premium">Crear <span class="highlight">Validación QR</span></h2>
@@ -9,7 +8,6 @@
                 <div class="accent-line"></div>
             </div>
 
-            <!-- Tarjeta del formulario (efecto glass) -->
             <div class="form-card">
                 @if ($errors->any())
                     <div class="alert-modern alert-error">
@@ -81,9 +79,7 @@
         </div>
     </div>
 
-    <!-- Estilos modernos (integrados) -->
     <style>
-        /* ----- Mismos estilos base de la sección anterior (adaptados) ----- */
         @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
         .training-premium {
@@ -111,7 +107,6 @@
             padding: 0 2rem;
         }
 
-        /* Encabezado */
         .header-premium {
             text-align: center;
             margin-bottom: 2.5rem;
@@ -162,7 +157,6 @@
             border-radius: 4px;
         }
 
-        /* Tarjeta del formulario */
         .form-card {
             background: var(--card-white);
             border-radius: 32px;
@@ -178,7 +172,6 @@
             transform: translateY(-3px);
         }
 
-        /* Alertas modernas */
         .alert-modern {
             display: flex;
             align-items: flex-start;
@@ -205,7 +198,6 @@
             font-size: 0.85rem;
         }
 
-        /* Formulario */
         .modern-form {
             display: flex;
             flex-direction: column;
@@ -265,7 +257,6 @@
             margin-top: 0.2rem;
         }
 
-        /* Botones */
         .form-buttons {
             display: flex;
             gap: 1rem;
@@ -314,7 +305,6 @@
             transform: translateY(-2px);
         }
 
-        /* Responsive */
         @media (max-width: 640px) {
             .container-premium {
                 padding: 0 1rem;
@@ -352,6 +342,5 @@
         }
     </style>
 
-    <!-- FontAwesome (si no está en tu layout) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </x-app-layout>

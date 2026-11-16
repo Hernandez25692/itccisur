@@ -66,7 +66,6 @@ class BitacoraActividadController extends Controller
             'observaciones' => 'nullable|string',
             'prioridad' => 'required|string|in:baja,media,alta,critica',
 
-            // 🔥 ESTADOS CORRECTOS
             'estado' => 'required|string|in:pendiente,en_proceso,resuelto',
 
             'evidencia' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx',
@@ -136,7 +135,6 @@ class BitacoraActividadController extends Controller
         // Estado solucionado
         $data['solucionado'] = $request->estado === 'resuelto' ? true : false;
 
-        // 🔥🔥 OBLIGATORIO: Recalcular tiempo empleado SI existen ambas horas
         if ($request->hora_inicio && $request->hora_fin) {
             $inicio = strtotime($request->hora_inicio);
             $fin = strtotime($request->hora_fin);

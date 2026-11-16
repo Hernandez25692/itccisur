@@ -220,7 +220,6 @@
 
     <div class="rh">
 
-        {{-- Encabezado --}}
         <header class="rh-head">
             <div class="rh-head-main">
                 <div class="rh-title-row">
@@ -258,7 +257,6 @@
             </div>
         </header>
 
-        {{-- Mensajes --}}
         @if (session('success'))
             <div class="rh-notice is-good" role="status">
                 <span class="rh-notice-text">@include('rrhh.partials.icono', ['i' => 'ok']){{ session('success') }}</span>
@@ -300,7 +298,6 @@
             </div>
         @endif
 
-        {{-- Lo que requiere atención --}}
         <ul class="rh-attn" aria-label="Requieren atención">
             @if ($resumen['debe_salir'] > 0)
                 <li>
@@ -340,7 +337,6 @@
             @endif
         </ul>
 
-        {{-- Filtros --}}
         <form method="GET" class="rh-filters" id="filtros" role="search">
             <input type="hidden" name="anio" value="{{ $anio }}">
 
@@ -390,7 +386,6 @@
             </div>
         </form>
 
-        {{-- Leyenda --}}
         <div class="rh-planilla-top">
             <div class="rh-legend" aria-hidden="true">
                 <span class="rh-legend-item">
@@ -410,7 +405,6 @@
             </div>
         </div>
 
-        {{-- Planilla --}}
         <div class="rh-table-wrap">
             <table class="rh-table rh-planilla">
                 <caption class="sr-only">
@@ -559,7 +553,6 @@
                 campo.addEventListener('change', () => campo.form.requestSubmit());
             });
 
-            // Detalle de cada mes al pasar el cursor
             const tip = document.getElementById('rh-tip');
 
             const mostrar = (celda) => {

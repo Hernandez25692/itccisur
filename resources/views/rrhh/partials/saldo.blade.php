@@ -1,4 +1,3 @@
-{{-- Saldo grande en días y horas: "15 días 5 h" --}}
 @php
     $partes = \App\Services\Rrhh\VacacionesService::partesDias($saldo);
     $horasTexto = \App\Services\Rrhh\VacacionesService::numero($partes['horas']);

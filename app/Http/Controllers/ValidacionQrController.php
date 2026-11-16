@@ -45,7 +45,6 @@ class ValidacionQrController extends Controller
 
         $token = Str::uuid()->toString();
 
-        // 🔹 1. Guardar en tu sistema TI
         $registro = ValidacionQr::create([
             'nombre_formacion' => $request->nombre_formacion,
             'fecha_formacion' => $request->fecha_formacion,
@@ -54,7 +53,6 @@ class ValidacionQrController extends Controller
             'activo' => true,
         ]);
 
-        // 🔥 2. ENVIAR A WORDPRESS
         try {
             Http::post('https://www.ccisur.org/wp-json/ccisur/v1/guardar-certificado', [
                 'token' => $token,

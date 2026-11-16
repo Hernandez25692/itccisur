@@ -13,7 +13,6 @@
             </div>
         @endif
 
-        {{-- FORMULARIO NUEVO RANGO --}}
         <form method="POST" action="{{ route('cobranza.capital-rangos.store') }}"
             class="bg-white rounded-2xl border p-6 space-y-4">
             @csrf
@@ -22,7 +21,6 @@
 
             <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
 
-                {{-- Tipo de empresa --}}
                 <select name="tipo_empresa_id" required class="rounded-xl border-gray-300">
                     <option value="">Tipo de empresa</option>
                     @foreach ($tiposEmpresa as $t)
@@ -48,7 +46,6 @@
             </button>
         </form>
 
-        {{-- TABLA DE RANGOS --}}
         <div class="bg-white rounded-2xl border overflow-hidden">
             <table class="min-w-full text-sm">
                 <thead class="bg-gray-50 text-gray-600">
@@ -112,27 +109,22 @@
 
             inputs.forEach(input => {
 
-                // Formatear mientras escribe
                 input.addEventListener('input', function(e) {
                     let value = this.value.replace(/,/g, '').replace(/[^\d.]/g, '');
 
-                    // Evitar múltiples puntos
                     let parts = value.split('.');
                     if (parts.length > 2) {
                         value = parts[0] + '.' + parts[1];
                     }
 
-                    // Separar enteros y decimales
                     let integer = parts[0];
                     let decimal = parts[1] ? '.' + parts[1] : '';
 
-                    // Formato miles
                     integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
                     this.value = integer + decimal;
                 });
 
-                // Limpiar antes de enviar
                 input.form.addEventListener('submit', function() {
                     inputs.forEach(i => {
                         i.value = i.value.replace(/,/g, '');

@@ -38,7 +38,6 @@
             border: 1px solid rgba(255, 255, 255, 0.9);
         }
 
-        /* Header */
         .detail-header {
             background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
             padding: 2rem 1.5rem;
@@ -81,7 +80,6 @@
             font-size: 0.875rem;
         }
 
-        /* Body */
         .detail-body {
             padding: 1.5rem;
         }
@@ -92,7 +90,6 @@
             }
         }
 
-        /* Info Sections */
         .info-section {
             margin-bottom: 1.5rem;
         }
@@ -137,7 +134,6 @@
             line-height: 1.4;
         }
 
-        /* Divider */
         .section-divider {
             height: 1px;
             background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
@@ -150,7 +146,6 @@
             }
         }
 
-        /* Motivo Section */
         .motivo-section {
             background: #f9fafb;
             border-radius: 10px;
@@ -175,7 +170,6 @@
             white-space: pre-line;
         }
 
-        /* Comprobante */
         .comprobante-section {
             background: #f9fafb;
             border-radius: 10px;
@@ -211,7 +205,6 @@
             text-decoration: none;
         }
 
-        /* Auditoría */
         .auditoria-section {
             background: #f8fafc;
             border-radius: 10px;
@@ -251,7 +244,6 @@
             font-weight: 500;
         }
 
-        /* Actions */
         .detail-actions {
             display: flex;
             flex-direction: column;
@@ -305,7 +297,6 @@
             box-shadow: 0 8px 20px rgba(197, 160, 73, 0.3);
         }
 
-        /* Touch optimizations */
         @media (hover: none) and (pointer: coarse) {
 
             .btn-back,
@@ -319,7 +310,6 @@
             }
         }
 
-        /* Print styles */
         @media print {
             .detail-container {
                 background: white;
@@ -337,7 +327,6 @@
             }
         }
 
-        /* Dark mode support */
         @media (prefers-color-scheme: dark) {
             .detail-card {
                 background: #1f2937;
@@ -370,15 +359,12 @@
     <div class="detail-container">
         <div class="detail-wrapper">
             <div class="detail-card">
-                <!-- Header -->
                 <div class="detail-header">
                     <h1 class="detail-title">Revisión de Antecedente Registral</h1>
                     <p class="detail-subtitle">Centro Asociado del Sur</p>
                 </div>
 
-                <!-- Body -->
                 <div class="detail-body">
-                    <!-- Información Principal -->
                     <div class="info-section">
                         <div class="section-grid">
                             <div class="info-item">
@@ -397,7 +383,6 @@
 
                     <div class="section-divider"></div>
 
-                    <!-- Datos del Solicitante -->
                     <div class="info-section">
                         <div class="section-grid">
                             <div class="info-item">
@@ -429,13 +414,11 @@
 
                     <div class="section-divider"></div>
 
-                    <!-- Motivo -->
                     <div class="motivo-section">
                         <div class="motivo-label">📝 Motivo de la Solicitud</div>
                         <div class="motivo-content">{{ $registro->motivo }}</div>
                     </div>
 
-                    <!-- Comprobante -->
                     @if ($registro->comprobante_path)
                         <div class="comprobante-section">
                             <div class="comprobante-label">📎 Comprobante Adjunto</div>
@@ -447,7 +430,6 @@
                         </div>
                     @endif
 
-                    <!-- Auditoría -->
                     <div class="auditoria-section">
                         <div class="auditoria-title">📊 Registro de Auditoría</div>
 
@@ -470,7 +452,6 @@
                         @endif
                     </div>
 
-                    <!-- Actions -->
                     <div class="detail-actions">
                         <a href="{{ route('gor.antecedentes.index') }}" class="btn-back">
                             ← Volver al listado
@@ -485,7 +466,6 @@
         </div>
     </div>
 
-    <!-- Lightbox para imagen del comprobante -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const comprobanteImage = document.querySelector('.comprobante-image');
@@ -494,7 +474,6 @@
                 comprobanteImage.addEventListener('click', function(e) {
                     e.preventDefault();
 
-                    // Crear modal para vista ampliada
                     const modal = document.createElement('div');
                     modal.style.cssText = `
                         position: fixed;
@@ -522,14 +501,12 @@
                     modal.appendChild(img);
                     document.body.appendChild(modal);
 
-                    // Cerrar modal al hacer clic
                     modal.addEventListener('click', function() {
                         document.body.removeChild(modal);
                     });
                 });
             }
 
-            // Optimizar carga de imágenes para móviles
             const images = document.querySelectorAll('img');
             images.forEach(img => {
                 img.loading = 'lazy';

@@ -22,18 +22,15 @@
         --gold-ink: #8a6a1f;
         --gold-wash: #faf5e8;
 
-        /* Barra de saldo (validada: azul del periodo / dorado de acumuladas) */
         --serie-periodo: #1c5cab;
         --serie-acum: #c5a049;
         --pista: #e4ecf8;
 
-        /* Días tomados por mes: un solo azul, de claro a oscuro */
         --heat-1: #86b6ef;
         --heat-2: #256abf;
         --heat-3: #184f95;
         --heat-4: #0d366b;
 
-        /* Estados: siempre con ícono y texto */
         --good: #0ca30c;
         --good-ink: #006300;
         --warn: #fab219;
@@ -86,7 +83,6 @@
         font-variant-numeric: tabular-nums;
     }
 
-    /* ── Encabezado de página ── */
     .rh-head {
         display: flex;
         flex-wrap: wrap;
@@ -137,7 +133,6 @@
         gap: 0.5rem;
     }
 
-    /* Selector de año: la cifra del año es parte del título */
     .rh-year {
         display: inline-flex;
         align-items: baseline;
@@ -175,7 +170,6 @@
         height: 16px;
     }
 
-    /* ── Botones ── */
     .rh-btn {
         display: inline-flex;
         align-items: center;
@@ -250,7 +244,6 @@
         border-radius: 7px;
     }
 
-    /* ── Avisos ── */
     .rh-notice {
         display: flex;
         flex-wrap: wrap;
@@ -306,7 +299,6 @@
         color: var(--crit-ink);
     }
 
-    /* ── Lo que requiere atención ── */
     .rh-attn {
         display: flex;
         flex-wrap: wrap;
@@ -375,7 +367,6 @@
         color: var(--serie-periodo);
     }
 
-    /* ── Filtros ── */
     .rh-filters {
         display: flex;
         flex-wrap: wrap;
@@ -497,7 +488,6 @@
         text-decoration-color: currentColor;
     }
 
-    /* Selector segmentado (filtros de estado) */
     .rh-seg {
         display: inline-flex;
         padding: 3px;
@@ -535,7 +525,6 @@
         font-variant-numeric: tabular-nums;
     }
 
-    /* ── Tablas ── */
     .rh-table-wrap {
         width: 100%;
         overflow-x: auto;
@@ -617,7 +606,6 @@
         margin: 0 0 0.75rem;
     }
 
-    /* ── Saldo y barra ── */
     .rh-saldo {
         display: flex;
         align-items: baseline;
@@ -676,7 +664,6 @@
         color: var(--ink-3);
     }
 
-    /* ── Etiquetas de estado (ícono + texto) ── */
     .rh-chips {
         display: flex;
         flex-wrap: wrap;
@@ -718,7 +705,6 @@
         color: var(--crit-ink);
     }
 
-    /* Adelantos: es normal tenerlos, se muestran como información */
     .rh-chip.is-info {
         background: #e8f0fb;
         color: #1c4f8f;
@@ -749,7 +735,6 @@
         background: var(--rule-2);
     }
 
-    /* ── Leyenda ── */
     .rh-legend {
         display: flex;
         flex-wrap: wrap;
@@ -817,7 +802,6 @@
         color: #fff;
     }
 
-    /* ── Tooltip ── */
     .rh-tip {
         position: fixed;
         z-index: 80;
@@ -841,7 +825,6 @@
         display: none;
     }
 
-    /* ── Diálogo de confirmación ── */
     .rh-dialog {
         border: none;
         border-radius: 12px;

@@ -8,7 +8,7 @@ return new class extends Migration {
 
     public function up(): void
     {
-        // 🟢 ESCENARIO 1: base nueva (servidor)
+        // Base nueva
         if (!Schema::hasTable('cs_capital_rangos')) {
 
             Schema::create('cs_capital_rangos', function (Blueprint $table) {
@@ -29,7 +29,7 @@ return new class extends Migration {
             return;
         }
 
-        // 🟡 ESCENARIO 2: base existente (local)
+        // Base que ya tenía la tabla, sin tipo_empresa_id
         if (!Schema::hasColumn('cs_capital_rangos', 'tipo_empresa_id')) {
 
             Schema::table('cs_capital_rangos', function (Blueprint $table) {

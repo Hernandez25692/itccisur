@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="max-w-4xl mx-auto py-8">
-        <!-- Header del formulario -->
         <div class="mb-8">
             <a href="{{ route('control.index') }}" 
                class="inline-flex items-center gap-2 text-[#0C1C3C] hover:text-[#1A2A4F] font-medium mb-4 group">
@@ -23,9 +22,7 @@
             </div>
         </div>
 
-        <!-- Tarjeta del formulario -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <!-- Encabezado de la tarjeta -->
             <div class="bg-gradient-to-r from-[#C5A049] to-[#D8B96E] px-8 py-6">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -40,7 +37,6 @@
                         </div>
                     </div>
                     
-                    <!-- Indicador de progreso -->
                     <div class="text-right">
                         <div class="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl">
                             <svg class="w-4 h-4 text-[#0C1C3C] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,11 +48,9 @@
                 </div>
             </div>
 
-            <!-- Formulario -->
             <form method="POST" action="{{ route('control.store') }}" class="p-8" id="nuevoRegistroForm">
                 @csrf
 
-                <!-- Mensajes de validación -->
                 @if($errors->any())
                     <div class="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl">
                         <div class="flex items-center gap-3 mb-3">
@@ -80,9 +74,7 @@
                     </div>
                 @endif
 
-                <!-- Grid de 2 columnas para campos principales -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <!-- Actividad -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -103,7 +95,6 @@
                         <p class="mt-2 text-xs text-gray-500">Nombre descriptivo de la actividad o servicio</p>
                     </div>
 
-                    <!-- Tipo -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -130,7 +121,6 @@
                     </div>
                 </div>
 
-                <!-- Descripción -->
                 <div class="mb-8">
                     <label class="block text-sm font-semibold text-gray-900 mb-3">
                         <span class="flex items-center gap-2">
@@ -150,9 +140,7 @@
                     @enderror
                 </div>
 
-                <!-- Grid para fechas -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <!-- Fecha de Ejecución -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -175,7 +163,6 @@
                         <p class="mt-2 text-xs text-gray-500">Fecha de pago, renovación o implementación</p>
                     </div>
 
-                    <!-- Fecha de Vencimiento -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -198,12 +185,10 @@
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                         <div class="mt-2 text-sm text-gray-500" id="dias-restantes">
-                            <!-- Calculado dinámicamente por JavaScript -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Configuración de Recordatorio -->
                 <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-8">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                         <svg class="w-5 h-5 text-[#C5A049]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,7 +198,6 @@
                     </h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Días de recordatorio -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-900 mb-3">
                                 <span class="flex items-center gap-2">
@@ -254,9 +238,7 @@
                             </div>
                         </div>
 
-                        <!-- Opciones adicionales -->
                         <div class="space-y-6">
-                            <!-- Notificación automática -->
                             <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200">
                                 <div class="flex items-center gap-3">
                                     <div class="p-2 bg-blue-50 rounded-lg">
@@ -279,7 +261,6 @@
                                 </label>
                             </div>
 
-                            <!-- Estado inicial -->
                             <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 opacity-50 cursor-not-allowed">
                                 <div class="flex items-center gap-3">
                                     <div class="p-2 bg-gray-100 rounded-lg">
@@ -298,7 +279,6 @@
                     </div>
                 </div>
 
-                <!-- Botones de acción -->
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-200">
                     <div class="text-sm text-gray-500 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +305,6 @@
             </form>
         </div>
 
-        <!-- Información de ayuda -->
         <div class="mt-8 bg-gradient-to-r from-[#0C1C3C]/5 to-[#1A2A4F]/5 rounded-2xl p-6 border border-gray-200">
             <h3 class="text-lg font-semibold text-[#0C1C3C] mb-4 flex items-center gap-2">
                 <svg class="w-5 h-5 text-[#C5A049]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,7 +341,6 @@
         </div>
     </div>
 
-    <!-- Script para mejoras de UX -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const fechaVencimiento = document.querySelector('.fecha-vencimiento');
@@ -370,23 +348,19 @@
             const diasRestantes = document.getElementById('dias-restantes');
             const sliderProgress = document.getElementById('slider-progress');
             
-            // Configurar fecha mínima como hoy
             const hoy = new Date().toISOString().split('T')[0];
             fechaVencimiento.min = hoy;
             
-            // Calcular días restantes al cambiar fecha de vencimiento
             if (fechaVencimiento) {
                 fechaVencimiento.addEventListener('change', function() {
                     calcularDiasRestantes();
                 });
                 
-                // Calcular inicialmente si hay valor
                 if (fechaVencimiento.value) {
                     calcularDiasRestantes();
                 }
             }
             
-            // Actualizar barra de progreso para días de recordatorio
             if (diasRecordatorio) {
                 diasRecordatorio.addEventListener('input', function() {
                     actualizarProgreso();
@@ -440,7 +414,6 @@
             }
         });
         
-        // Función para establecer días de recordatorio rápidamente
         function setRecordatorio(dias) {
             const input = document.querySelector('.dias-recordatorio');
             if (input) {
@@ -449,7 +422,6 @@
             }
         }
         
-        // Función para limpiar el formulario
         function resetForm() {
             if (confirm('¿Estás seguro de que deseas limpiar todos los campos del formulario?')) {
                 document.getElementById('nuevoRegistroForm').reset();
@@ -458,7 +430,6 @@
             }
         }
         
-        // Validación adicional antes de enviar
         document.getElementById('nuevoRegistroForm').addEventListener('submit', function(e) {
             const fechaVencimiento = document.querySelector('.fecha-vencimiento');
             if (fechaVencimiento && fechaVencimiento.value) {

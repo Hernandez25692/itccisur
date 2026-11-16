@@ -1,9 +1,7 @@
 <x-app-layout>
     <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         
-        <!-- Tarjeta Principal -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <!-- Encabezado -->
             <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] px-8 py-6 text-white">
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div class="flex-1">
@@ -22,9 +20,7 @@
                             </div>
                         </div>
                         
-                        <!-- Badges de Estado y Prioridad -->
                         <div class="flex flex-wrap items-center gap-3">
-                            <!-- Prioridad -->
                             <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold
                                 @if($actividad->prioridad == 'critica') bg-red-100 text-red-800 border border-red-200
                                 @elseif($actividad->prioridad == 'alta') bg-red-50 text-red-700 border border-red-100
@@ -42,7 +38,6 @@
                                 {{ ucfirst($actividad->prioridad) }}
                             </span>
                             
-                            <!-- Estado -->
                             <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold
                                 @if($actividad->estado == 'resuelto') bg-green-100 text-green-800 border border-green-200
                                 @elseif($actividad->estado == 'en_proceso') bg-blue-100 text-blue-800 border border-blue-200
@@ -61,7 +56,6 @@
                         </div>
                     </div>
                     
-                    <!-- Botón Editar -->
                     <a href="{{ route('bitacora.edit', $actividad->id) }}"
                        class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold rounded-xl hover:shadow-lg transition-all duration-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,11 +66,8 @@
                 </div>
             </div>
 
-            <!-- Contenido Principal -->
             <div class="p-8">
-                <!-- Grid de Información Principal -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <!-- Fecha -->
                     <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="p-2 bg-[#0C1C3C]/5 rounded-lg">
@@ -89,7 +80,6 @@
                         <p class="text-lg text-gray-800">{{ $actividad->fecha->format('d/m/Y') }}</p>
                     </div>
 
-                    <!-- Ubicación -->
                     <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="p-2 bg-[#0C1C3C]/5 rounded-lg">
@@ -103,7 +93,6 @@
                         <p class="text-lg text-gray-800">{{ $actividad->ubicacion }}</p>
                     </div>
 
-                    <!-- Equipo Afectado -->
                     <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="p-2 bg-[#0C1C3C]/5 rounded-lg">
@@ -116,7 +105,6 @@
                         <p class="text-lg text-gray-800">{{ $actividad->equipo_afectado }}</p>
                     </div>
 
-                    <!-- Tipo de Falla -->
                     <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="p-2 bg-[#0C1C3C]/5 rounded-lg">
@@ -129,9 +117,7 @@
                         <p class="text-lg text-gray-800">{{ $actividad->tipo_falla }}</p>
                     </div>
 
-                    <!-- Horario -->
                     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Hora Inicio -->
                         <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                             <div class="flex items-center gap-3 mb-2">
                                 <div class="p-2 bg-blue-50 rounded-lg">
@@ -146,7 +132,6 @@
                             </p>
                         </div>
 
-                        <!-- Hora Fin -->
                         <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                             <div class="flex items-center gap-3 mb-2">
                                 <div class="p-2 bg-green-50 rounded-lg">
@@ -163,7 +148,6 @@
                     </div>
                 </div>
 
-                <!-- Descripción -->
                 @if($actividad->descripcion)
                     <div class="mb-8">
                         <div class="flex items-center gap-3 mb-4">
@@ -180,7 +164,6 @@
                     </div>
                 @endif
 
-                <!-- Solución Aplicada -->
                 @if($actividad->solucion_aplicada)
                     <div class="mb-8">
                         <div class="flex items-center gap-3 mb-4">
@@ -197,7 +180,6 @@
                     </div>
                 @endif
 
-                <!-- Tiempo Empleado -->
                 @if($actividad->tiempo_empleado_minutos)
                     <div class="mb-8">
                         <div class="flex items-center gap-3 mb-4">
@@ -217,7 +199,6 @@
                     </div>
                 @endif
 
-                <!-- Evidencia -->
                 @if($actividad->evidencia)
                     <div class="mb-8">
                         <div class="flex items-center gap-3 mb-4">
@@ -255,7 +236,6 @@
                     </div>
                 @endif
 
-                <!-- Acciones -->
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-200">
                     <a href="{{ route('bitacora.index') }}"
                        class="inline-flex items-center gap-2 px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors duration-200">

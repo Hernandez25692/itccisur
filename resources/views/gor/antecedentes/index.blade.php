@@ -30,7 +30,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .page-header {
             display: flex;
             flex-direction: column;
@@ -84,7 +83,6 @@
             box-shadow: 0 8px 20px rgba(197, 160, 73, 0.3);
         }
 
-        /* Filtros */
         .filters-container {
             background: white;
             border-radius: 12px;
@@ -184,7 +182,6 @@
             box-shadow: 0 8px 20px rgba(26, 42, 79, 0.3);
         }
 
-        /* Listado */
         .registros-list {
             display: flex;
             flex-direction: column;
@@ -356,7 +353,6 @@
             border-color: var(--gold-primary);
         }
 
-        /* Paginación */
         .pagination-container {
             margin-top: 2rem;
             padding-top: 2rem;
@@ -368,7 +364,6 @@
             justify-content: center;
         }
 
-        /* Empty state */
         .empty-state {
             background: white;
             border-radius: 12px;
@@ -396,7 +391,6 @@
             margin-bottom: 1.5rem;
         }
 
-        /* Safari specific fixes */
         @media not all and (min-resolution:.001dpcm) {
             @supports (-webkit-appearance:none) {
 
@@ -407,7 +401,6 @@
             }
         }
 
-        /* Firefox scrollbar */
         @-moz-document url-prefix() {
             .registro-card {
                 scrollbar-width: thin;
@@ -415,7 +408,6 @@
             }
         }
 
-        /* Touch device optimizations */
         @media (hover: none) and (pointer: coarse) {
 
             .btn-new,
@@ -428,14 +420,12 @@
             .filter-input,
             .filter-select {
                 font-size: 16px;
-                /* Prevents iOS zoom */
             }
         }
     </style>
 
     <div class="antecedentes-container">
         <div class="antecedentes-wrapper">
-            <!-- ENCABEZADO -->
             <div class="page-header">
                 <div>
                     <h1 class="page-title">Revisión de Antecedentes Registrales</h1>
@@ -447,10 +437,8 @@
                 </a>
             </div>
 
-            <!-- 🔎 FILTROS -->
             <form method="GET" class="filters-container">
                 <div class="filters-grid">
-                    <!-- Circunscripción -->
                     <select name="circunscripcion" class="filter-select">
                         <option value="">Todas las circunscripciones</option>
                         <option value="Nacaome - Valle"
@@ -463,15 +451,12 @@
                         </option>
                     </select>
 
-                    <!-- Fecha desde -->
                     <input type="date" name="fecha_desde" value="{{ request('fecha_desde') }}" class="filter-input"
                         placeholder="Desde">
 
-                    <!-- Fecha hasta -->
                     <input type="date" name="fecha_hasta" value="{{ request('fecha_hasta') }}" class="filter-input"
                         placeholder="Hasta">
 
-                    <!-- Texto libre -->
                     <input type="text" name="buscar" value="{{ request('buscar') }}" class="filter-input"
                         placeholder="Nombre o Exequátur">
                 </div>
@@ -487,7 +472,6 @@
                 </div>
             </form>
 
-            <!-- LISTADO -->
             @if ($registros->count() > 0)
                 <div class="registros-list">
                     @foreach ($registros as $registro)
@@ -554,14 +538,12 @@
                     @endforeach
                 </div>
 
-                <!-- Paginación -->
                 <div class="pagination-container">
                     <div class="pagination-wrapper">
                         {{ $registros->links() }}
                     </div>
                 </div>
             @else
-                <!-- Estado vacío -->
                 <div class="empty-state">
                     <div class="empty-icon">📄</div>
                     <h3 class="empty-title">No se encontraron registros</h3>

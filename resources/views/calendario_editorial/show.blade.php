@@ -2,7 +2,6 @@
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <!-- Header con navegación -->
             <div class="mb-8">
                 <div class="flex items-center gap-2 mb-3">
                     <a href="{{ route('calendario-editorial.index') }}"
@@ -33,7 +32,6 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <!-- Botón Editar -->
                         <a href="{{ route('calendario-editorial.edit', $calendarioEditorial) }}"
                             class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-blue-300 text-blue-700 font-medium rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 shadow-sm hover:shadow">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -45,7 +43,6 @@
                             Editar publicación
                         </a>
 
-                        <!-- Botón Publicar (solo admin_ti y si no está publicado) -->
                         @role('admin_ti')
                             @if ($calendarioEditorial->estado !== 'publicado')
                                 <form method="POST"
@@ -68,10 +65,8 @@
                 </div>
             </div>
 
-            <!-- Tarjeta principal -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
-                <!-- Header de la tarjeta con estado -->
                 <div class="px-8 py-6 border-b border-gray-100 bg-gray-50">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
@@ -119,7 +114,6 @@
                             </p>
                         </div>
 
-                        <!-- Indicador de publicación programada -->
                         <div class="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
                             <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -140,10 +134,8 @@
                     </div>
                 </div>
 
-                <!-- Contenido organizado en secciones -->
                 <div class="divide-y divide-gray-100">
 
-                    <!-- Sección 1: Programación -->
                     <div class="p-8">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="p-2 bg-blue-50 rounded-lg">
@@ -158,7 +150,6 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Semana -->
                             <div class="space-y-2">
                                 <div class="text-sm font-medium text-gray-500 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -174,7 +165,6 @@
                                 </div>
                             </div>
 
-                            <!-- Día -->
                             <div class="space-y-2">
                                 <div class="text-sm font-medium text-gray-500 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -189,7 +179,6 @@
                                 </div>
                             </div>
 
-                            <!-- Hora -->
                             <div class="space-y-2">
                                 <div class="text-sm font-medium text-gray-500 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -210,7 +199,6 @@
                         </div>
                     </div>
 
-                    <!-- Sección 2: Contenido -->
                     <div class="p-8">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="p-2 bg-blue-50 rounded-lg">
@@ -225,7 +213,6 @@
                         </div>
 
                         <div class="space-y-8">
-                            <!-- Tema -->
                             <div class="space-y-3">
                                 <div class="text-sm font-medium text-gray-500 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -243,7 +230,6 @@
                                 </div>
                             </div>
 
-                            <!-- Encabezado -->
                             <div class="space-y-3">
                                 <div class="text-sm font-medium text-gray-500 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -261,7 +247,6 @@
                                 </div>
                             </div>
 
-                            <!-- Área -->
                             @if ($calendarioEditorial->area)
                                 <div class="space-y-3">
                                     <div class="text-sm font-medium text-gray-500 flex items-center gap-2">
@@ -288,10 +273,8 @@
                         </div>
                     </div>
 
-                    <!-- Sección 3: Formatos y Redes -->
                     <div class="p-8">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <!-- Tipo de contenido -->
                             <div>
                                 <div class="flex items-center gap-3 mb-6">
                                     <div class="p-2 bg-blue-50 rounded-lg">
@@ -362,7 +345,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Redes Sociales -->
                                 <div>
                                     <div class="flex items-center gap-3 mb-6">
                                         <div class="p-2 bg-blue-50 rounded-lg">
@@ -420,10 +402,8 @@
                                 </div>
                             </div>
 
-                            <!-- Sección 4: Enlaces y adjuntos -->
                             <div class="p-8">
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                    <!-- Enlace publicado -->
                                     <div>
                                         <div class="flex items-center gap-3 mb-6">
                                             <div class="p-2 bg-blue-50 rounded-lg">
@@ -464,7 +444,6 @@
                                         @endif
                                     </div>
 
-                                    <!-- Archivos adjuntos -->
                                     @if ($calendarioEditorial->adjunto_path || $calendarioEditorial->adjuntos->count())
                                         <div class="mt-8">
                                             <div class="flex items-center gap-3 mb-6">
@@ -481,7 +460,6 @@
                                             </div>
 
                                             <div class="space-y-3">
-                                                {{-- Adjuntos múltiples --}}
                                                 @foreach ($calendarioEditorial->adjuntos as $adjunto)
                                                     <div class="group">
                                                         <button onclick="mostrarPreview('{{ route('calendario-editorial.adjuntos.show', $adjunto) }}', '{{ $adjunto->mime_type }}')"
@@ -489,7 +467,6 @@
                                                             border border-gray-200 hover:bg-gray-100 hover:border-gray-300
                                                             transition-all duration-200">
 
-                                                            {{-- Icono según tipo --}}
                                                             @php
                                                                 $icono = str_contains($adjunto->mime_type, 'image')
                                                                     ? '🖼️'
@@ -525,7 +502,6 @@
                                         </div>
                                     @endif
 
-                                    <!-- Modal de vista previa -->
                                     <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                                         <div class="bg-white rounded-xl shadow-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
                                             <div class="sticky top-0 flex items-center justify-between p-4 border-b border-gray-200 bg-white">
@@ -538,7 +514,6 @@
                                             </div>
                                             <div class="p-6">
                                                 <div id="previewContent" class="flex items-center justify-center">
-                                                    <!-- Se llena dinámicamente -->
                                                 </div>
                                             </div>
                                         </div>
@@ -573,11 +548,9 @@
 
                                 </div>
 
-                                <!-- Etiquetas y comentarios -->
                                 @if ($calendarioEditorial->etiquetas || $calendarioEditorial->comentario)
                                     <div class="mt-8 pt-8 border-t border-gray-200">
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                            <!-- Etiquetas -->
                                             @if ($calendarioEditorial->etiquetas)
                                                 <div class="space-y-3">
                                                     <div class="text-sm font-medium text-gray-500">Etiquetas (páginas a
@@ -593,7 +566,6 @@
                                                 </div>
                                             @endif
 
-                                            <!-- Comentarios -->
                                             @if ($calendarioEditorial->comentario)
                                                 <div class="space-y-3">
                                                     <div class="text-sm font-medium text-gray-500">Comentarios adicionales
@@ -609,7 +581,6 @@
                                 @endif
                             </div>
 
-                            <!-- Sección 5: Auditoría -->
                             <div class="p-8 bg-gray-50">
                                 <div class="flex items-center gap-3 mb-6">
                                     <div class="p-2 bg-gray-100 rounded-lg">
@@ -686,7 +657,6 @@
                         </div>
                     </div>
 
-                    <!-- Nota informativa -->
                     <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <div class="flex items-start gap-3">
                             <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor"
@@ -705,7 +675,6 @@
                 </div>
             </div>
 
-            <!-- SweetAlert2 para confirmación de publicación -->
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             <script>
                 function confirmarPublicacion() {

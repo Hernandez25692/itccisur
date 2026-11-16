@@ -33,15 +33,12 @@ class PlanActividadController extends Controller
             'observaciones' => 'nullable|string',
         ]);
 
-        // 1️⃣ Obtener el último código dentro del plan
         $ultimo = PlanActividad::where('plan_trabajo_id', $plan->id)
             ->orderBy('codigo', 'DESC')
             ->first();
 
-        // 2️⃣ Si no existe ninguno, empezamos en 1
         $nuevoCodigo = $ultimo ? intval($ultimo->codigo) + 1 : 1;
 
-        // 3️⃣ Crear la actividad
         $plan->actividades()->create([
             'codigo' => $nuevoCodigo,
             'seccion' => $request->seccion,

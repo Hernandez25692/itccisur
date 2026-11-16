@@ -2,7 +2,6 @@
     <div class="min-h-screen bg-slate-50 py-8">
         <div class="max-w-7xl mx-auto px-4 space-y-8">
 
-            {{-- ================= HEADER EJECUTIVO ================= --}}
             <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-900 to-blue-800 p-8 shadow-xl">
                 <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,#fbbf24,transparent)]">
                 </div>
@@ -33,7 +32,6 @@
                 </div>
             </div>
 
-            {{-- ================= FILTROS ================= --}}
             <div class="bg-white rounded-2xl border shadow-sm p-6">
                 <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                     <div>
@@ -78,7 +76,6 @@
                 </form>
             </div>
 
-            {{-- ================= KPIs ================= --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div class="bg-white rounded-2xl border p-5">
                     <p class="text-sm text-gray-500">Total pagos</p>
@@ -107,7 +104,6 @@
                 </div>
             </div>
 
-            {{-- ================= TABLA DETALLADA ================= --}}
             <div class="bg-white rounded-2xl border overflow-hidden shadow-sm">
                 <div class="p-5 border-b flex items-center justify-between">
                     <h2 class="font-bold text-gray-900">Pagos registrados</h2>
@@ -167,7 +163,6 @@
                     </table>
                 </div>
 
-                {{-- PAGINACIÓN --}}
                 <div class="p-4 border-t">
                     {{ $pagos->links() }}
                 </div>

@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8">
-        <!-- Header Principal -->
         <div class="mb-8">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
@@ -20,7 +19,6 @@
             </div>
         </div>
 
-        <!-- Mensajes de éxito -->
         @if (session('success'))
             <div
                 class="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl shadow-sm">
@@ -38,7 +36,6 @@
             </div>
         @endif
 
-        <!-- Panel de Estadísticas -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-gradient-to-br from-[#0C1C3C] to-[#1A2A4F] text-white p-6 rounded-2xl shadow-lg">
                 <div class="flex items-center justify-between">
@@ -109,7 +106,6 @@
             </div>
         </div>
 
-        <!-- Alertas de Vencimiento -->
         @if ($alertas->count() > 0)
             <div
                 class="mb-8 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-2xl shadow-lg overflow-hidden">
@@ -165,7 +161,6 @@
 
         
 
-        <!-- Tabla Principal -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -190,7 +185,6 @@
                             @endphp
 
                             <tr class="hover:bg-gray-50/80 transition-colors duration-200">
-                                <!-- Actividad -->
                                 <td class="p-4">
                                     <div class="flex items-center gap-3">
                                         <div
@@ -233,7 +227,6 @@
                                     </div>
                                 </td>
 
-                                <!-- Tipo -->
                                 <td class="p-4">
                                     <span
                                         class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
@@ -245,7 +238,6 @@
                                     </span>
                                 </td>
 
-                                <!-- Fecha Ejecución -->
                                 <td class="p-4">
                                     @if ($item->fecha_ejecucion)
                                         <div class="text-gray-700">
@@ -257,7 +249,6 @@
                                     @endif
                                 </td>
 
-                                <!-- Fecha Vencimiento -->
                                 <td class="p-4">
                                     <div class="flex flex-col">
                                         <div class="font-medium text-gray-900">{{ $vence->format('d/m/Y') }}</div>
@@ -272,7 +263,6 @@
                                     </div>
                                 </td>
 
-                                <!-- Estado -->
                                 <td class="p-4">
                                     <div class="flex justify-center">
                                         @if ($item->atendido)
@@ -342,7 +332,6 @@
                                     </div>
                                 </td>
 
-                                <!-- Acciones -->
                                 <td class="p-4">
                                     <div class="flex items-center justify-center gap-2">
                                         <a href="{{ route('control.edit', $item->id) }}"
@@ -383,7 +372,6 @@
                 </table>
             </div>
 
-            <!-- Estado vacío -->
             @if ($recordatorios->isEmpty())
                 <div class="py-12 text-center">
                     <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
@@ -410,7 +398,6 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmación de Eliminación -->
     <div id="confirmDeleteModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
             <h2 class="text-lg font-bold mb-4">Confirmación de Eliminación</h2>

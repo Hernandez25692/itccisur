@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="max-w-4xl mx-auto py-8">
-        <!-- Header del formulario -->
         <div class="mb-8">
             <a href="{{ route('control.index') }}"
                 class="inline-flex items-center gap-2 text-[#0C1C3C] hover:text-[#1A2A4F] font-medium mb-4 group">
@@ -28,9 +27,7 @@
             </div>
         </div>
 
-        <!-- Tarjeta del formulario -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <!-- Encabezado de la tarjeta -->
             <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] px-8 py-6">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -48,7 +45,6 @@
                         </div>
                     </div>
 
-                    <!-- Estado actual -->
                     @php
                         $hoy = now();
                         $vence = \Carbon\Carbon::parse($recordatorio->fecha_vencimiento);
@@ -79,14 +75,11 @@
                 </div>
             </div>
 
-            <!-- Formulario -->
             <form method="POST" action="{{ route('control.update', $recordatorio->id) }}" class="p-8">
                 @csrf
                 @method('PUT')
 
-                <!-- Grid de 2 columnas para campos principales -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <!-- Actividad -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -102,7 +95,6 @@
                         @enderror
                     </div>
 
-                    <!-- Tipo -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">Tipo</label>
                         <select name="tipo"
@@ -130,7 +122,6 @@
                     </div>
                 </div>
 
-                <!-- Descripción -->
                 <div class="mb-8">
                     <label class="block text-sm font-semibold text-gray-900 mb-3">
                         <span class="flex items-center gap-2">
@@ -149,9 +140,7 @@
                     @enderror
                 </div>
 
-                <!-- Grid para fechas -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <!-- Fecha de Ejecución -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -177,7 +166,6 @@
                         @endif
                     </div>
 
-                    <!-- Fecha de Vencimiento -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -203,7 +191,6 @@
                     </div>
                 </div>
 
-                <!-- Configuración de Recordatorio -->
                 <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-8">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                         <svg class="w-5 h-5 text-[#0C1C3C]" fill="none" stroke="currentColor"
@@ -216,7 +203,6 @@
                     </h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Días de recordatorio -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-900 mb-3">
                                 <span class="flex items-center gap-2">
@@ -239,9 +225,7 @@
                             @enderror
                         </div>
 
-                        <!-- Checkboxes -->
                         <div class="space-y-6">
-                            <!-- Notificar -->
                             <div
                                 class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200">
                                 <div class="flex items-center gap-3">
@@ -267,7 +251,6 @@
                                 </label>
                             </div>
 
-                            <!-- Atendido -->
                             <div
                                 class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200">
                                 <div class="flex items-center gap-3">
@@ -295,7 +278,6 @@
                     </div>
                 </div>
 
-                <!-- Botones de acción -->
                 <div
                     class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-200">
                     <div class="text-sm text-gray-500">
@@ -323,7 +305,6 @@
             </form>
         </div>
 
-        <!-- Información adicional -->
         <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4">
                 <div class="flex items-center gap-3">

@@ -55,10 +55,6 @@ class CalendarioEditorial extends Model
         'estado' => 'pendiente',
     ];
 
-    /* =========================
-     |  RELACIONES
-     ========================= */
-
     public function creador()
     {
         return $this->belongsTo(User::class, 'creado_por');
@@ -68,10 +64,6 @@ class CalendarioEditorial extends Model
     {
         return $this->belongsTo(User::class, 'publicado_por');
     }
-
-    /* =========================
-     |  SCOPES (para filtros)
-     ========================= */
 
     public function scopeSemana($query, $semana)
     {
@@ -101,18 +93,11 @@ class CalendarioEditorial extends Model
         }
     }
 
-    /* =========================
-     |  HELPERS
-     ========================= */
-
     public function esPublicado(): bool
     {
         return $this->estado === 'publicado';
     }
 
-    /* =========================
- |  ADJUNTOS MÚLTIPLES
- ========================= */
     public function adjuntos()
     {
         return $this->hasMany(

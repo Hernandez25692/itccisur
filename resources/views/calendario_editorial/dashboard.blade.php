@@ -15,7 +15,6 @@
 
             <div class="flex flex-col sm:flex-row gap-4 items-center">
 
-                {{-- PERIODO SELECCIONADO --}}
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                     <div class="flex items-center gap-3">
                         <div class="bg-blue-500 p-2 rounded-lg flex-shrink-0">
@@ -36,11 +35,9 @@
                     </div>
                 </div>
 
-                {{-- FORM FILTRO --}}
                 <form method="GET"
                     class="flex flex-wrap gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/20 items-end">
 
-                    {{-- MES --}}
                     <div class="flex flex-col">
                         <label class="text-xs text-blue-200 mb-1 font-semibold">Mes</label>
                         <select name="mes"
@@ -55,7 +52,6 @@
                         </select>
                     </div>
 
-                    {{-- AÑO --}}
                     <div class="flex flex-col">
                         <label class="text-xs text-blue-200 mb-1 font-semibold">Año</label>
                         <select name="anio"
@@ -70,7 +66,6 @@
                         </select>
                     </div>
 
-                    {{-- APLICAR --}}
                     <button type="submit"
                         class="px-5 py-2.5 h-10 bg-gradient-to-r from-cyan-500 to-blue-500
                    text-white rounded-lg font-semibold hover:shadow-lg
@@ -79,7 +74,6 @@
                         🔍 Aplicar
                     </button>
 
-                    {{-- LIMPIAR --}}
                     <a href="{{ route('calendario-editorial.dashboard') }}"
                         class="px-5 py-2.5 h-10 bg-white/20 text-white rounded-lg
                    font-semibold hover:bg-white/30 transition-all">
@@ -408,10 +402,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script>
-        // Registrar plugin de etiquetas
         Chart.register(ChartDataLabels);
 
-        // Colores mejorados y diferenciados
         const colors = {
             blue: {
                 bg: 'rgba(59, 130, 246, 0.1)',
@@ -433,7 +425,6 @@
             }
         };
 
-        // ========== GRÁFICA SEMANA ==========
         const dataSemana = @json($porSemana->pluck('total'));
         const ctxSemana = document.getElementById('chartSemana').getContext('2d');
         const gradientSemana = ctxSemana.createLinearGradient(0, 0, 0, 400);
@@ -522,7 +513,6 @@
             }
         });
 
-        // ========== GRÁFICA DÍA ==========
         const dataDia = @json($porDia->pluck('total'));
         const ctxDia = document.getElementById('chartDia').getContext('2d');
         const gradientDia = ctxDia.createLinearGradient(0, 0, 0, 400);
@@ -608,7 +598,6 @@
             }
         });
 
-        // ========== GRÁFICA RED (DOUGHNUT) ==========
         const dataRed = @json($porRed);
         const ctxRed = document.getElementById('chartRed').getContext('2d');
 

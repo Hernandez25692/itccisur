@@ -19,7 +19,6 @@ class EmpresaController extends Controller
         $q = Empresa::query()
             ->with(['corte', 'categoria', 'tipoEmpresa']);
 
-        // 🔎 Buscar por nombre o RTN
         if ($request->filled('buscar')) {
             $buscar = $request->buscar;
             $q->where(function ($x) use ($buscar) {
@@ -28,32 +27,26 @@ class EmpresaController extends Controller
             });
         }
 
-        // 📌 Estatus cobranza
         if ($request->filled('estatus')) {
             $q->where('estatus_cobranza', $request->estatus);
         }
 
-        // 🌍 Ciudad
         if ($request->filled('ciudad')) {
             $q->where('ciudad', 'like', "%{$request->ciudad}%");
         }
 
-        // 💳 Tipo de pago
         if ($request->filled('tipo_pago')) {
             $q->where('tipo_pago', $request->tipo_pago);
         }
 
-        // 🏢 Tipo de empresa
         if ($request->filled('tipo_empresa_id')) {
             $q->where('tipo_empresa_id', $request->tipo_empresa_id);
         }
 
-        // 🗂️ Categoría
         if ($request->filled('categoria_id')) {
             $q->where('categoria_id', $request->categoria_id);
         }
 
-        // 📅 CORTE (NUEVO)
         if ($request->filled('corte_id')) {
             $q->where('corte_id', $request->corte_id);
         }
@@ -63,7 +56,6 @@ class EmpresaController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        // 🔽 Catálogos para filtros
         $tiposEmpresa = TipoEmpresa::where('activo', true)->orderBy('nombre')->get();
         $categorias   = Categoria::where('activo', true)->orderBy('nombre')->get();
         $cortes       = Corte::where('activo', true)->orderBy('dia_corte')->get();
@@ -98,7 +90,6 @@ class EmpresaController extends Controller
 
             'capital_declarado'   => 'required|numeric|min:0',
 
-            // ❌ capital_rango_id NO se recibe del request
             // 'capital_rango_id' => eliminado a propósito
 
             'cuota_especial'      => 'nullable|numeric|min:0',
@@ -112,7 +103,6 @@ class EmpresaController extends Controller
             'ciudad'              => 'nullable|string|max:255',
             'barrio_colonia'      => 'nullable|string|max:255',
 
-            // 🔐 Validación geográfica REAL
             'latitud'             => 'nullable|numeric|between:-90,90',
             'longitud'            => 'nullable|numeric|between:-180,180',
 
@@ -141,11 +131,6 @@ class EmpresaController extends Controller
 
         return DB::transaction(function () use ($data, $calc) {
 
-            /**
-             * =====================================================
-             * 1️⃣ DETERMINAR RANGO DE CAPITAL AUTOMÁTICAMENTE
-             * =====================================================
-             */
             $rango = null;
 
             if (!empty($data['tipo_empresa_id']) && isset($data['capital_declarado'])) {
@@ -173,27 +158,12 @@ class EmpresaController extends Controller
                     ->withInput();
             }
 
-            /**
-             * =====================================================
-             * 2️⃣ DEFINIR CUOTAS BASE
-             * =====================================================
-             */
             $cuotaBase = (float) $rango->cuota_mensual;
             $insBase   = (float) $rango->inscripcion;
 
-            /**
-             * =====================================================
-             * 3️⃣ NORMALIZAR LAT / LONG
-             * =====================================================
-             */
             $data['latitud']  = $data['latitud']  ?? null;
             $data['longitud'] = $data['longitud'] ?? null;
 
-            /**
-             * =====================================================
-             * 4️⃣ CREAR EMPRESA
-             * =====================================================
-             */
             $empresa = Empresa::create(array_merge($data, [
                 'capital_rango_id'  => $rango->id,
                 'cuota_base'        => $cuotaBase,
@@ -201,11 +171,6 @@ class EmpresaController extends Controller
                 'estado_empresa'    => 'activo',
             ]));
 
-            /**
-             * =====================================================
-             * 5️⃣ PROPIETARIOS
-             * =====================================================
-             */
             foreach (($data['propietarios'] ?? []) as $p) {
                 Propietario::create([
                     'empresa_id' => $empresa->id,
@@ -215,11 +180,6 @@ class EmpresaController extends Controller
                 ]);
             }
 
-            /**
-             * =====================================================
-             * 6️⃣ TELÉFONOS FIJOS
-             * =====================================================
-             */
             foreach (($data['telefonos_fijos'] ?? []) as $t) {
                 if (trim((string) $t) !== '') {
                     TelefonoFijo::create([
@@ -229,11 +189,6 @@ class EmpresaController extends Controller
                 }
             }
 
-            /**
-             * =====================================================
-             * 7️⃣ CELULARES
-             * =====================================================
-             */
             foreach (($data['celulares'] ?? []) as $c) {
                 if (trim((string) $c) !== '') {
                     Celular::create([
@@ -243,11 +198,6 @@ class EmpresaController extends Controller
                 }
             }
 
-            /**
-             * =====================================================
-             * 8️⃣ CORREOS
-             * =====================================================
-             */
             foreach (($data['correos'] ?? []) as $e) {
                 if (trim((string) $e) !== '') {
                     Correo::create([
@@ -257,19 +207,9 @@ class EmpresaController extends Controller
                 }
             }
 
-            /**
-             * =====================================================
-             * 9️⃣ RECÁLCULO AUTOMÁTICO (CORTE / MORA / ESTATUS)
-             * =====================================================
-             */
             $empresa->load(['corte']);
             $calc->recalcularEmpresa($empresa);
 
-            /**
-             * =====================================================
-             * 🔚 FIN
-             * =====================================================
-             */
             return redirect()
                 ->route('cobranza.empresas.show', $empresa)
                 ->with('success', 'Empresa creada correctamente.');
@@ -288,7 +228,6 @@ class EmpresaController extends Controller
 
     public function show(Empresa $empresa, CobranzaCalculoService $calc)
     {
-        // ✅ Garantiza estado de cuenta y mora sincronizados al abrir la ficha
         $empresa->loadMissing('corte');
         $calc->recalcularEmpresa($empresa);
 
@@ -477,7 +416,6 @@ class EmpresaController extends Controller
      */
     public function estadoCuenta(Empresa $empresa)
     {
-        // 🔄 Asegurar cargos actualizados
         app(\App\Services\Cobranza\CobranzaCalculoService::class)
             ->recalcularEmpresa($empresa);
 
@@ -527,7 +465,6 @@ class EmpresaController extends Controller
      */
     public function estadoCuentaPdf(Empresa $empresa)
     {
-        // 🔄 Asegurar cargos actualizados
         app(\App\Services\Cobranza\CobranzaCalculoService::class)
             ->recalcularEmpresa($empresa);
 

@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <!-- Header Principal -->
         <div class="mb-8">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
@@ -18,7 +17,6 @@
             </div>
         </div>
 
-        <!-- Panel de Estadísticas -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-gradient-to-br from-[#0C1C3C] to-[#1A2A4F] text-white p-6 rounded-2xl shadow-lg">
                 <div class="flex items-center justify-between">
@@ -55,7 +53,6 @@
 
         </div>
 
-        <!-- Tabla de Usuarios -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -77,7 +74,6 @@
                             @endphp
                             
                             <tr class="hover:bg-gray-50/80 transition-colors duration-200">
-                                <!-- Información del Usuario -->
                                 <td class="p-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#C5A049] to-[#D8B96E] flex items-center justify-center text-white font-bold text-lg shadow-md">
@@ -94,7 +90,6 @@
                                     </div>
                                 </td>
                                 
-                                <!-- Contacto -->
                                 <td class="p-4">
                                     <div class="space-y-2">
                                         <div class="flex items-center gap-2">
@@ -108,10 +103,8 @@
                                     </div>
                                 </td>
                                 
-                                <!-- Rol y Estado -->
                                 <td class="p-4">
                                     <div class="space-y-2">
-                                        <!-- Roles -->
                                         <div class="flex flex-wrap gap-2">
                                             @foreach($roles as $role)
                                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
@@ -130,7 +123,6 @@
                                     </div>
                                 </td>
                                 
-                                <!-- Registro -->
                                 <td class="p-4">
                                     <div class="text-sm text-gray-600">
                                         <div class="font-medium">{{ $user->created_at->format('d/m/Y') }}</div>
@@ -138,10 +130,8 @@
                                     </div>
                                 </td>
                                 
-                                <!-- Acciones -->
                                 <td class="p-4">
                                     <div class="flex items-center gap-2">
-                                        <!-- Editar -->
                                         <a href="{{ route('admin.users.edit', $user) }}"
                                            class="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white text-sm font-medium rounded-xl hover:shadow-md transition-shadow duration-200">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +146,6 @@
                     </tbody>
                 </table>
                 
-                <!-- Estado vacío -->
                 @if($users->isEmpty())
                     <div class="py-16 text-center">
                         <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">

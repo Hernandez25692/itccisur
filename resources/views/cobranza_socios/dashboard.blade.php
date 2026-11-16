@@ -1,7 +1,6 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 space-y-6">
 
-        {{-- HEADER --}}
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold text-gray-900">Cobranza de Socios</h1>
             <a href="{{ route('cobranza.empresas.index') }}"
@@ -10,7 +9,6 @@
             </a>
         </div>
 
-        {{-- MENSAJES --}}
         @if (session('success'))
             <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">
                 {{ session('success') }}
@@ -22,7 +20,6 @@
             </div>
         @endif
 
-        {{-- KPIs --}}
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
             <div class="bg-white rounded-2xl border p-5">
@@ -48,7 +45,6 @@
             </div>
         </div>
 
-        {{-- TOP MORA --}}
         <div class="bg-white rounded-2xl border overflow-hidden">
             <div class="p-5 border-b flex items-center justify-between">
                 <h2 class="font-semibold text-gray-900">

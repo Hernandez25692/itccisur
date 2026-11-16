@@ -16,27 +16,22 @@ class ControlAudienciaController extends Controller
         $query = ControlAudiencia::with('creador')
             ->orderBy('created_at', 'desc');
 
-        // 🔎 Filtro por nombre
         if ($request->filled('nombre')) {
             $query->where('nombre_solicitante', 'like', '%' . $request->nombre . '%');
         }
 
-        // 🔎 Filtro por número de documento
         if ($request->filled('documento')) {
             $query->where('numero_documento', 'like', '%' . $request->documento . '%');
         }
 
-        // 📅 Filtro por fecha de recepción (desde)
         if ($request->filled('fecha_desde')) {
             $query->whereDate('fecha_recepcion', '>=', $request->fecha_desde);
         }
 
-        // 📅 Filtro por fecha de recepción (hasta)
         if ($request->filled('fecha_hasta')) {
             $query->whereDate('fecha_recepcion', '<=', $request->fecha_hasta);
         }
 
-        // 🟢 Estado
         if ($request->filled('estado')) {
             if ($request->estado === 'atendido') {
                 $query->whereNotNull('fecha_hora_atencion');
@@ -46,7 +41,7 @@ class ControlAudienciaController extends Controller
             }
         }
 
-        // 📊 KPIs (clonamos el query para no afectar la paginación)
+        // clone para no alterar el query de la paginación
         $total = (clone $query)->count();
         $atendidos = (clone $query)->whereNotNull('fecha_hora_atencion')->count();
         $pendientes = (clone $query)->whereNull('fecha_hora_atencion')->count();

@@ -19,7 +19,6 @@
             border: 1px solid rgba(255, 255, 255, 0.9);
         }
 
-        /* Hero Section */
         .hero-section {
             background: linear-gradient(135deg, #0C1C3C 0%, #1A2A4F 100%);
             padding: 3rem 2.5rem;
@@ -55,7 +54,6 @@
             margin: 0 auto;
         }
 
-        /* Support Section */
         .support-section {
             padding: 3rem 2.5rem;
         }
@@ -132,7 +130,6 @@
             opacity: 0.9;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .welcome-container {
                 padding: 1rem;
@@ -156,7 +153,6 @@
 
     <div class="welcome-container">
         <div class="welcome-wrapper">
-            <!-- Hero Section -->
             <section class="hero-section">
                 <div class="accent-line"></div>
                 <div class="hero-content">
@@ -168,7 +164,6 @@
                 </div>
             </section>
 
-            <!-- Support Section -->
             <section class="support-section">
                 <div class="support-content">
                     <div class="support-info">

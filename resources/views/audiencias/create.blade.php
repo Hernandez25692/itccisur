@@ -2,7 +2,6 @@
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 md:py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-4xl mx-auto">
 
-            <!-- Encabezado de navegación -->
             <div class="mb-6 md:mb-8">
                 <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-4">
                     <a href="{{ route('audiencias.index') }}" class="hover:text-gray-900 transition duration-200">
@@ -36,9 +35,7 @@
                 </div>
             </div>
 
-            <!-- Tarjeta del formulario -->
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-                <!-- Encabezado de la tarjeta -->
                 <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
                     <div class="flex items-center gap-3">
                         <div class="p-2 bg-blue-100 rounded-lg">
@@ -55,12 +52,10 @@
                     </div>
                 </div>
 
-                <!-- Formulario -->
                 <form method="POST" action="{{ route('audiencias.store') }}" class="p-6 md:p-8">
                     @csrf
 
                     <div class="space-y-8">
-                        <!-- Sección 1: Información básica -->
                         <div class="space-y-6">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="h-px flex-1 bg-gradient-to-r from-blue-500 to-transparent"></div>
@@ -72,7 +67,6 @@
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Nombre solicitante -->
                                 <div class="space-y-2">
                                     <label for="nombre_solicitante" class="block text-sm font-medium text-gray-700">
                                         Nombre de quien solicita <span class="text-red-500">*</span>
@@ -96,7 +90,6 @@
                                     @enderror
                                 </div>
 
-                                <!-- Fecha de recepción -->
                                 <div class="space-y-2">
                                     <label for="fecha_recepcion" class="block text-sm font-medium text-gray-700">
                                         Fecha de recepción <span class="text-red-500">*</span>
@@ -121,7 +114,6 @@
                             </div>
                         </div>
 
-                        <!-- Sección 2: Documentación -->
                         <div class="space-y-6">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="h-px flex-1 bg-gradient-to-r from-blue-500 to-transparent"></div>
@@ -157,7 +149,6 @@
                             </div>
                         </div>
 
-                        <!-- Sección 3: Detalles de la audiencia -->
                         <div class="space-y-6">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="h-px flex-1 bg-gradient-to-r from-blue-500 to-transparent"></div>
@@ -168,7 +159,6 @@
                                 <div class="h-px flex-1 bg-gradient-to-l from-blue-500 to-transparent"></div>
                             </div>
 
-                            <!-- Motivo -->
                             <div class="space-y-2">
                                 <label for="motivo" class="block text-sm font-medium text-gray-700">
                                     Motivo de la audiencia <span class="text-red-500">*</span>
@@ -193,7 +183,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Fecha y hora de atención -->
                             <div class="space-y-2">
                                 <label for="fecha_hora_atencion" class="block text-sm font-medium text-gray-700">
                                     Fecha y hora de atención (opcional)
@@ -218,7 +207,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Dictamen -->
                             <div class="space-y-2">
                                 <label for="dictamen" class="block text-sm font-medium text-gray-700">
                                     Dictamen (opcional)
@@ -245,7 +233,6 @@
                         </div>
                     </div>
 
-                    <!-- Botones de acción -->
                     <div class="mt-10 pt-8 border-t border-gray-200">
                         <div class="flex flex-col-reverse sm:flex-row justify-between gap-4">
                             <a href="{{ route('audiencias.index') }}"
@@ -270,7 +257,6 @@
                 </form>
             </div>
 
-            <!-- Nota informativa -->
             <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
                 <div class="flex items-start gap-3">
                     <div class="flex-shrink-0">
@@ -293,36 +279,29 @@
         </div>
     </div>
 
-    <!-- Script para mejoras de UI -->
     <script>
-        // Establecer fecha mínima para campos de fecha
         document.addEventListener('DOMContentLoaded', function() {
             const fechaRecepcion = document.getElementById('fecha_recepcion');
             const fechaAtencion = document.getElementById('fecha_hora_atencion');
 
-            // Establecer fecha actual como valor por defecto si no hay valor previo
             if (!fechaRecepcion.value) {
                 const today = new Date().toISOString().split('T')[0];
                 fechaRecepcion.value = today;
             }
 
-            // Establecer min/max para fechas
             const today = new Date().toISOString().split('T')[0];
             fechaRecepcion.max = today;
 
-            // Si hay fecha de recepción, establecer como mínima para fecha de atención
             fechaRecepcion.addEventListener('change', function() {
                 if (fechaAtencion) {
                     fechaAtencion.min = this.value + 'T00:00';
                 }
             });
 
-            // Inicializar si ya hay valor
             if (fechaRecepcion.value && fechaAtencion) {
                 fechaAtencion.min = fechaRecepcion.value + 'T00:00';
             }
 
-            // Mejorar la experiencia de los campos de texto
             const textareas = document.querySelectorAll('textarea');
             textareas.forEach(textarea => {
                 textarea.addEventListener('focus', function() {
@@ -335,7 +314,6 @@
                 });
             });
 
-            // Contador de caracteres para textareas
             const motivoTextarea = document.getElementById('motivo');
             if (motivoTextarea) {
                 const motivoCounter = document.createElement('div');
@@ -356,7 +334,6 @@
             }
         });
 
-        // Validación antes de enviar
         const form = document.querySelector('form');
         form.addEventListener('submit', function(e) {
             const requiredFields = this.querySelectorAll('[required]');
@@ -367,7 +344,6 @@
                     isValid = false;
                     field.classList.add('border-red-500', 'bg-red-50');
 
-                    // Remover la clase después de un tiempo
                     setTimeout(() => {
                         field.classList.remove('border-red-500', 'bg-red-50');
                     }, 3000);
@@ -377,7 +353,6 @@
             if (!isValid) {
                 e.preventDefault();
 
-                // Mostrar mensaje de error
                 const errorAlert = document.createElement('div');
                 errorAlert.className =
                     'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl shadow-lg z-50 animate-slide-in';
@@ -396,7 +371,6 @@
                     errorAlert.remove();
                 }, 5000);
 
-                // Scroll al primer campo con error
                 const firstError = this.querySelector('[required]:invalid');
                 if (firstError) {
                     firstError.scrollIntoView({
@@ -409,7 +383,6 @@
         });
     </script>
 
-    <!-- Estilos personalizados -->
     <style>
         .animate-slide-in {
             animation: slideIn 0.3s ease-out;
@@ -427,7 +400,6 @@
             }
         }
 
-        /* Mejoras para inputs y textareas */
         input,
         textarea,
         select {
@@ -441,14 +413,12 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        /* Scroll personalizado para textareas */
         textarea {
             resize: vertical;
             min-height: 100px;
             max-height: 300px;
         }
 
-        /* Estilos para errores */
         .border-red-500 {
             border-color: #ef4444;
         }
@@ -457,7 +427,6 @@
             background-color: #fef2f2;
         }
 
-        /* Mejoras responsivas */
         @media (max-width: 640px) {
             .text-3xl {
                 font-size: 1.75rem;

@@ -43,7 +43,6 @@
             }
         }
 
-        /* Header */
         .public-header {
             background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
             padding: 1.5rem 1.25rem;
@@ -80,7 +79,6 @@
             font-size: 0.875rem;
         }
 
-        /* Form Body */
         .form-body {
             padding: 1.5rem 1.25rem;
         }
@@ -91,7 +89,6 @@
             }
         }
 
-        /* Error Messages */
         .error-container {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
             border: 1px solid rgba(239, 68, 68, 0.2);
@@ -121,7 +118,6 @@
             font-size: 0.875rem;
         }
 
-        /* Form Groups */
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -134,7 +130,6 @@
             margin-bottom: 0.75rem;
         }
 
-        /* Radio Buttons */
         .radio-group {
             display: flex;
             flex-direction: column;
@@ -171,7 +166,6 @@
             flex-shrink: 0;
         }
 
-        /* Form Inputs */
         .form-input,
         .form-select,
         .form-textarea {
@@ -206,7 +200,6 @@
             font-family: inherit;
         }
 
-        /* File Upload */
         .file-upload {
             border: 2px dashed var(--gray-medium);
             border-radius: 10px;
@@ -255,7 +248,6 @@
             border-left: 3px solid var(--accent);
         }
 
-        /* Submit Button */
         .submit-btn {
             width: 100%;
             padding: 1rem;
@@ -284,14 +276,12 @@
             transform: translateY(0);
         }
 
-        /* Section Dividers */
         .section-divider {
             height: 1px;
             background: linear-gradient(90deg, transparent, var(--gray-medium), transparent);
             margin: 1.5rem 0;
         }
 
-        /* Touch Optimizations */
         @media (hover: none) and (pointer: coarse) {
             .radio-label,
             .submit-btn,
@@ -314,7 +304,6 @@
             }
         }
 
-        /* iOS specific fixes */
         @supports (-webkit-touch-callout: none) {
             .form-select {
                 background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
@@ -346,7 +335,6 @@
             }
         }
 
-        /* Dark mode support */
         @media (prefers-color-scheme: dark) {
             .public-container {
                 background: linear-gradient(135deg, #0f1e2e 0%, #1a2f45 100%);
@@ -404,15 +392,12 @@
 
     <div class="public-container">
         <div class="public-card">
-            <!-- Header -->
             <div class="public-header">
                 <h1 class="public-title">Revisión de Antecedentes Registrales</h1>
                 <p class="public-subtitle">Centro Asociado del Sur</p>
             </div>
 
-            <!-- Form Body -->
             <div class="form-body">
-                <!-- Error Messages -->
                 @if ($errors->any())
                     <div class="error-container">
                         <ul class="error-list">
@@ -428,7 +413,6 @@
 
                     @csrf
 
-                    <!-- CIRCUNSCRIPCIÓN -->
                     <div class="form-group">
                         <label class="form-label">
                             Circunscripción Registral
@@ -448,7 +432,6 @@
                         </div>
                     </div>
 
-                    <!-- FECHA -->
                     <div class="form-group">
                         <label class="form-label">
                             Fecha de Recepción
@@ -459,7 +442,6 @@
 
                     <div class="section-divider"></div>
 
-                    <!-- DATOS SOLICITANTE -->
                     <div class="form-group">
                         <h2 class="form-label">
                             Datos del Solicitante
@@ -475,7 +457,6 @@
 
                     <div class="section-divider"></div>
 
-                    <!-- DATOS REGISTRALES -->
                     <div class="form-group">
                         <h2 class="form-label">
                             Datos Registrales
@@ -499,7 +480,6 @@
 
                     <div class="section-divider"></div>
 
-                    <!-- MOTIVO -->
                     <div class="form-group">
                         <label class="form-label">
                             Motivo de la Solicitud
@@ -507,7 +487,6 @@
                         <textarea name="motivo" rows="4" class="form-textarea" placeholder="Describa el motivo de la solicitud"></textarea>
                     </div>
 
-                    <!-- COMPROBANTE -->
                     <div class="form-group">
                         <label class="form-label">
                             Comprobante (opcional)
@@ -531,7 +510,6 @@
                         </div>
                     </div>
 
-                    <!-- BOTÓN -->
                     <button type="submit" class="submit-btn">
                         📋 Guardar Registro
                     </button>

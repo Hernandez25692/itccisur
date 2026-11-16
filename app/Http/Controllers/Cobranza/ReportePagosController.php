@@ -16,7 +16,6 @@ class ReportePagosController extends Controller
             ->with(['empresa', 'usuario'])
             ->orderBy('fecha_pago', 'desc');
 
-        // 🔎 Filtros
         if ($request->filled('desde')) {
             $query->whereDate('fecha_pago', '>=', $request->desde);
         }
@@ -39,7 +38,6 @@ class ReportePagosController extends Controller
 
         $pagos = $query->paginate(15)->withQueryString();
 
-        // 🔢 KPIs
         $totalPagos = $query->clone()->count();
         $totalMonto = $query->clone()->sum('monto');
 

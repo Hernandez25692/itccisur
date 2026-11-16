@@ -13,7 +13,7 @@ return new class extends Migration
             $table->unsignedBigInteger('plan_actividad_id');
 
             $table->date('fecha_ejecucion');
-            $table->decimal('avance', 5, 2)->default(0); // CORREGIDO
+            $table->decimal('avance', 5, 2)->default(0);
             $table->text('comentarios')->nullable();
             $table->string('evidencia')->nullable();
 

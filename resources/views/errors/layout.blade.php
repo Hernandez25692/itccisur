@@ -10,13 +10,11 @@
 </head>
 
 <body class="min-h-screen bg-gray-50 text-gray-900">
-    <!-- Fondo institucional -->
     <div class="relative min-h-screen overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-[#0C1C3C] via-[#13264d] to-[#1A2A4F]"></div>
         <div class="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#C5A049]/20 blur-3xl"></div>
         <div class="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
 
-        <!-- Contenido -->
         <div class="relative flex min-h-screen items-center justify-center px-4 py-10">
             <div class="w-full max-w-3xl">
                 <div class="rounded-3xl bg-white/95 shadow-2xl border border-white/20 overflow-hidden">

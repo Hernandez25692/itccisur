@@ -2,7 +2,6 @@
     <div class="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- Header Institucional --}}
             <div
                 class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-900 via-navy-800 to-blue-900 p-8 shadow-2xl">
                 <div
@@ -61,7 +60,6 @@
                 </div>
             </div>
 
-            {{-- Filtros Ejecutivos --}}
             <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center gap-3">
@@ -146,9 +144,7 @@
                 </form>
             </div>
 
-            {{-- KPIs Ejecutivos --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {{-- Total Antecedentes --}}
                 <div
                     class="bg-gradient-to-br from-blue-50 to-white rounded-2xl border border-blue-100 shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
                     <div class="flex items-start justify-between">
@@ -176,7 +172,6 @@
                     </div>
                 </div>
 
-                {{-- Total Audiencias --}}
                 <div
                     class="bg-gradient-to-br from-navy-50 to-white rounded-2xl border border-navy-100 shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
                     <div class="flex items-start justify-between">
@@ -207,7 +202,6 @@
                     </div>
                 </div>
 
-                {{-- Eficiencia en Atención --}}
                 <div
                     class="bg-gradient-to-br from-amber-50 to-white rounded-2xl border border-amber-100 shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
                     <div class="flex items-start justify-between">
@@ -246,7 +240,6 @@
                     </div>
                 </div>
 
-                {{-- Métricas de Calidad --}}
                 <div
                     class="bg-gradient-to-br from-emerald-50 to-white rounded-2xl border border-emerald-100 shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
                     <div class="flex items-start justify-between">
@@ -283,9 +276,7 @@
                 </div>
             </div>
 
-            {{-- Análisis Gráfico --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {{-- Tendencia Temporal --}}
                 <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-3">
@@ -310,7 +301,6 @@
                     </div>
                 </div>
 
-                {{-- Distribución por Circunscripción --}}
                 <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-3">
@@ -336,9 +326,7 @@
                 </div>
             </div>
 
-            {{-- Análisis Estratégico --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {{-- Documentos Más Consultados --}}
                 <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="font-bold text-gray-900 flex items-center gap-2">
@@ -390,7 +378,6 @@
                     </div>
                 </div>
 
-                {{-- Tipología Documental --}}
                 <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="font-bold text-gray-900 flex items-center gap-2">
@@ -440,7 +427,6 @@
                     </div>
                 </div>
 
-                {{-- Perfil de Usuarios --}}
                 <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="font-bold text-gray-900 flex items-center gap-2">
@@ -510,7 +496,6 @@
                 </div>
             </div>
 
-            {{-- Nota Ejecutiva --}}
             <div class="bg-gradient-to-r from-blue-50 to-navy-50 rounded-2xl border border-blue-200 p-6">
                 <div class="flex items-start gap-4">
                     <div class="flex-shrink-0 p-3 bg-blue-100 rounded-xl">
@@ -543,11 +528,9 @@
         </div>
     </div>
 
-    {{-- Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // ========= Tendencia por mes =========
         const allMonths = (() => {
             const start = new Date();
             start.setDate(1);
@@ -571,7 +554,6 @@
         const antSeries = allMonths.map(m => antMap[m] ?? 0);
         const audSeries = allMonths.map(m => audMap[m] ?? 0);
 
-        // Configuración de colores institucionales
         const institutionalColors = {
             blue: '#1e40af', // Azul corporativo
             navy: '#0f172a', // Azul marino
@@ -580,7 +562,6 @@
             lightGold: '#f59e0b'
         };
 
-        // Gráfico de tendencia
         new Chart(document.getElementById('trendChart'), {
             type: 'line',
             data: {
@@ -668,12 +649,10 @@
             }
         });
 
-        // ========= Circunscripción =========
         const circRaw = @json($porCircunscripcion);
         const circLabels = circRaw.map(x => x.circunscripcion ?? 'Sin definir');
         const circTotals = circRaw.map(x => Number(x.total));
 
-        // Colores para el gráfico de barras
         const barColors = circTotals.map((_, index) => {
             const colors = [
                 institutionalColors.blue,
@@ -751,7 +730,6 @@
             }
         });
 
-        // Animaciones para los KPIs
         document.addEventListener('DOMContentLoaded', function() {
             const kpiCards = document.querySelectorAll('.bg-gradient-to-br');
             kpiCards.forEach(card => {
@@ -763,7 +741,6 @@
                 });
             });
 
-            // Contadores animados (opcional)
             const counters = document.querySelectorAll('.text-3xl');
             counters.forEach(counter => {
                 const target = parseInt(counter.textContent.replace(/,/g, ''));
@@ -791,7 +768,6 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Mejoras en scroll */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -811,7 +787,6 @@
             background: #94a3b8;
         }
 
-        /* Animaciones sutiles */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -828,7 +803,6 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        /* Gradientes personalizados */
         .from-navy-50 {
             --tw-gradient-from: #f8fafc;
         }
@@ -857,7 +831,6 @@
             background-color: #f8fafc;
         }
 
-        /* Efectos de hover mejorados */
         .hover-lift {
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
@@ -867,7 +840,6 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        /* Tipografía corporativa */
         h1,
         h2,
         h3,
@@ -876,7 +848,6 @@
             letter-spacing: -0.025em;
         }
 
-        /* Mejoras responsivas */
         @media (max-width: 768px) {
             .text-3xl {
                 font-size: 1.875rem;

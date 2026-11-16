@@ -2,7 +2,6 @@
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 md:py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-5xl mx-auto">
 
-            <!-- Encabezado de navegación -->
             <div class="mb-6 md:mb-8">
                 <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-4">
                     <a href="{{ route('audiencias.index') }}"
@@ -39,7 +38,6 @@
                         </div>
                     </div>
 
-                    <!-- Badge de estado -->
                     <div class="flex items-center gap-3">
                         @if ($audiencia->fecha_hora_atencion)
                             <span
@@ -62,9 +60,7 @@
                 </div>
             </div>
 
-            <!-- Tarjeta principal de detalle -->
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
-                <!-- Encabezado de la tarjeta -->
                 <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
                     <div class="flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-gray-900">
@@ -76,12 +72,9 @@
                     </div>
                 </div>
 
-                <!-- Contenido de la tarjeta -->
                 <div class="p-6 md:p-8">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- Columna izquierda: Información principal -->
                         <div class="space-y-6">
-                            <!-- Información del solicitante -->
                             <div class="space-y-4">
                                 <h3
                                     class="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
@@ -123,7 +116,6 @@
                                 </div>
                             </div>
 
-                            <!-- Fechas importantes -->
                             <div class="space-y-4">
                                 <h3
                                     class="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
@@ -176,9 +168,7 @@
                             </div>
                         </div>
 
-                        <!-- Columna derecha: Detalles adicionales -->
                         <div class="space-y-6">
-                            <!-- Motivo -->
                             <div class="space-y-4">
                                 <h3
                                     class="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
@@ -199,7 +189,6 @@
                                 </div>
                             </div>
 
-                            <!-- Dictamen (si existe) -->
                             @if ($audiencia->dictamen)
                                 <div class="space-y-4">
                                     <h3
@@ -226,7 +215,6 @@
                         </div>
                     </div>
 
-                    <!-- Información de registro -->
                     <div class="mt-8 pt-8 border-t border-gray-200">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div class="flex items-center gap-3">
@@ -261,7 +249,6 @@
                 </div>
             </div>
 
-            <!-- Tarjeta de acciones -->
             <div class="bg-white rounded-2xl shadow-md p-6">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="text-sm text-gray-600">
@@ -290,9 +277,7 @@
                 </div>
             </div>
 
-            <!-- Información adicional -->
             <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Información de tiempo transcurrido -->
                 <div class="bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-200 p-5">
                     <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                         <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,7 +313,6 @@
                     </div>
                 </div>
 
-                <!-- Acciones rápidas -->
                 <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-5">
                     <h3 class="text-sm font-semibold text-blue-700 mb-3 flex items-center gap-2">
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -365,9 +349,7 @@
         </div>
     </div>
 
-    <!-- Script para funcionalidades adicionales -->
     <script>
-        // Función para copiar información al portapapeles
         function copyToClipboard(text, elementId) {
             navigator.clipboard.writeText(text).then(() => {
                 const element = document.getElementById(elementId);
@@ -383,9 +365,7 @@
             });
         }
 
-        // Preparar datos para copiar
         document.addEventListener('DOMContentLoaded', function() {
-            // Agregar funcionalidad de copiar al documento
             const docNumber = "{{ $audiencia->numero_documento }}";
             const docElement = document.querySelector('.font-mono');
 
@@ -394,12 +374,10 @@
                     copyToClipboard(docNumber, 'doc-number');
                 });
 
-                // Agregar tooltip
                 docElement.title = 'Click para copiar';
                 docElement.classList.add('cursor-pointer', 'hover:bg-gray-200', 'transition');
             }
 
-            // Formatear fechas para mejor presentación
             const fechaElements = document.querySelectorAll('[data-date]');
             fechaElements.forEach(el => {
                 const date = new Date(el.dataset.date);
@@ -411,7 +389,6 @@
                 });
             });
 
-            // Animación para los badges de estado
             const badges = document.querySelectorAll('[class*="bg-"] span[class*="bg-"]');
             badges.forEach(badge => {
                 badge.style.animation = 'pulse 2s infinite';
@@ -419,7 +396,6 @@
         });
     </script>
 
-    <!-- Script de impresión profesional -->
     <script>
         function printFullDetails() {
             const printWindow = window.open('', '_blank');
@@ -742,7 +718,6 @@
         }
     </script>
 
-    <!-- Estilos personalizados para impresión -->
     <style>
         @media print {
 
@@ -779,25 +754,21 @@
             }
         }
 
-        /* Mejoras de animación */
         .transition-all {
             transition-property: all;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
             transition-duration: 200ms;
         }
 
-        /* Efectos hover para tarjetas */
         .hover-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        /* Estilos para scroll suave */
         html {
             scroll-behavior: smooth;
         }
 
-        /* Mejoras responsivas */
         @media (max-width: 768px) {
             .grid-cols-2 {
                 grid-template-columns: 1fr;

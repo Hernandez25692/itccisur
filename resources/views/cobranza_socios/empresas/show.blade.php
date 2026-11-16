@@ -1,7 +1,6 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 space-y-8">
 
-        {{-- ================= HEADER ================= --}}
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">
@@ -43,7 +42,6 @@
 
         </div>
 
-        {{-- ================= ALERTAS ================= --}}
         @if (session('success'))
             <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">
                 {{ session('success') }}
@@ -60,7 +58,6 @@
             $periodosVencidos = $cargosPendientes->count();
         @endphp
 
-        {{-- ================= BLOQUE COBRANZA ================= --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white rounded-2xl border p-5">
                 @php
@@ -113,7 +110,6 @@
             </div>
         </div>
 
-        {{-- ================= INFORMACIÓN ADMINISTRATIVA ================= --}}
         <div class="bg-white rounded-2xl border p-6">
             <h2 class="font-bold text-gray-900 mb-4">Información administrativa</h2>
 
@@ -159,7 +155,6 @@
             @endif
         </div>
 
-        {{-- ================= UBICACIÓN ================= --}}
         <div class="bg-white rounded-2xl border p-6">
             <h2 class="font-bold text-gray-900 mb-3">Ubicación</h2>
             <p class="text-sm text-gray-700">{{ $empresa->direccion ?? '—' }}</p>
@@ -176,7 +171,6 @@
             @endif
         </div>
 
-        {{-- ================= CONTACTOS Y PROPIETARIOS ================= --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-white rounded-2xl border p-6">
                 <h2 class="font-bold text-gray-900 mb-3">Contactos</h2>

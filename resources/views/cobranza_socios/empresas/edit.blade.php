@@ -365,7 +365,6 @@
         </form>
     </div>
 
-    <!-- Modal de Validación -->
     <div id="validationModal"
         class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
@@ -384,7 +383,6 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmación -->
     <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
             <div class="flex items-center gap-3 mb-4">
@@ -408,7 +406,6 @@
         </div>
     </div>
 
-    <!-- Modal de Salida sin guardar -->
     <div id="leaveModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
             <div class="flex items-center gap-3 mb-4">
@@ -464,7 +461,6 @@
             }
         }
 
-        // Inicializar al cargar
         document.addEventListener('DOMContentLoaded', calcularRango);
 
         capitalInput.addEventListener('input', calcularRango);
@@ -476,7 +472,6 @@
         const initialFormData = new FormData(form);
         let pendingLeave = null;
 
-        // Validaciones
         const validationRules = {
             nombre_empresa: {
                 required: true,
@@ -509,7 +504,6 @@
                 }
             });
 
-            // Validar correos
             const correos = form.querySelectorAll('input[name="correos[]"]');
             correos.forEach((correo, idx) => {
                 if (correo.value && !correo.value.includes('@')) {
@@ -517,7 +511,6 @@
                 }
             });
 
-            // Validar propietarios con identidad
             const propietarios = document.getElementById('propietarios_wrap').querySelectorAll('.grid');
             propietarios.forEach((prop, idx) => {
                 const inputs = prop.querySelectorAll('input');
@@ -579,7 +572,6 @@
             if (pendingLeave) pendingLeave();
         }
 
-        // Event listeners
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const errors = validateForm();
@@ -592,7 +584,6 @@
             showConfirmModal();
         });
 
-        // Prevenir salida sin guardar
         window.addEventListener('beforeunload', (e) => {
             if (hasChanges()) {
                 e.preventDefault();
@@ -600,7 +591,6 @@
             }
         });
 
-        // Interceptar links
         document.addEventListener('click', (e) => {
             if (e.target.tagName === 'A' && e.target.href && !e.target.href.includes('javascript')) {
                 if (hasChanges()) {

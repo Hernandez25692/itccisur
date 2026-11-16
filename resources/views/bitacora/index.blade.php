@@ -1,5 +1,4 @@
 <x-app-layout>
-    <!-- Header de la página -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -18,7 +17,6 @@
             @endrole
         </div>
 
-        <!-- Indicadores de estado -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             <div class="bg-gradient-to-br from-[#0C1C3C] to-[#1A2A4F] text-white p-4 rounded-xl shadow">
                 <div class="flex items-center justify-between">
@@ -89,7 +87,6 @@
         </div>
     </div>
 
-    <!-- Filtros -->
     <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900">Filtros de Búsqueda</h3>
@@ -177,12 +174,10 @@
         @endif
     </div>
 
-    <!-- Lista de Actividades -->
     <div class="space-y-4">
         @forelse ($actividades as $a)
             <div
                 class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <!-- Barra de prioridad -->
                 <div
                     class="h-2 
                     @if ($a->prioridad == 'critica') bg-gradient-to-r from-red-600 to-red-800
@@ -192,7 +187,6 @@
                 </div>
 
                 <div class="p-6">
-                    <!-- Header de la actividad -->
                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
                         <div class="flex-1">
                             <div class="flex items-center gap-3">
@@ -230,10 +224,8 @@
                         </div>
                     </div>
 
-                    <!-- Descripción -->
                     <p class="text-gray-700 mb-6 leading-relaxed">{{ $a->descripcion }}</p>
 
-                    <!-- Información detallada -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div class="flex items-start gap-3">
                             <div class="p-2 bg-[#0C1C3C]/5 rounded-lg">
@@ -282,7 +274,6 @@
                         </div>
                     </div>
 
-                    <!-- Solución aplicada -->
                     @if ($a->solucion_aplicada)
                         <div class="bg-green-50 border border-green-100 rounded-xl p-4 mb-6">
                             <div class="flex items-center gap-2 mb-2">
@@ -297,7 +288,6 @@
                         </div>
                     @endif
 
-                    <!-- Evidencia -->
                     @if ($a->evidencia)
                         <div class="mb-6">
                             <p class="text-sm font-medium text-gray-700 mb-3">Evidencia Adjunta</p>
@@ -335,7 +325,6 @@
                         </div>
                     @endif
 
-                    <!-- Modal Preview -->
                     <div id="previewModal"
                         class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
                         <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto">
@@ -391,7 +380,6 @@
                         });
                     </script>
 
-                    <!-- Acciones -->
                     <div class="flex items-center justify-between pt-4 border-t border-gray-100">
                         <div class="text-sm text-gray-500">
                             <span class="font-medium">Última actualización:</span>
@@ -427,7 +415,6 @@
                 </div>
             </div>
         @empty
-            <!-- Estado vacío -->
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
                 <div class="max-w-md mx-auto">
                     <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
@@ -455,7 +442,6 @@
         @endforelse
     </div>
 
-    <!-- Paginación -->
     @if ($actividades->hasPages())
         <div class="mt-8 bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <div class="flex items-center justify-between">
@@ -477,7 +463,6 @@
         </div>
     @endif
 
-    <!-- Modal de confirmación (para futuras implementaciones) -->
     <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
             <h3 class="text-lg font-bold text-gray-900 mb-2">¿Confirmar eliminación?</h3>
@@ -497,7 +482,6 @@
     </div>
 </x-app-layout>
 
-<!-- Componente de paginación personalizado (opcional) -->
 @if (!view()->exists('vendor.pagination.custom'))
     @php
         // Crear una vista simple para la paginación personalizada

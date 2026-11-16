@@ -51,7 +51,6 @@ class PagoController extends Controller
 
         return DB::transaction(function () use ($data, $empresa, $calc) {
 
-            // 🔒 Tomar y bloquear cargos seleccionados
             $cargos = Cargo::whereIn('id', $data['cargos'])
                 ->where('empresa_id', $empresa->id)
                 ->where('estado', 'pendiente')
@@ -63,10 +62,8 @@ class PagoController extends Controller
                 return back()->withErrors('No hay cargos válidos para aplicar el pago.');
             }
 
-            // ✅ Monto REAL del pago (suma exacta de cargos)
             $montoTotal = (float) $cargos->sum('total');
 
-            // 🔹 Crear pago
             $pago = Pago::create([
                 'empresa_id' => $empresa->id,
                 'fecha_pago' => $data['fecha_pago'],
@@ -75,12 +72,10 @@ class PagoController extends Controller
                 'referencia' => $data['referencia'] ?? null,
                 'comentario' => $data['comentario'] ?? null,
 
-                // gestor REAL
                 'gestor_id' => Auth::id(),
                 'created_by' => Auth::id(),
             ]);
 
-            // 🔹 Aplicar pago a cargos (FIFO garantizado)
             foreach ($cargos as $cargo) {
 
                 $pago->cargos()->attach($cargo->id, [
@@ -92,7 +87,6 @@ class PagoController extends Controller
                 $cargo->save();
             }
 
-            // 🔹 Recalcular empresa (estatus, próxima fecha, etc.)
             $calc->recalcularEmpresa($empresa);
 
             return redirect()

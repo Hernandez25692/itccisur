@@ -60,7 +60,6 @@ class RrhhVacacionesController extends Controller
         $query = RrhhEmpleado::where('estado', 'activo')
             ->with(['periodosVacaciones', 'movimientosVacaciones']);
 
-        // 🔍 BUSQUEDA
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('nombre_completo', 'like', '%' . $request->search . '%')
@@ -68,7 +67,6 @@ class RrhhVacacionesController extends Controller
             });
         }
 
-        // 📌 AREA
         if ($request->filled('area')) {
             $query->where('area', $request->area);
         }
@@ -102,7 +100,6 @@ class RrhhVacacionesController extends Controller
             'adelanto' => $filas->where('adelanto', true)->count(),
         ];
 
-        // 🎯 FILTRO POR SALDO
         if ($request->filled('pendiente')) {
             $filas = $filas->filter(fn ($fila) => match ($request->pendiente) {
                 'con' => $fila['estado']->saldo > 0,

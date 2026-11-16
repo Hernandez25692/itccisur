@@ -208,7 +208,6 @@
             color: var(--gold-primary);
         }
 
-        /* Iconos para inputs */
         .input-with-icon {
             position: relative;
         }
@@ -227,7 +226,6 @@
             padding-left: 2.75rem;
         }
 
-        /* Password strength indicator */
         .password-strength {
             margin-top: 0.5rem;
             height: 4px;
@@ -251,7 +249,6 @@
             color: var(--text-light);
         }
 
-        /* Responsive */
         @media (max-width: 640px) {
             .user-form-container {
                 padding: 1rem;
@@ -271,7 +268,6 @@
             }
         }
 
-        /* Animaciones */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -427,7 +423,6 @@
     </div>
 
     <script>
-        // Validación de fortaleza de contraseña
         const passwordInput = document.getElementById('password');
         const passwordStrengthBar = document.getElementById('passwordStrengthBar');
         const passwordStrengthText = document.getElementById('passwordStrengthText');
@@ -439,22 +434,16 @@
             let strength = 0;
             let text = '';
 
-            // Longitud
             if (password.length >= 8) strength += 25;
             
-            // Minúsculas y mayúsculas
             if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25;
             
-            // Números
             if (/\d/.test(password)) strength += 25;
             
-            // Caracteres especiales
             if (/[^A-Za-z0-9]/.test(password)) strength += 25;
 
-            // Actualizar barra
             passwordStrengthBar.style.width = strength + '%';
 
-            // Actualizar texto y color
             if (strength < 50) {
                 passwordStrengthBar.style.background = '#EF4444';
                 text = 'Contraseña débil';
@@ -470,7 +459,6 @@
             passwordStrengthText.style.color = passwordStrengthBar.style.background;
         });
 
-        // Validación de coincidencia de contraseñas
         function checkPasswordMatch() {
             if (passwordInput.value && confirmPasswordInput.value) {
                 if (passwordInput.value === confirmPasswordInput.value) {
@@ -491,7 +479,6 @@
         passwordInput.addEventListener('input', checkPasswordMatch);
         confirmPasswordInput.addEventListener('input', checkPasswordMatch);
 
-        // Validación de email institucional
         const emailInput = document.querySelector('input[name="email"]');
         emailInput.addEventListener('blur', function() {
             const email = this.value;
@@ -504,11 +491,9 @@
             }
         });
 
-        // Validación del formulario
         document.getElementById('userForm').addEventListener('submit', function(e) {
             let valid = true;
             
-            // Validar contraseñas
             if (passwordInput.value !== confirmPasswordInput.value) {
                 e.preventDefault();
                 passwordMatch.textContent = '✗ Las contraseñas deben coincidir';
@@ -517,7 +502,6 @@
                 valid = false;
             }
             
-            // Validar longitud de contraseña
             if (passwordInput.value.length < 8) {
                 e.preventDefault();
                 passwordStrengthText.textContent = '✗ La contraseña debe tener al menos 8 caracteres';
@@ -527,7 +511,6 @@
             }
 
             if (!valid) {
-                // Agregar animación de error
                 const inputs = document.querySelectorAll('.form-input, .form-select');
                 inputs.forEach(input => {
                     if (!input.value || (input.name === 'password' && input.value.length < 8)) {
@@ -540,7 +523,6 @@
             }
         });
 
-        // Animación de shake para errores
         const style = document.createElement('style');
         style.textContent = `
             @keyframes shake {

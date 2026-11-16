@@ -31,7 +31,6 @@
         align-items: center;
     }
 
-    /* ── Breadcrumb ── */
     .emp-breadcrumb {
         width: 100%;
         max-width: 680px;
@@ -58,7 +57,6 @@
         color: var(--gold);
     }
 
-    /* ── Card ── */
     .emp-card {
         width: 100%;
         max-width: 680px;
@@ -71,7 +69,6 @@
             0 32px 64px rgba(0, 0, 0, 0.45);
     }
 
-    /* ── Card Header ── */
     .emp-header {
         padding: 2rem 2.5rem 1.75rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -114,12 +111,10 @@
         margin: 0.2rem 0 0;
     }
 
-    /* ── Form Body ── */
     .emp-body {
         padding: 2rem 2.5rem 2.5rem;
     }
 
-    /* ── Section Divider ── */
     .emp-section {
         margin-bottom: 1.75rem;
     }
@@ -143,7 +138,6 @@
         background: var(--gold-border);
     }
 
-    /* ── Grid ── */
     .emp-grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -156,7 +150,6 @@
         gap: 1rem;
     }
 
-    /* ── Field ── */
     .emp-field {
         display: flex;
         flex-direction: column;
@@ -217,7 +210,6 @@
         box-shadow: 0 0 0 3px rgba(197, 160, 73, 0.12);
     }
 
-    /* Date input icon color fix */
     input[type="date"]::-webkit-calendar-picker-indicator {
         filter: invert(0.6) sepia(1) saturate(3) hue-rotate(5deg);
         cursor: pointer;
@@ -241,7 +233,6 @@
         opacity: 0.7;
     }
 
-    /* ── Footer / Actions ── */
     .emp-footer {
         display: flex;
         justify-content: flex-end;
@@ -309,7 +300,6 @@
         height: 16px;
     }
 
-    /* ── Validation errors (Laravel) ── */
     .emp-error {
         font-size: 0.73rem;
         color: var(--error);
@@ -319,7 +309,6 @@
         border-color: var(--error);
     }
 
-    /* ── Responsive ── */
     @media (max-width: 600px) {
         .emp-header {
             padding: 1.5rem 1.25rem;
@@ -348,7 +337,6 @@
         }
     }
 
-    /* ── Avisos ── */
     .emp-alert {
         border: 1px solid var(--gold-border);
         background: var(--gold-dim);

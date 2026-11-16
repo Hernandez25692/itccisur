@@ -147,7 +147,7 @@
             Route::post('/', [CalendarioEditorialController::class, 'store'])
                 ->name('store');
 
-            // ⭐ ESTA DEBE IR ANTES DE LAS RUTAS CON {calendarioEditorial}
+            // Va antes de las rutas con {calendarioEditorial}; si no, 'calendar' se toma como id
             Route::get('/calendar', [CalendarioEditorialController::class, 'calendar'])
                 ->name('calendar');
 
@@ -296,10 +296,6 @@
             Route::resource('/rutas', RutaController::class)->only(['index', 'create', 'store', 'show']);
             Route::post('/rutas/{ruta}/ordenar', [RutaController::class, 'ordenarPorCercania'])->name('rutas.ordenar');
             Route::post('/rutas/{ruta}/check/{empresa}', [RutaController::class, 'check'])->name('rutas.check');
-
-            // ============================
-            // CATÁLOGOS DE COBRANZA
-            // ============================
 
             // Categorías
             Route::resource('categorias', \App\Http\Controllers\Cobranza\CategoriaController::class)

@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->date('fecha_vencimiento');
 
             $table->decimal('monto_cuota', 14, 2);
-            $table->decimal('monto_mora', 14, 2)->default(0); // si luego agregas recargo
+            $table->decimal('monto_mora', 14, 2)->default(0); // recargo por mora
             $table->decimal('total', 14, 2);
 
             $table->enum('estado', ['pendiente', 'pagado', 'anulado'])->default('pendiente');

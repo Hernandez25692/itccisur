@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <!-- Header del formulario -->
         <div class="mb-8">
             <a href="{{ route('plan-trabajo.index') }}" 
                class="inline-flex items-center gap-2 text-[#0C1C3C] hover:text-[#1A2A4F] font-medium mb-6 group">
@@ -23,9 +22,7 @@
             </div>
         </div>
 
-        <!-- Tarjeta del formulario -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <!-- Encabezado de la tarjeta -->
             <div class="bg-gradient-to-r from-[#C5A049] to-[#D8B96E] px-8 py-6">
                 <div class="flex items-center gap-3">
                     <div class="p-2 bg-white/20 rounded-lg">
@@ -40,11 +37,9 @@
                 </div>
             </div>
 
-            <!-- Formulario -->
             <form action="{{ route('plan-trabajo.store') }}" method="POST" class="p-8">
                 @csrf
 
-                <!-- Mensajes de validación -->
                 @if($errors->any())
                     <div class="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl">
                         <div class="flex items-center gap-3 mb-3">
@@ -68,9 +63,7 @@
                     </div>
                 @endif
 
-                <!-- Grid de campos -->
                 <div class="space-y-8">
-                    <!-- Año del Plan -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -121,7 +114,6 @@
                         </div>
                     </div>
 
-                    <!-- Descripción General -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 mb-3">
                             <span class="flex items-center gap-2">
@@ -140,7 +132,6 @@
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                         
-                        <!-- Plantillas sugeridas -->
                         <div class="mt-4">
                             <p class="text-sm font-medium text-gray-700 mb-2">Plantillas sugeridas:</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -160,7 +151,6 @@
                         </div>
                     </div>
 
-                    <!-- Configuración Inicial -->
                     <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                             <svg class="w-5 h-5 text-[#0C1C3C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +198,6 @@
                     </div>
                 </div>
 
-                <!-- Botones de acción -->
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-200">
                     <div class="text-sm text-gray-500 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,7 +224,6 @@
             </form>
         </div>
 
-        <!-- Información de ayuda -->
         <div class="mt-8 bg-gradient-to-r from-[#0C1C3C]/5 to-[#1A2A4F]/5 rounded-2xl p-6 border border-gray-200">
             <h3 class="text-lg font-semibold text-[#0C1C3C] mb-4 flex items-center gap-2">
                 <svg class="w-5 h-5 text-[#C5A049]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,9 +260,7 @@
         </div>
     </div>
 
-    <!-- Scripts para mejoras de UX -->
     <script>
-        // Función para establecer año rápidamente
         function setYear(year) {
             const yearInput = document.querySelector('input[name="anio"]');
             if (yearInput) {
@@ -283,7 +269,6 @@
             }
         }
         
-        // Función para establecer plantillas de descripción
         function setTemplate(templateType) {
             const textarea = document.querySelector('textarea[name="descripcion_general"]');
             if (!textarea) return;
@@ -299,7 +284,6 @@
             }
         }
         
-        // Función para limpiar el formulario
         function resetForm() {
             if (confirm('¿Estás seguro de que deseas limpiar todos los campos del formulario?')) {
                 document.querySelector('form').reset();
@@ -310,7 +294,6 @@
             }
         }
         
-        // Validación básica del año
         document.querySelector('input[name="anio"]')?.addEventListener('input', function(e) {
             let value = parseInt(this.value);
             if (value < 2024) this.value = 2024;

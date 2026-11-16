@@ -4,7 +4,6 @@
 
     <div class="emp-page">
 
-        {{-- Breadcrumb --}}
         <nav class="emp-breadcrumb">
             <a href="{{ route('dashboard') }}">Inicio</a>
             <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -17,10 +16,8 @@
             <span>Nuevo registro</span>
         </nav>
 
-        {{-- Card --}}
         <div class="emp-card">
 
-            {{-- Header --}}
             <div class="emp-header">
                 <div class="emp-header-icon">
                     <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
@@ -34,14 +31,12 @@
                 </div>
             </div>
 
-            {{-- Form --}}
             <div class="emp-body">
                 <form method="POST" action="{{ route('empleados.store') }}">
                     @csrf
 
                     @include('rrhh.empleados.partials.form')
 
-                    {{-- Footer --}}
                     <div class="emp-footer">
                         <a href="{{ route('empleados.index') }}" class="emp-btn-cancel">
                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <!-- Header Principal -->
         <div class="mb-8">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
@@ -22,7 +21,6 @@
             </div>
         </div>
 
-        <!-- Panel de Estadísticas -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             
 
@@ -77,10 +75,8 @@
 
         
 
-        <!-- Tabla de Planes -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             @if ($planes->isEmpty())
-                <!-- Estado vacío -->
                 <div class="py-16 text-center">
                     <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
                         <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,7 +126,6 @@
                                 @endphp
                                 
                                 <tr class="hover:bg-gray-50/80 transition-colors duration-200">
-                                    <!-- Año -->
                                     <td class="p-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0C1C3C] to-[#1A2A4F] flex items-center justify-center text-white font-bold text-lg shadow-md">
@@ -143,7 +138,6 @@
                                         </div>
                                     </td>
                                     
-                                    <!-- Estado -->
                                     <td class="p-4">
                                         <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold {{ $badgeClasses }}">
                                             @if($state == 'borrador')
@@ -167,7 +161,6 @@
                                         </div>
                                     </td>
                                     
-                                    <!-- Actividades -->
                                     <td class="p-4">
                                         <div class="flex items-center gap-3">
                                             <div class="p-2 bg-blue-50 rounded-lg">
@@ -185,10 +178,8 @@
                                         </div>
                                     </td>
                                     
-                                    <!-- Acciones -->
                                     <td class="p-4">
                                         <div class="flex items-center gap-2">
-                                            <!-- Ver -->
                                             <a href="{{ route('plan-trabajo.show', $plan->id) }}"
                                                class="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white text-sm font-medium rounded-xl hover:shadow-md transition-shadow duration-200">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +189,6 @@
                                                 Ver
                                             </a>
                                             
-                                            <!-- Editar -->
                                             <a href="{{ route('plan-trabajo.edit', $plan->id) }}"
                                                class="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] text-sm font-medium rounded-xl hover:shadow-md transition-shadow duration-200">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +204,6 @@
                     </table>
                 </div>
 
-                <!-- Paginación -->
                 @if(method_exists($planes, 'links'))
                     <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">

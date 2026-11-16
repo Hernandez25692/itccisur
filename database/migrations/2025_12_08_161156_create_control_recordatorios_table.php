@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('actividad');
             // Ej: "Renovación licencia Windows Server", "Dominio ccisur.hn"
 
-            // Opcional: tipo de elemento (no obligatorio, por si luego segmentás)
             $table->string('tipo')->nullable();
             // Ej: "licencia", "dominio", "soporte", "certificado SSL"
 
@@ -37,7 +36,6 @@ return new class extends Migration
             // Días antes del vencimiento para empezar a alertar
             $table->unsignedSmallInteger('dias_recordatorio')->default(15);
 
-            // Por si quieres pausar recordatorios o marcarlo como atendido
             $table->boolean('notificar')->default(true);
             $table->boolean('atendido')->default(false);
 

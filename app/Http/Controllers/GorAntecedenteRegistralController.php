@@ -64,7 +64,6 @@ class GorAntecedenteRegistralController extends Controller
             'tipo_libro' => 'nullable|string',
             'motivo' => 'nullable|string',
 
-            // 📸 comprobante
             'comprobante' => 'nullable|mimes:jpg,jpeg,png,heic,heif|max:10240',
 
         ]);
@@ -146,7 +145,6 @@ class GorAntecedenteRegistralController extends Controller
             'tipo_libro' => 'nullable|string',
             'motivo' => 'nullable|string',
 
-            // 📸 comprobante
             'comprobante' => 'nullable|mimes:jpg,jpeg,png,heic,heif|max:10240',
 
         ]);

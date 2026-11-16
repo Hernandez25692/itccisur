@@ -29,7 +29,6 @@ return new class extends Migration
             // Estado de la actividad
             $table->enum('estado', ['pendiente', 'en_proceso', 'resuelto'])->default('pendiente');
 
-            // Indicador si se solucionó o no (por si el gerente solo quiere ver esto rápido)
             $table->boolean('solucionado')->default(false);
 
             // Tiempos
@@ -42,7 +41,7 @@ return new class extends Migration
             $table->text('observaciones')->nullable();
 
             // Archivo de evidencia (foto, captura, etc.)
-            $table->string('evidencia')->nullable(); // guardaremos ruta del archivo
+            $table->string('evidencia')->nullable(); // ruta del archivo
 
             // Severidad / prioridad
             $table->enum('prioridad', ['baja', 'media', 'alta', 'critica'])->default('media');

@@ -19,7 +19,6 @@
             padding: 0;
         }
 
-        /* ================= HEADER ================= */
         .header-table {
             width: 100%;
             border-collapse: collapse;
@@ -44,7 +43,6 @@
             text-transform: uppercase;
         }
 
-        /* ================= INFO RUTA ================= */
         .box {
             border: 1px solid #000;
             padding: 6px;
@@ -66,7 +64,6 @@
             width: 130px;
         }
 
-        /* ================= EMPRESA ================= */
         .empresa {
             border: 1px solid #000;
             padding: 8px;
@@ -95,7 +92,6 @@
             text-decoration: none;
         }
 
-        /* ================= CONTROL ================= */
         .control {
             margin-top: 6px;
             border-top: 1px dashed #000;
@@ -109,7 +105,6 @@
             margin-top: 4px;
         }
 
-        /* ================= FOOTER ================= */
         .footer {
             text-align: center;
             font-size: 8pt;
@@ -121,7 +116,6 @@
 
 <body>
 
-    {{-- ================= HEADER ================= --}}
     <table class="header-table">
         <tr>
             <td>
@@ -138,7 +132,6 @@
 
     <div class="title">Ruta de Cobranza</div>
 
-    {{-- ================= INFO RUTA ================= --}}
     <div class="box">
         <table class="info-table">
             <tr>
@@ -160,7 +153,6 @@
         </table>
     </div>
 
-    {{-- ================= EMPRESAS ================= --}}
     @foreach ($ruta->empresas as $i => $e)
         <div class="empresa">
 
@@ -208,7 +200,6 @@
                             <strong>L. {{ number_format($e->valor_mora, 2) }}</strong>
                         </div>
 
-                        {{-- MAPS --}}
                         @if ($e->latitud && $e->longitud)
                             <p>
                                 
@@ -224,7 +215,6 @@
                             <p class="muted"> Sin coordenadas registradas</p>
                         @endif
 
-                        {{-- CONTROL MANUAL --}}
                         <div class="control">
                             <div><span class="label">Estado de visita:</span></div>
                             <div class="line"></div>
@@ -237,7 +227,6 @@
                     </div>
                 @endforeach
 
-                {{-- ================= FOOTER ================= --}}
                 <div class="footer">
                     CCISUR · Sistema de Cobranza<br>
                     Documento generado el {{ now()->format('d/m/Y H:i') }}

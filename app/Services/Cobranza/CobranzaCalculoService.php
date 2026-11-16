@@ -18,11 +18,6 @@ class CobranzaCalculoService
         // Asegurar relación corte cargada
         $empresa->loadMissing('corte');
 
-        /**
-         * =====================================================
-         * 1) FECHA ÚLTIMO PAGO (sistema o histórico)
-         * =====================================================
-         */
         $ultimoPagoSistema = $empresa->pagos()
             ->orderBy('fecha_pago', 'desc')
             ->first();
@@ -33,20 +28,8 @@ class CobranzaCalculoService
             $empresa->fecha_ultimo_pago = $empresa->fecha_ultimo_pago_historico;
         }
 
-        /**
-         * =====================================================
-         * 2) ✅ AUTO-GENERAR CARGOS VENCIDOS (SIN BOTÓN)
-         * =====================================================
-         * Genera cargos solo hasta HOY (vencidos o que vencen hoy),
-         * sin duplicar, y sin depender de vistas.
-         */
         $this->autogenerarCargosHastaHoy($empresa, $hoy);
 
-        /**
-         * =====================================================
-         * 3) PRÓXIMA FECHA DE COBRO (conservador)
-         * =====================================================
-         */
         $pendiente = $empresa->cargos()
             ->where('estado', 'pendiente')
             ->orderBy('fecha_vencimiento', 'asc')
@@ -58,23 +41,15 @@ class CobranzaCalculoService
             $empresa->proxima_fecha_cobro = $this->calcularProximoCorte($empresa, $hoy);
         }
 
-        /**
-         * =====================================================
-         * 4) MORA REAL (por vencimientos de corte)
-         * =====================================================
-         */
         $cuotasVencidas = 0;
         $valorMora = 0;
 
         if ($empresa->fecha_ultimo_pago) {
 
-            // 🔹 Cantidad de CUOTAS vencidas (no meses)
             $cuotasVencidas = $this->contarCuotasVencidasDesdeUltimoPago($empresa, $hoy);
 
-            // 🔹 Cuota mensual
             $cuotaMensual = $empresa->cuota_especial ?? $empresa->cuota_base;
 
-            // 🔹 Meses reales por tipo de pago
             $mesesPorCuota = match ($empresa->tipo_pago) {
                 'mensual'   => 1,
                 'bimensual' => 2,
@@ -84,20 +59,14 @@ class CobranzaCalculoService
                 default     => 1,
             };
 
-            // ✅ MORA REAL = cuotas vencidas × meses reales × cuota mensual
             $valorMora = $cuotasVencidas * $mesesPorCuota * (float)$cuotaMensual;
         }
 
-        // 👉 Este campo ahora representa CUOTAS vencidas
+        // meses_mora guarda cuotas vencidas, no meses
         $empresa->meses_mora = max(0, (int)$cuotasVencidas);
         $empresa->valor_mora = max(0, (float)$valorMora);
 
 
-        /**
-         * =====================================================
-         * 5) ESTATUS DE COBRANZA
-         * =====================================================
-         */
         if ($empresa->meses_mora > 0) {
             $empresa->estatus_cobranza = 'en_mora';
         } else {
@@ -105,20 +74,10 @@ class CobranzaCalculoService
             $empresa->valor_mora = 0;
         }
 
-        /**
-         * =====================================================
-         * 6) OBSERVACIÓN
-         * =====================================================
-         */
         $empresa->observacion_cobro = ($empresa->meses_mora >= 18)
             ? 'incobrable'
             : 'cobrable';
 
-        /**
-         * =====================================================
-         * 7) GUARDAR
-         * =====================================================
-         */
         $empresa->save();
     }
 
@@ -132,8 +91,7 @@ class CobranzaCalculoService
         // Seguridad: si no hay corte, no se puede calcular vencimiento real
         if (!$empresa->corte) return;
 
-        // Evitar loops infinitos: nadie debe 500 años 😄
-        $maxIter = 120; // 10 años mensual
+        $maxIter = 120; // tope: 10 años de cargos mensuales
 
         for ($i = 0; $i < $maxIter; $i++) {
 
@@ -159,8 +117,7 @@ class CobranzaCalculoService
                 if ($empresa->fecha_ultimo_pago) {
                     $inicio = Carbon::parse($empresa->fecha_ultimo_pago)->addDay();
                 } else {
-                    // Si no hay fecha base, no autogeneramos hacia atrás
-                    // (evita inventar historiales). Aquí solo generas desde este mes.
+                    // Sin fecha base no se generan cargos hacia atrás, solo desde este mes
                     $inicio = $hoy->copy()->startOfMonth();
                 }
             }
@@ -171,12 +128,10 @@ class CobranzaCalculoService
             $venc = Carbon::create($fin->year, $fin->month, 1)
                 ->day(min($diaCorte, $fin->daysInMonth));
 
-            // ✅ Si el siguiente cargo vencería en el futuro, paramos
             if ($venc->gt($hoy)) {
                 break;
             }
 
-            // ✅ Evitar duplicados por período (pendiente/pagado)
             $existe = $empresa->cargos()
                 ->whereIn('estado', ['pendiente', 'pagado'])
                 ->whereDate('periodo_inicio', $inicio->toDateString())

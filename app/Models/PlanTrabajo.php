@@ -20,7 +20,6 @@ class PlanTrabajo extends Model
         'comentario_gerencia',
     ];
 
-    // 👇 Aquí está la clave del error
     protected $casts = [
         'fecha_aprobacion' => 'date',
     ];

@@ -1,7 +1,6 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 space-y-6">
 
-        {{-- ================= HEADER ================= --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900">Empresas · Cobranza</h1>
@@ -56,7 +55,6 @@
             </div>
         </div>
 
-        {{-- ================= MENSAJES ================= --}}
         @if (session('success'))
             <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">
                 {{ session('success') }}
@@ -69,7 +67,6 @@
             </div>
         @endif
 
-        {{-- ================= FILTROS ================= --}}
         <form method="GET" class="bg-white rounded-2xl border p-4 grid grid-cols-1 md:grid-cols-7 gap-3">
 
             <input name="buscar" value="{{ request('buscar') }}" class="rounded-xl border-gray-300"
@@ -84,7 +81,6 @@
                 <option value="en_mora" @selected(request('estatus') === 'en_mora')>En mora</option>
             </select>
 
-            {{-- CORTE --}}
             <select name="corte_id" class="rounded-xl border-gray-300">
                 <option value="">Corte</option>
                 @foreach ($cortes as $corte)
@@ -94,7 +90,6 @@
                 @endforeach
             </select>
             
-            {{-- Tipo de pago --}}
             <select name="tipo_pago" class="rounded-xl border-gray-300">
                 <option value="">Tipo de pago</option>
                 @foreach (['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'] as $tp)
@@ -104,7 +99,6 @@
                 @endforeach
             </select>
 
-            {{-- Tipo de empresa --}}
             <select name="tipo_empresa_id" class="rounded-xl border-gray-300">
                 <option value="">Tipo empresa</option>
                 @foreach ($tiposEmpresa as $t)
@@ -114,7 +108,6 @@
                 @endforeach
             </select>
 
-            {{-- Categoría --}}
             <select name="categoria_id" class="rounded-xl border-gray-300">
                 <option value="">Categoría</option>
                 @foreach ($categorias as $c)
@@ -135,7 +128,6 @@
         </form>
 
 
-        {{-- ================= TABLA RMS ================= --}}
         <div class="bg-white rounded-2xl border overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead class="bg-gradient-to-r from-gray-900 to-gray-800 text-white">
@@ -158,29 +150,23 @@
                     @forelse ($empresas as $e)
                         <tr class="hover:bg-blue-50 transition duration-150">
 
-                            {{-- Empresa --}}
                             <td class="px-4 py-3">
                                 <div class="font-semibold text-gray-900">{{ $e->nombre_empresa }}</div>
                                 <div class="text-xs text-gray-500 mt-1">RTN: {{ $e->rtn_empresa }}</div>
                             </td>
 
-                            {{-- Ciudad --}}
                             <td class="px-4 py-3 text-gray-700">{{ $e->ciudad ?? '—' }}</td>
 
-                            {{-- Corte --}}
                             <td class="px-4 py-3 text-center text-gray-700">
                                 {{ $e->corte?->dia_corte ?? '-' }}
                             </td>
 
-                            {{-- Tipo --}}
                             <td class="px-4 py-3 text-gray-700">{{ strtoupper($e->tipo_pago) }}</td>
 
-                            {{-- Próximo cobro --}}
                             <td class="px-4 py-3 text-gray-700">
                                 {{ $e->proxima_fecha_cobro?->format('d/m/Y') ?? '—' }}
                             </td>
 
-                            {{-- Mora --}}
                             @php
                                 $moraReal = $e->cargos->where('estado', 'pendiente')->sum('total');
                             @endphp
@@ -190,7 +176,6 @@
                                 </span>
                             </td>
 
-                            {{-- Estatus --}}
                             <td class="px-4 py-3 text-center">
                                 @php
                                     $enMora = $e->cargos->where('estado', 'pendiente')->count() > 0;
@@ -202,12 +187,10 @@
                                 </span>
                             </td>
 
-                            {{-- Categoría --}}
                             @role('admin_ti|gerencia')
                                 <td class="px-4 py-3 text-gray-700">{{ $e->categoria?->nombre ?? '—' }}</td>
                             @endrole
 
-                            {{-- Acción --}}
                             <td class="px-4 py-3 text-center">
                                 <a href="{{ route('cobranza.empresas.show', $e) }}"
                                     class="inline-flex items-center px-3 py-1.5 rounded-lg border border-blue-300 bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-medium transition">
@@ -233,7 +216,6 @@
             </table>
         </div>
 
-        {{-- ================= PAGINACIÓN ================= --}}
         <div>
             {{ $empresas->links() }}
         </div>
