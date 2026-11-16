@@ -101,7 +101,7 @@
 
                     @if ($registro->comprobante_path)
                         <div class="mb-2">
-                            <a href="{{ asset('storage/' . $registro->comprobante_path) }}" target="_blank"
+                            <a href="{{ route('gor.antecedentes.comprobante', $registro->id) }}" target="_blank"
                                 class="text-sm text-blue-700 underline">
                                 Ver comprobante actual
                             </a>

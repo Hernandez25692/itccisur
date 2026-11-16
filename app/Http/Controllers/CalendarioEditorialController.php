@@ -6,7 +6,6 @@ use App\Models\CalendarioEditorial;
 use App\Models\CalendarioEditorialAdjunto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 
 class CalendarioEditorialController extends Controller
@@ -84,7 +83,7 @@ class CalendarioEditorialController extends Controller
         if ($request->hasFile('adjuntos')) {
             foreach ($request->file('adjuntos') as $index => $file) {
 
-                $ruta = $file->store('calendario_editorial', 'public');
+                $ruta = $file->store('calendario_editorial', 'local');
 
                 // Primer archivo = adjunto principal (compatibilidad)
                 if ($index === 0) {
@@ -166,7 +165,7 @@ class CalendarioEditorialController extends Controller
         if ($request->hasFile('adjuntos')) {
             foreach ($request->file('adjuntos') as $file) {
 
-                $ruta = $file->store('calendario_editorial', 'public');
+                $ruta = $file->store('calendario_editorial', 'local');
 
                 $calendarioEditorial->adjuntos()->create([
                     'ruta'            => $ruta,
@@ -184,6 +183,11 @@ class CalendarioEditorialController extends Controller
 
 
 
+    public function verAdjunto(CalendarioEditorialAdjunto $adjunto)
+    {
+        return $this->mostrarArchivo($adjunto->ruta);
+    }
+
     public function destroyAdjunto(CalendarioEditorialAdjunto $adjunto)
     {
         $cal = $adjunto->calendarioEditorial; // relación inversa (la ponemos en el modelo adjunto abajo)
@@ -196,9 +200,7 @@ class CalendarioEditorialController extends Controller
         }
 
         // Eliminar archivo físico
-        if ($adjunto->ruta) {
-            Storage::disk('public')->delete($adjunto->ruta);
-        }
+        $this->eliminarArchivo($adjunto->ruta);
 
         // Eliminar registro
         $adjunto->delete();

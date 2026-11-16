@@ -61,7 +61,7 @@ class ValidacionQrController extends Controller
                 'nombre_formacion' => $request->nombre_formacion,
                 'fecha' => $request->fecha_formacion,
                 'anio' => $request->anio,
-                'api_key' => 'CCISUR2026'
+                'api_key' => config('services.wordpress.api_key'),
             ]);
         } catch (\Exception $e) {
             // no romper el sistema si falla WP

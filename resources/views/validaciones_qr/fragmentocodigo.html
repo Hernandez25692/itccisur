@@ -78,7 +78,7 @@ add_action('rest_api_init', function () {
         'methods' => 'POST',
         'callback' => function ($request) {
 
-            if ($request['api_key'] !== 'CCISUR2026') {
+            if ($request['api_key'] !== 'PONER_AQUI_LA_MISMA_WORDPRESS_API_KEY_DEL_.ENV') {
                 return ['success' => false, 'mensaje' => 'No autorizado'];
             }
 

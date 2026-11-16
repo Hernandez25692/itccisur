@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\BitacoraActividad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class BitacoraActividadController extends Controller
 {
@@ -79,7 +78,7 @@ class BitacoraActividadController extends Controller
 
         // Evidencia
         if ($request->hasFile('evidencia')) {
-            $data['evidencia'] = $request->file('evidencia')->store('bitacora_evidencias', 'public');
+            $data['evidencia'] = $request->file('evidencia')->store('bitacora_evidencias', 'local');
         }
 
         // Marcar solucionado
@@ -130,10 +129,8 @@ class BitacoraActividadController extends Controller
 
         // Nueva evidencia
         if ($request->hasFile('evidencia')) {
-            if ($actividad->evidencia) {
-                Storage::disk('public')->delete($actividad->evidencia);
-            }
-            $data['evidencia'] = $request->file('evidencia')->store('bitacora_evidencias', 'public');
+            $this->eliminarArchivo($actividad->evidencia);
+            $data['evidencia'] = $request->file('evidencia')->store('bitacora_evidencias', 'local');
         }
 
         // Estado solucionado
@@ -160,5 +157,10 @@ class BitacoraActividadController extends Controller
     {
         $actividad = BitacoraActividad::with('user')->findOrFail($id);
         return view('bitacora.show', compact('actividad'));
+    }
+
+    public function evidencia($id)
+    {
+        return $this->mostrarArchivo(BitacoraActividad::findOrFail($id)->evidencia);
     }
 }

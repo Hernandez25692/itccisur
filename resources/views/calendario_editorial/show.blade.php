@@ -484,7 +484,7 @@
                                                 {{-- Adjuntos múltiples --}}
                                                 @foreach ($calendarioEditorial->adjuntos as $adjunto)
                                                     <div class="group">
-                                                        <button onclick="mostrarPreview('{{ asset('storage/' . $adjunto->ruta) }}', '{{ $adjunto->mime_type }}')"
+                                                        <button onclick="mostrarPreview('{{ route('calendario-editorial.adjuntos.show', $adjunto) }}', '{{ $adjunto->mime_type }}')"
                                                             class="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg
                                                             border border-gray-200 hover:bg-gray-100 hover:border-gray-300
                                                             transition-all duration-200">

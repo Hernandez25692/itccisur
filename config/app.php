@@ -79,7 +79,7 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'es'),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
@@ -122,6 +122,21 @@ return [
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Administrador inicial
+    |--------------------------------------------------------------------------
+    |
+    | Lo usa AdminUserSeeder. Si ADMIN_PASSWORD no está definido se genera una
+    | contraseña aleatoria y se muestra una sola vez en la consola.
+    |
+    */
+
+    'admin' => [
+        'email' => env('ADMIN_EMAIL', 'admin@gmail.com'),
+        'password' => env('ADMIN_PASSWORD'),
     ],
 
 ];

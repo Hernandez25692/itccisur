@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    // Sitio ccisur.org: recibe los certificados para la validación por QR
+    'wordpress' => [
+        'api_key' => env('WORDPRESS_API_KEY'),
+    ],
+
 ];

@@ -302,9 +302,9 @@
                         <div class="mb-6">
                             <p class="text-sm font-medium text-gray-700 mb-3">Evidencia Adjunta</p>
                             <div class="inline-block relative group cursor-pointer"
-                                onclick="openPreview('{{ asset('storage/' . $a->evidencia) }}', '{{ strtolower(pathinfo($a->evidencia, PATHINFO_EXTENSION)) }}')">
+                                onclick="openPreview('{{ route('bitacora.evidencia', $a->id) }}', '{{ strtolower(pathinfo($a->evidencia, PATHINFO_EXTENSION)) }}')">
                                 @php
-                                    $evidenciaPath = 'storage/' . $a->evidencia;
+                                    $evidenciaUrl = route('bitacora.evidencia', $a->id);
                                     $extension = strtolower(pathinfo($a->evidencia, PATHINFO_EXTENSION));
                                     $isPdf = $extension === 'pdf';
                                 @endphp
@@ -317,7 +317,7 @@
                                         </svg>
                                     </div>
                                 @else
-                                    <img src="{{ asset($evidenciaPath) }}" alt="Evidencia de actividad"
+                                    <img src="{{ $evidenciaUrl }}" alt="Evidencia de actividad"
                                         class="h-40 rounded-lg shadow-md border border-gray-200 object-cover group-hover:scale-105 transition-transform duration-300">
                                 @endif
 

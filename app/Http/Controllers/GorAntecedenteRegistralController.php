@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\GorAntecedenteRegistral;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class GorAntecedenteRegistralController extends Controller
@@ -83,7 +82,7 @@ class GorAntecedenteRegistralController extends Controller
             $path = $file->storeAs(
                 'gor/comprobantes',
                 $filename,
-                'public'
+                'local'
             );
         }
 
@@ -115,6 +114,11 @@ class GorAntecedenteRegistralController extends Controller
             ->findOrFail($id);
 
         return view('gor.antecedentes.show', compact('registro'));
+    }
+
+    public function comprobante($id)
+    {
+        return $this->mostrarArchivo(GorAntecedenteRegistral::findOrFail($id)->comprobante_path);
     }
 
     /**
@@ -154,9 +158,7 @@ class GorAntecedenteRegistralController extends Controller
         if ($request->hasFile('comprobante')) {
 
             // eliminar anterior si existe
-            if ($registro->comprobante_path) {
-                Storage::disk('public')->delete($registro->comprobante_path);
-            }
+            $this->eliminarArchivo($registro->comprobante_path);
 
             $file = $request->file('comprobante');
 
@@ -168,7 +170,7 @@ class GorAntecedenteRegistralController extends Controller
             $path = $file->storeAs(
                 'gor/comprobantes',
                 $filename,
-                'public'
+                'local'
             );
         }
 

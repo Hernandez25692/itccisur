@@ -483,7 +483,7 @@
 
                                                 <span class="text-lg">{{ $icono }}</span>
 
-                                                <a href="{{ asset('storage/' . $adjunto->ruta) }}" target="_blank"
+                                                <a href="{{ route('calendario-editorial.adjuntos.show', $adjunto) }}" target="_blank"
                                                     class="text-sm truncate hover:underline text-gray-800 flex-1">
                                                     {{ $adjunto->nombre_original }}
                                                 </a>

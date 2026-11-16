@@ -439,9 +439,9 @@
                     @if ($registro->comprobante_path)
                         <div class="comprobante-section">
                             <div class="comprobante-label">📎 Comprobante Adjunto</div>
-                            <a href="{{ asset('storage/' . $registro->comprobante_path) }}" target="_blank"
+                            <a href="{{ route('gor.antecedentes.comprobante', $registro->id) }}" target="_blank"
                                 class="comprobante-link">
-                                <img src="{{ asset('storage/' . $registro->comprobante_path) }}"
+                                <img src="{{ route('gor.antecedentes.comprobante', $registro->id) }}"
                                     alt="Comprobante del registro" class="comprobante-image">
                             </a>
                         </div>

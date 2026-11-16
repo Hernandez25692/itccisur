@@ -11,7 +11,6 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -358,17 +357,7 @@ class RrhhVacacionesController extends Controller
      */
     public function comprobante(RrhhVacacionesMovimiento $movimiento)
     {
-        $ruta = $movimiento->archivo_comprobante;
-
-        abort_unless($ruta, 404);
-
-        foreach (['local', 'public'] as $disco) {
-            if (Storage::disk($disco)->exists($ruta)) {
-                return Storage::disk($disco)->response($ruta);
-            }
-        }
-
-        abort(404);
+        return $this->mostrarArchivo($movimiento->archivo_comprobante);
     }
 
     /**

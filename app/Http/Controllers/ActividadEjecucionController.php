@@ -40,7 +40,7 @@ class ActividadEjecucionController extends Controller
         // 5. Guardar evidencia
         $path = null;
         if ($request->hasFile('evidencia')) {
-            $path = $request->file('evidencia')->store('evidencias', 'public');
+            $path = $request->file('evidencia')->store('evidencias', 'local');
         }
 
         // 6. Registrar ejecución
@@ -67,5 +67,10 @@ class ActividadEjecucionController extends Controller
         }
 
         return back()->with('success', 'Avance registrado correctamente.');
+    }
+
+    public function evidencia(ActividadEjecucion $ejecucion)
+    {
+        return $this->mostrarArchivo($ejecucion->evidencia);
     }
 }

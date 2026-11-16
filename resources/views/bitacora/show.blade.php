@@ -230,11 +230,11 @@
                         </div>
                         <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                             <div class="relative group">
-                                <img src="{{ asset('storage/' . $actividad->evidencia) }}" 
+                                <img src="{{ route('bitacora.evidencia', $actividad->id) }}" 
                                      class="w-full max-h-96 object-contain rounded-lg shadow-lg border border-gray-300 group-hover:scale-[1.02] transition-transform duration-300"
                                      alt="Evidencia del incidente">
                                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                    <a href="{{ asset('storage/' . $actividad->evidencia) }}" target="_blank" 
+                                    <a href="{{ route('bitacora.evidencia', $actividad->id) }}" target="_blank" 
                                        class="bg-white/90 p-3 rounded-full shadow-lg hover:scale-110 transition-transform">
                                         <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m0 0l3-3m-3 3l-3-3"></path>
@@ -243,7 +243,7 @@
                                 </div>
                             </div>
                             <div class="mt-4 text-center">
-                                <a href="{{ asset('storage/' . $actividad->evidencia) }}" target="_blank"
+                                <a href="{{ route('bitacora.evidencia', $actividad->id) }}" target="_blank"
                                    class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white rounded-xl hover:shadow-md transition-shadow">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>

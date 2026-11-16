@@ -36,6 +36,7 @@
         });
 
     Route::get('/dashboard-ti', [DashboardTIController::class, 'index'])
+        ->middleware(['auth', 'role:admin_ti|gerencia'])
         ->name('dashboard-ti.index');
 
     Route::middleware(['auth'])->group(function () {
@@ -46,11 +47,11 @@
     Route::get('/qr-preview/{token}', [ValidacionQrController::class, 'qrPreview']);
 
 
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth', 'role:GOR|admin_ti|gerencia|GOR_Gerencia'])->group(function () {
         Route::get('/gor/resumen', [GorResumenController::class, 'index'])->name('gor.resumen');
     });
 
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
 
         Route::get(
             'plan-trabajo/{plan}/actividad/create',
@@ -68,11 +69,16 @@
             'plan-actividad/{plan_actividad}/ejecucion',
             [\App\Http\Controllers\ActividadEjecucionController::class, 'store']
         )->name('actividad.ejecucion.store');
+
+        Route::get(
+            'actividad-ejecucion/{ejecucion}/evidencia',
+            [\App\Http\Controllers\ActividadEjecucionController::class, 'evidencia']
+        )->name('actividad.ejecucion.evidencia');
     });
 
 
 
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
 
         Route::prefix('control')->group(function () {
             Route::get('/', [\App\Http\Controllers\ControlRecordatorioController::class, 'index'])->name('control.index');
@@ -120,6 +126,9 @@
                 '/antecedentes/{id}',
                 [GorAntecedenteRegistralController::class, 'show']
             )->name('antecedentes.show');
+
+            Route::get('/antecedentes/{id}/comprobante', [GorAntecedenteRegistralController::class, 'comprobante'])
+                ->name('antecedentes.comprobante');
         });
 
 
@@ -156,6 +165,11 @@
                 ->name('show');
         });
 
+    Route::get(
+        '/calendario-editorial/adjuntos/{adjunto}',
+        [CalendarioEditorialController::class, 'verAdjunto']
+    )->name('calendario-editorial.adjuntos.show');
+
     Route::delete(
         '/calendario-editorial/adjuntos/{adjunto}',
         [CalendarioEditorialController::class, 'destroyAdjunto']
@@ -163,7 +177,7 @@
 
 
     // Bitácora de Actividades TI
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
 
         Route::get('/bitacora', [App\Http\Controllers\BitacoraActividadController::class, 'index'])
             ->name('bitacora.index');
@@ -179,23 +193,21 @@
 
         Route::put('/bitacora/{id}', [App\Http\Controllers\BitacoraActividadController::class, 'update'])
             ->name('bitacora.update');
+
+        Route::get('/bitacora/{id}/evidencia', [App\Http\Controllers\BitacoraActividadController::class, 'evidencia'])
+            ->name('bitacora.evidencia');
     });
     Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
         Route::get('/gerente/dashboard-ti', [App\Http\Controllers\DashboardTIController::class, 'index'])
             ->name('dashboard.ti');
     });
 
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
 
         Route::resource('plan-trabajo', PlanTrabajoController::class)
             ->parameters(['plan-trabajo' => 'plan']);
 
-
-        Route::post(
-            'plan-trabajo/{plan}/aprobar',
-            [PlanTrabajoController::class, 'aprobar']
-        )
-            ->name('plan-trabajo.aprobar');
+        // aprobar/rechazar están más abajo, solo para gerencia
 
         Route::get(
             'plan-actividad/{actividad}/edit',

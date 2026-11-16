@@ -358,7 +358,7 @@
 
                                 <div class="flex items-center gap-4">
                                     @if ($e->evidencia)
-                                        <a href="{{ asset('storage/' . $e->evidencia) }}" target="_blank"
+                                        <a href="{{ route('actividad.ejecucion.evidencia', $e) }}" target="_blank"
                                             class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white text-sm font-medium rounded-xl hover:shadow-md transition-shadow">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">

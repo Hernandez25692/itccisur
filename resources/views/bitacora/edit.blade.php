@@ -346,10 +346,10 @@
                         <div class="mb-4 bg-gray-50 border border-gray-200 rounded-xl p-6">
                             <h4 class="font-semibold text-gray-700 mb-3">Evidencia Actual</h4>
                             <div class="flex items-center gap-4">
-                                <img src="{{ asset('storage/' . $actividad->evidencia) }}" 
+                                <img src="{{ route('bitacora.evidencia', $actividad->id) }}" 
                                      class="h-32 rounded-lg shadow border border-gray-300 object-cover">
                                 <div>
-                                    <a href="{{ asset('storage/' . $actividad->evidencia) }}" target="_blank"
+                                    <a href="{{ route('bitacora.evidencia', $actividad->id) }}" target="_blank"
                                        class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white text-sm rounded-xl hover:shadow-md transition-shadow">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
