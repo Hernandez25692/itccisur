@@ -4,12 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\CalendarioEditorial;
 use App\Models\CalendarioEditorialAdjunto;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class CalendarioEditorialController extends Controller
 {
+    private const FILTROS = ['buscar', 'area', 'red', 'tipo', 'creado_por'];
+
+    /** Tipos de adjunto permitidos (sin HTML/SVG/ejecutables: se sirven desde el sistema). */
+    private const MIMES_ADJUNTOS = 'jpg,jpeg,png,gif,webp,mp4,mov,avi,webm,pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar';
+
     public function __construct()
     {
         $this->middleware(['auth', 'role:admin_ti|gerencia|usuario|calendario']);
@@ -17,49 +25,56 @@ class CalendarioEditorialController extends Controller
 
     public function index(Request $request)
     {
-        $query = CalendarioEditorial::query()
-            ->with('creador', 'publicadoPor')
-            ->orderBy('fecha_publicacion');
+        $filtros = $request->only(self::FILTROS);
 
-        // Filtros
-        $query->semana($request->semana)
-            ->estado($request->estado)
+        $base = fn () => CalendarioEditorial::query()
+            ->filtrar($filtros)
+            ->semana($request->semana)
             ->mes($request->mes)
             ->anio($request->anio);
 
-
-
-        $registros = $query
+        $registros = $base()
+            ->estado($request->estado)
+            ->with('creador', 'publicadoPor')
             ->orderBy('fecha_publicacion', 'desc')
+            ->orderBy('hora', 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        return view('calendario_editorial.index', compact('registros'));
+        // Contadores por estado con los mismos filtros (menos el de estado)
+        $porEstado = $base()
+            ->select('estado', DB::raw('COUNT(*) as total'))
+            ->groupBy('estado')
+            ->pluck('total', 'estado');
+
+        $vencidas = $base()->vencidas()->count();
+
+        $anios = CalendarioEditorial::selectRaw('DISTINCT ' . $this->sqlAnio() . ' as anio')
+            ->orderByDesc('anio')
+            ->pluck('anio')
+            ->push(now()->year)
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        $creadores = User::whereIn('id', CalendarioEditorial::select('creado_por')->whereNotNull('creado_por')->distinct())
+            ->orderBy('name')
+            ->pluck('name', 'id');
+
+        return view('calendario_editorial.index', compact('registros', 'porEstado', 'vencidas', 'anios', 'creadores'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('calendario_editorial.create');
+        // Desde la vista calendario se puede llegar con el día ya elegido
+        $fechaSugerida = $this->fechaDeQuery($request, 'fecha');
+
+        return view('calendario_editorial.create', compact('fechaSugerida'));
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'semana'            => 'required|integer',
-            'dia'               => 'required|string',
-            'fecha_publicacion' => 'required|date',
-            'hora'              => 'nullable',
-            'tema'              => 'required|string',
-            'area'              => 'nullable|string',
-            'encabezado'        => 'nullable|string',
-            'contenido'         => 'nullable|array',
-            'publicar_en'       => 'nullable|array',
-            'etiquetas'         => 'nullable|string',
-            'comentario'        => 'nullable|string',
-
-            'adjuntos'          => 'nullable|array',
-            'adjuntos.*'        => 'file|max:20480',
-        ]);
+        $data = $request->validate($this->reglas());
 
         $data['creado_por'] = Auth::id();
         $data['estado']     = 'pendiente';
@@ -67,28 +82,7 @@ class CalendarioEditorialController extends Controller
         // Crear publicación
         $calendario = CalendarioEditorial::create($data);
 
-        if ($request->hasFile('adjuntos')) {
-            foreach ($request->file('adjuntos') as $index => $file) {
-
-                $ruta = $file->store('calendario_editorial', 'local');
-
-                // Primer archivo = adjunto principal (compatibilidad)
-                if ($index === 0) {
-                    $calendario->update([
-                        'adjunto_path'   => $ruta,
-                        'adjunto_nombre' => $file->getClientOriginalName(),
-                    ]);
-                }
-
-                // Todos van a la tabla de adjuntos
-                $calendario->adjuntos()->create([
-                    'ruta'            => $ruta,
-                    'nombre_original' => $file->getClientOriginalName(),
-                    'mime_type'       => $file->getMimeType(),
-                    'tamano'          => $file->getSize(),
-                ]);
-            }
-        }
+        $this->guardarAdjuntos($request, $calendario);
 
         return redirect()
             ->route('calendario-editorial.index')
@@ -97,39 +91,39 @@ class CalendarioEditorialController extends Controller
 
     public function edit(CalendarioEditorial $calendarioEditorial)
     {
-        if (
-            Auth::user()->hasRole('calendario') &&
-            $calendarioEditorial->creado_por !== Auth::id()
-        ) {
-            abort(403);
-        }
+        abort_unless($calendarioEditorial->puedeEditar(Auth::user()), 403);
+
+        $calendarioEditorial->load('adjuntos');
 
         return view('calendario_editorial.edit', compact('calendarioEditorial'));
     }
 
     public function update(Request $request, CalendarioEditorial $calendarioEditorial)
     {
-        $data = $request->validate([
-            'semana'            => 'required|integer',
-            'dia'               => 'required|string',
-            'fecha_publicacion' => 'required|date',
-            'hora'              => 'nullable',
-            'tema'              => 'required|string',
-            'area'              => 'nullable|string',
-            'encabezado'        => 'nullable|string',
-            'contenido'         => 'nullable|array',
-            'publicar_en'       => 'nullable|array',
-            'etiquetas'         => 'nullable|string',
-            'comentario'        => 'nullable|string',
-            'estado'            => 'required|in:pendiente,publicado,reprogramado,cancelado',
-            'enlace'            => 'nullable|string',
-            'adjuntos'   => 'nullable|array',
-            'adjuntos.*' => 'file|max:20480',
-        ]);
+        abort_unless($calendarioEditorial->puedeEditar(Auth::user()), 403);
+
+        $esAdmin = Auth::user()->hasRole('admin_ti');
+
+        if ($esAdmin && $request->filled('enlace') && !preg_match('#^https?://#i', $request->enlace)) {
+            $request->merge(['enlace' => 'https://' . ltrim($request->enlace, '/')]);
+        }
+
+        // Estado, enlace y nota administrativa solo los cambia admin_ti
+        $reglas = $this->reglas() + ($esAdmin ? [
+            'estado'     => ['required', Rule::in(CalendarioEditorial::ESTADOS)],
+            'enlace'     => 'nullable|url:http,https|max:2048',
+            'nota_admin' => 'nullable|string',
+        ] : []);
+
+        $data = $request->validate($reglas);
+
+        // Si se desmarcan todas las casillas, el navegador no manda el campo
+        $data['contenido']   = $data['contenido'] ?? null;
+        $data['publicar_en'] = $data['publicar_en'] ?? null;
 
         // Control de publicación
         if (
-            $data['estado'] === 'publicado' &&
+            ($data['estado'] ?? null) === 'publicado' &&
             $calendarioEditorial->estado !== 'publicado'
         ) {
             $data['fecha_publicado'] = now();
@@ -139,26 +133,12 @@ class CalendarioEditorialController extends Controller
         // Actualizar datos principales
         $calendarioEditorial->update($data);
 
-        if ($request->hasFile('adjuntos')) {
-            foreach ($request->file('adjuntos') as $file) {
-
-                $ruta = $file->store('calendario_editorial', 'local');
-
-                $calendarioEditorial->adjuntos()->create([
-                    'ruta'            => $ruta,
-                    'nombre_original' => $file->getClientOriginalName(),
-                    'mime_type'       => $file->getMimeType(),
-                    'tamano'          => $file->getSize(),
-                ]);
-            }
-        }
+        $this->guardarAdjuntos($request, $calendarioEditorial);
 
         return redirect()
             ->route('calendario-editorial.index')
             ->with('success', 'Actividad actualizada correctamente');
     }
-
-
 
     public function verAdjunto(CalendarioEditorialAdjunto $adjunto)
     {
@@ -167,14 +147,10 @@ class CalendarioEditorialController extends Controller
 
     public function destroyAdjunto(CalendarioEditorialAdjunto $adjunto)
     {
-        $cal = $adjunto->calendarioEditorial;
+        $cal = $adjunto->calendario;
 
-        // Seguridad:
-        // - admin_ti puede borrar cualquiera
-        // - rol calendario solo puede borrar los que él creó
-        if (Auth::user()->hasRole('calendario') && $cal->creado_por !== Auth::id()) {
-            abort(403);
-        }
+        // Mismo permiso que para editar la publicación
+        abort_unless($cal && $cal->puedeEditar(Auth::user()), 403);
 
         // Eliminar archivo físico
         $this->eliminarArchivo($adjunto->ruta);
@@ -182,9 +158,17 @@ class CalendarioEditorialController extends Controller
         // Eliminar registro
         $adjunto->delete();
 
+        // El adjunto "principal" (columna antigua) pasa al siguiente que quede
+        if ($cal->adjunto_path === $adjunto->ruta) {
+            $siguiente = $cal->adjuntos()->oldest()->first();
+            $cal->update([
+                'adjunto_path'   => $siguiente?->ruta,
+                'adjunto_nombre' => $siguiente?->nombre_original,
+            ]);
+        }
+
         return response()->json(['success' => true]);
     }
-
 
     public function marcarPublicado(CalendarioEditorial $calendarioEditorial)
     {
@@ -201,27 +185,113 @@ class CalendarioEditorialController extends Controller
 
     public function show(CalendarioEditorial $calendarioEditorial)
     {
+        $calendarioEditorial->load('adjuntos', 'creador', 'publicadoPor');
+
         return view('calendario_editorial.show', compact('calendarioEditorial'));
     }
 
     public function calendar()
     {
-        $eventos = CalendarioEditorial::orderBy('fecha_publicacion')
+        return view('calendario_editorial.calendar');
+    }
+
+    /**
+     * Feed JSON para FullCalendar: solo el rango visible (start/end) y con los
+     * mismos filtros del listado.
+     */
+    public function eventos(Request $request)
+    {
+        $inicio = $this->fechaDeQuery($request, 'start') ?? now()->startOfMonth()->subWeek()->toDateString();
+        $fin    = $this->fechaDeQuery($request, 'end') ?? now()->endOfMonth()->addWeek()->toDateString();
+
+        $eventos = CalendarioEditorial::query()
+            ->filtrar($request->only(self::FILTROS))
+            ->estado($request->estado)
+            ->whereDate('fecha_publicacion', '>=', $inicio)
+            ->whereDate('fecha_publicacion', '<', $fin)
+            ->orderBy('fecha_publicacion')
             ->orderBy('hora')
             ->get()
-            ->map(function ($evento) {
-                return [
-                    'id'    => $evento->id,
-                    'title' => $evento->tema ?? 'Sin título',
-                    'start' => $evento->fecha_publicacion
-                        ? \Carbon\Carbon::parse($evento->fecha_publicacion)->format('Y-m-d')
-                        : null,
-                    'url'   => route('calendario-editorial.show', $evento->id),
-                ];
-            })
-            ->filter(fn($evento) => !empty($evento['start']))
-            ->values();
+            ->map(fn (CalendarioEditorial $e) => [
+                'id'              => $e->id,
+                'title'           => $e->tema ?: 'Sin título',
+                'start'           => $e->fecha_publicacion->format('Y-m-d') . ($e->hora ? 'T' . substr($e->hora, 0, 5) : ''),
+                'allDay'          => !$e->hora,
+                'url'             => route('calendario-editorial.show', $e),
+                'backgroundColor' => $e->color,
+                'borderColor'     => $e->color,
+                'extendedProps'   => [
+                    'estado' => $e->estado,
+                    'area'   => $e->area,
+                    'redes'  => $e->publicar_en ?? [],
+                    'hora'   => $e->hora ? substr($e->hora, 0, 5) : null,
+                ],
+            ]);
 
-        return view('calendario_editorial.calendar', compact('eventos'));
+        return response()->json($eventos);
+    }
+
+    private function reglas(): array
+    {
+        return [
+            'semana'            => 'nullable|integer|min:1|max:53',
+            'dia'               => 'nullable|string', // se recalcula desde la fecha
+            'fecha_publicacion' => 'required|date',
+            'hora'              => 'nullable|date_format:H:i,H:i:s',
+            'tema'              => 'required|string',
+            'area'              => 'nullable|string|max:120',
+            'encabezado'        => 'nullable|string',
+            'contenido'         => 'nullable|array',
+            'contenido.*'       => ['string', Rule::in(CalendarioEditorial::TIPOS_CONTENIDO)],
+            'publicar_en'       => 'nullable|array',
+            'publicar_en.*'     => ['string', Rule::in(CalendarioEditorial::REDES)],
+            'etiquetas'         => 'nullable|string',
+            'comentario'        => 'nullable|string',
+            'adjuntos'          => 'nullable|array',
+            'adjuntos.*'        => 'file|max:20480|mimes:' . self::MIMES_ADJUNTOS,
+        ];
+    }
+
+    private function guardarAdjuntos(Request $request, CalendarioEditorial $calendario): void
+    {
+        if (!$request->hasFile('adjuntos')) {
+            return;
+        }
+
+        foreach ($request->file('adjuntos') as $file) {
+            $ruta = $file->store('calendario_editorial', 'local');
+
+            // El primero queda como adjunto principal (compatibilidad con registros antiguos)
+            if (!$calendario->adjunto_path) {
+                $calendario->update([
+                    'adjunto_path'   => $ruta,
+                    'adjunto_nombre' => $file->getClientOriginalName(),
+                ]);
+            }
+
+            $calendario->adjuntos()->create([
+                'ruta'            => $ruta,
+                'nombre_original' => $file->getClientOriginalName(),
+                'mime_type'       => $file->getMimeType(),
+                'tamano'          => $file->getSize(),
+            ]);
+        }
+    }
+
+    /** Fecha Y-m-d de un parámetro de la URL, o null si no viene o no es una fecha. */
+    private function fechaDeQuery(Request $request, string $clave): ?string
+    {
+        if (!$request->filled($clave)) {
+            return null;
+        }
+
+        return rescue(fn () => Carbon::parse($request->query($clave))->toDateString(), null, false);
+    }
+
+    private function sqlAnio(): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%Y', fecha_publicacion) AS INTEGER)"
+            : 'YEAR(fecha_publicacion)';
     }
 }

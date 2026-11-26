@@ -295,15 +295,13 @@
                                 Estado
                             </span>
                         </label>
-                        <select name="estado"
-                                class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('estado') ? 'border-red-300' : 'border-gray-200' }} rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors">
-                            <option value="pendiente" {{ old('estado', $actividad->estado) == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
-                            <option value="en_progreso" {{ old('estado', $actividad->estado) == 'en_progreso' ? 'selected' : '' }}>En progreso</option>
-                            <option value="finalizado" {{ old('estado', $actividad->estado) == 'finalizado' ? 'selected' : '' }}>Finalizado</option>
-                        </select>
-                        @error('estado')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        <div class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-700">
+                            {{ $actividad->progreso >= 100 ? 'Finalizada' : ($actividad->progreso > 0 ? 'En progreso' : 'Pendiente') }}
+                            · {{ $actividad->progreso }}%
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500">
+                            El estado se calcula con los avances registrados (en la actividad o desde la Bitácora TI).
+                        </p>
                     </div>
                 </div>
 

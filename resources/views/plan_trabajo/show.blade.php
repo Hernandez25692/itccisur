@@ -1,6 +1,8 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
 
+        <x-flash class="!mb-0" />
+
         <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] rounded-2xl p-8 text-white shadow-xl">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div class="flex-1">
@@ -42,6 +44,13 @@
                                 </svg>
                             @endif
                             {{ ucfirst($plan->estado) }}
+                        </div>
+
+                        <div class="flex items-center gap-3 min-w-[220px]">
+                            <div class="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-[#C5A049]" style="width: {{ $resumen['avance'] }}%"></div>
+                            </div>
+                            <span class="text-sm font-bold">{{ $resumen['avance'] }}% de avance</span>
                         </div>
 
                         @if ($plan->fecha_aprobacion)
@@ -109,9 +118,30 @@
             </div>
         </div>
 
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            @foreach ([
+                ['Actividades', $resumen['total'], 'text-[#0C1C3C]', null],
+                ['Finalizadas', $resumen['finalizadas'], 'text-green-600', 'finalizado'],
+                ['En progreso', $resumen['en_progreso'], 'text-blue-600', 'en_progreso'],
+                ['Pendientes', $resumen['pendientes'], 'text-yellow-600', 'pendiente'],
+                ['Atrasadas', $resumen['atrasadas'], 'text-red-600', 'atrasada'],
+            ] as [$etiqueta, $valor, $color, $situacion])
+                <a href="{{ route('plan-trabajo.show', array_filter(['plan' => $plan->id, 'situacion' => $situacion])) }}"
+                    class="bg-white rounded-2xl border p-4 shadow-sm hover:shadow-md transition {{ ($filtros['situacion'] ?? null) === $situacion && $situacion ? 'border-[#C5A049] ring-2 ring-[#C5A049]/30' : 'border-gray-200' }}">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ $etiqueta }}</p>
+                    <p class="text-3xl font-bold mt-1 {{ $color }}">{{ $valor }}</p>
+                </a>
+            @endforeach
+            <a href="{{ route('bitacora.index', ['plan' => 'con']) }}"
+                class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Bitácoras vinculadas</p>
+                <p class="text-3xl font-bold mt-1 text-[#C5A049]">{{ $resumen['bitacoras'] }}</p>
+            </a>
+        </div>
+
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <div class="p-8">
-                <div class="flex items-center justify-between mb-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div class="flex items-center gap-3">
                         <div class="p-3 bg-gradient-to-r from-[#C5A049]/10 to-[#D8B96E]/10 rounded-xl">
                             <svg class="w-6 h-6 text-[#C5A049]" fill="none" stroke="currentColor"
@@ -123,13 +153,18 @@
                         </div>
                         <div>
                             <h2 class="text-2xl font-bold text-gray-900">Actividades del Plan</h2>
-                            <p class="text-gray-600">Total: {{ $plan->actividades->count() }} actividades registradas
+                            <p class="text-gray-600">
+                                @if (count(array_filter($filtros)))
+                                    Mostrando {{ $actividades->count() }} de {{ $resumen['total'] }} actividades
+                                @else
+                                    Total: {{ $resumen['total'] }} actividades registradas
+                                @endif
                             </p>
                         </div>
                     </div>
 
                     @role('admin_ti')
-                        @if ($plan->estado === 'borrador' || $plan->estado === 'rechazado')
+                        @if ($plan->esEditable())
                             <a href="{{ route('plan-actividad.create', $plan->id) }}"
                                 class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,7 +177,46 @@
                     @endrole
                 </div>
 
-                @if ($plan->actividades->count() == 0)
+                @if ($resumen['total'] > 0)
+                    <form method="GET" class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                        <input type="text" name="buscar" value="{{ $filtros['buscar'] ?? '' }}" placeholder="Buscar actividad u objetivo"
+                            class="md:col-span-2 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+                        <select name="seccion" class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+                            <option value="">Todas las secciones</option>
+                            @foreach ($secciones as $s)
+                                <option value="{{ $s }}" @selected(($filtros['seccion'] ?? '') === $s)>{{ $s }}</option>
+                            @endforeach
+                        </select>
+                        <select name="situacion" class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+                            <option value="">Cualquier situación</option>
+                            @foreach (['pendiente' => 'Pendiente', 'en_progreso' => 'En progreso', 'finalizado' => 'Finalizada', 'atrasada' => 'Atrasada'] as $valor => $texto)
+                                <option value="{{ $valor }}" @selected(($filtros['situacion'] ?? '') === $valor)>{{ $texto }}</option>
+                            @endforeach
+                        </select>
+                        <select name="responsable" class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+                            <option value="">Cualquier responsable</option>
+                            @foreach ($responsables as $r)
+                                <option value="{{ $r }}" @selected(($filtros['responsable'] ?? '') === $r)>{{ $r }}</option>
+                            @endforeach
+                        </select>
+                        <div class="flex gap-2">
+                            <select name="mes" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+                                <option value="">Mes</option>
+                                @foreach (\App\Models\PlanActividad::MESES as $n => $nombre)
+                                    <option value="{{ $n }}" @selected((int) ($filtros['mes'] ?? 0) === $n)>{{ $nombre }}</option>
+                                @endforeach
+                            </select>
+                            <button class="px-4 py-2 bg-[#0C1C3C] text-white rounded-lg text-sm font-medium hover:bg-[#1A2A4F]">Filtrar</button>
+                        </div>
+                        @if (count(array_filter($filtros)))
+                            <div class="md:col-span-6 text-right">
+                                <a href="{{ route('plan-trabajo.show', $plan) }}" class="text-sm text-[#C5A049] hover:text-[#B59038] font-medium">Limpiar filtros</a>
+                            </div>
+                        @endif
+                    </form>
+                @endif
+
+                @if ($resumen['total'] == 0)
                     <div class="py-12 text-center">
                         <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
                             <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor"
@@ -154,6 +228,11 @@
                         </div>
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">No hay actividades registradas</h3>
                         <p class="text-gray-600">Comienza agregando la primera actividad al plan.</p>
+                    </div>
+                @elseif ($actividades->isEmpty())
+                    <div class="py-10 text-center text-gray-600">
+                        Ninguna actividad coincide con los filtros.
+                        <a href="{{ route('plan-trabajo.show', $plan) }}" class="text-[#C5A049] font-medium">Ver todas</a>
                     </div>
                 @else
                     <div class="overflow-x-auto rounded-xl border border-gray-200">
@@ -170,32 +249,29 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
-                                @php
-                                    $agrupadas = $plan->actividades->groupBy('seccion');
-                                @endphp
-                                @php
-                                    $contadorSeccion = 1;
-                                @endphp
-
-                                @foreach ($agrupadas as $seccion => $actividades)
+                                @foreach ($actividades->groupBy('seccion') as $seccion => $grupo)
                                     <tr class="bg-[#0C1C3C]/10">
                                         <td colspan="7"
                                             class="px-4 py-3 text-left font-bold text-[#0C1C3C] text-lg tracking-wide">
-                                            {{ $contadorSeccion }} — {{ strtoupper($seccion) }}
+                                            {{ $numeroSeccion[$seccion] ?? '' }} — {{ strtoupper($seccion) }}
                                         </td>
                                     </tr>
 
-                                    @php
-                                        $contadorActividad = 1;
-                                    @endphp
-
-                                    @foreach ($actividades as $act)
-                                        <tr class="hover:bg-gray-50 transition-colors">
+                                    @foreach ($grupo as $act)
+                                        @php
+                                            $progreso = $act->progreso;
+                                            [$estadoTexto, $estadoClase] = match (true) {
+                                                $progreso >= 100 => ['Completado', 'bg-green-100 text-green-800'],
+                                                $progreso > 0 => ['En progreso', 'bg-blue-100 text-blue-800'],
+                                                default => ['Pendiente', 'bg-yellow-100 text-yellow-800'],
+                                            };
+                                        @endphp
+                                        <tr class="hover:bg-gray-50 transition-colors {{ $act->atrasada ? 'bg-red-50/40' : '' }}">
 
                                             <td class="p-4">
                                                 <span
                                                     class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#0C1C3C]/10 text-[#0C1C3C]">
-                                                    {{ $contadorSeccion }}.{{ $contadorActividad }}
+                                                    {{ $numeracion[$act->id] ?? $act->codigo }}
                                                 </span>
                                             </td>
 
@@ -203,6 +279,12 @@
                                                 <div>
                                                     <p class="font-medium text-gray-900">{{ $act->actividad }}</p>
                                                     <p class="text-sm text-gray-500 mt-1">{{ $act->objetivo }}</p>
+                                                    @if ($act->bitacoras_count)
+                                                        <a href="{{ route('bitacora.index', ['plan_actividad_id' => $act->id]) }}"
+                                                            class="inline-flex items-center gap-1 mt-2 text-xs font-medium text-[#B59038] hover:underline">
+                                                            📋 {{ $act->bitacoras_count }} registro{{ $act->bitacoras_count > 1 ? 's' : '' }} en bitácora
+                                                        </a>
+                                                    @endif
                                                 </div>
                                             </td>
 
@@ -210,7 +292,7 @@
                                                 <div class="flex items-center gap-2">
                                                     <div
                                                         class="w-8 h-8 rounded-full bg-gradient-to-r from-[#C5A049] to-[#D8B96E] flex items-center justify-center text-[#0C1C3C] text-xs font-bold">
-                                                        {{ strtoupper(substr($act->responsable ?? '?', 0, 1)) }}
+                                                        {{ strtoupper(mb_substr($act->responsable ?? '?', 0, 1)) }}
                                                     </div>
                                                     <span
                                                         class="text-sm font-medium text-gray-900">{{ $act->responsable }}</span>
@@ -219,63 +301,57 @@
 
                                             <td class="p-4">
                                                 <div class="text-sm">
-                                                    <div class="font-medium text-gray-900">{{ $act->fecha_ejecucion }}
-                                                    </div>
+                                                    <div class="font-medium text-gray-900">{{ $act->fecha_ejecucion }}</div>
                                                     <div class="text-gray-500">{{ $act->mes_previsto }}</div>
                                                 </div>
                                             </td>
 
                                             <td class="p-4">
-                                                <span
-                                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                    @if ($act->progreso == 100) bg-green-100 text-green-800
-                    @elseif($act->estado == 'en_progreso') bg-blue-100 text-blue-800
-                    @elseif($act->estado == 'pendiente') bg-yellow-100 text-yellow-800
-                    @else bg-gray-100 text-gray-800 @endif">
-                                                    @if ($act->progreso == 100)
-                                                        Completado
-                                                    @else
-                                                        {{ ucfirst($act->estado) }}
+                                                <div class="flex flex-col items-start gap-1">
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{ $estadoClase }}">
+                                                        {{ $estadoTexto }}
+                                                    </span>
+                                                    @if ($act->atrasada)
+                                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                                            Atrasada
+                                                        </span>
                                                     @endif
-                                                </span>
+                                                </div>
                                             </td>
 
                                             <td class="p-4">
                                                 <div class="space-y-2 w-32">
                                                     <div class="flex justify-between text-xs">
-                                                        <span class="font-medium">{{ $act->progreso }}%</span>
+                                                        <span class="font-medium">{{ $progreso }}%</span>
                                                     </div>
                                                     <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                        <div class="h-full rounded-full
-                            @if ($act->progreso == 100) bg-green-500
-                            @elseif($act->progreso > 0) bg-yellow-500
-                            @else bg-gray-400 @endif"
-                                                            style="width: {{ $act->progreso }}%">
+                                                        <div class="h-full rounded-full {{ $progreso >= 100 ? 'bg-green-500' : ($progreso > 0 ? 'bg-yellow-500' : 'bg-gray-400') }}"
+                                                            style="width: {{ $progreso }}%">
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
 
                                             <td class="p-4">
-                                                <a href="{{ route('plan-actividad.show', $act->id) }}"
-                                                    class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white text-sm font-medium rounded-xl hover:shadow-md transition-shadow">
-                                                    Ver / Editar
-                                                </a>
+                                                <div class="flex flex-col gap-2">
+                                                    <a href="{{ route('plan-actividad.show', $act->id) }}"
+                                                        class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white text-sm font-medium rounded-xl hover:shadow-md transition-shadow">
+                                                        Ver detalle
+                                                    </a>
+                                                    @role('admin_ti')
+                                                        @if ($plan->estado === 'aprobado' && $progreso < 100)
+                                                            <a href="{{ route('bitacora.create', ['plan_actividad_id' => $act->id]) }}"
+                                                                class="inline-flex items-center justify-center gap-1 px-4 py-2 border border-[#C5A049] text-[#B59038] text-xs font-semibold rounded-xl hover:bg-[#C5A049]/10">
+                                                                + Registrar en bitácora
+                                                            </a>
+                                                        @endif
+                                                    @endrole
+                                                </div>
                                             </td>
 
                                         </tr>
-
-                                        @php
-                                            $contadorActividad++;
-                                        @endphp
                                     @endforeach
-
-                                    @php
-                                        $contadorSeccion++;
-                                    @endphp
                                 @endforeach
-
-
                             </tbody>
                         </table>
                     </div>

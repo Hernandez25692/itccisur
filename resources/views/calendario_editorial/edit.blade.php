@@ -58,12 +58,12 @@
                                             </path>
                                         </svg>
                                     </div>
-                                    <input type="number" name="semana" min="1" max="52"
+                                    <input type="number" name="semana" min="1" max="53"
                                         value="{{ old('semana', $calendarioEditorial->semana) }}" required
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                                         placeholder="Ej: 15">
                                 </div>
-                                <p class="text-xs text-gray-500">Número de semana del año (1-52)</p>
+                                <p class="text-xs text-gray-500">Semana ISO del año (1-53). Se completa sola al elegir la fecha.</p>
                             </div>
 
                             <div class="space-y-2">
@@ -81,7 +81,7 @@
                                     <select name="dia" required
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none transition-colors duration-200">
                                         <option value="" disabled>Seleccione un día</option>
-                                        @foreach (['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as $dia)
+                                        @foreach (\App\Models\CalendarioEditorial::DIAS as $dia)
                                             <option value="{{ $dia }}" @selected(old('dia', $calendarioEditorial->dia) === $dia)>
                                                 {{ $dia }}</option>
                                         @endforeach
@@ -187,7 +187,7 @@
                                     <select name="area"
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none transition-colors duration-200">
                                         <option value="" selected>Seleccione un área (opcional)</option>
-                                        @foreach (['Día festivo', 'Calendario', 'Bienvenida socios', 'Post capacitación', 'Servicio empresarial', 'Comunicado', 'Nota de duelo',  'Vacantes','Nota de prensa', 'Evento', 'Empresa afiliada Ofrece', 'Frase motivacional', 'Campaña muevete y emprende', 'Campaña Consejo laboral - video', 'Video resumen capacitación', 'Video resumen evento CCISUR', 'Servicios de Intermediación laboral', 'Alquiler de salón de eventos', 'Espacio de coworking', 'Alquiler de espacio para zona bancaria', 'Campaña de registro', 'Campaña de afiliación', 'Campaña informativa CAS - consejos'] as $area)
+                                        @foreach (\App\Models\CalendarioEditorial::AREAS as $area)
                                             <option value="{{ $area }}" @selected(old('area', $calendarioEditorial->area) === $area)>
                                                 {{ $area }}</option>
                                         @endforeach
@@ -241,7 +241,7 @@
                         <div class="space-y-4">
                             <p class="text-sm text-gray-600 mb-4">Seleccione uno o más tipos de contenido:</p>
                             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                                @foreach (['EN VIVO', 'IMAGEN', 'CARRUSEL', 'HISTORIA', 'VIDEO'] as $tipo)
+                                @foreach (\App\Models\CalendarioEditorial::TIPOS_CONTENIDO as $tipo)
                                     <label
                                         class="relative flex flex-col items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
                                         <input type="checkbox" name="contenido[]" value="{{ $tipo }}"
@@ -322,7 +322,7 @@
                         <div class="space-y-4">
                             <p class="text-sm text-gray-600 mb-4">Seleccione las redes sociales para publicación:</p>
                             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                @foreach (['FACEBOOK', 'INSTAGRAM', 'X', 'LINKEDIN', 'YOUTUBE', 'WHATSAPP', 'TIKTOK', 'OTRA'] as $red)
+                                @foreach (\App\Models\CalendarioEditorial::REDES as $red)
                                     <label
                                         class="relative flex flex-col items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
                                         <input type="checkbox" name="publicar_en[]" value="{{ $red }}"
@@ -620,6 +620,29 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Semana ISO (1-53) y día de la semana a partir de la fecha elegida
+            const fechaCampo = document.querySelector('input[name="fecha_publicacion"]');
+            const semanaCampo = document.querySelector('input[name="semana"]');
+            const diaCampo = document.querySelector('select[name="dia"]');
+            const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+            function semanaIso(fecha) {
+                const d = new Date(Date.UTC(fecha.getFullYear(), fecha.getMonth(), fecha.getDate()));
+                const dia = d.getUTCDay() || 7;
+                d.setUTCDate(d.getUTCDate() + 4 - dia);
+                const inicioAnio = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+                return Math.ceil(((d - inicioAnio) / 86400000 + 1) / 7);
+            }
+
+            function completarDesdeFecha() {
+                if (!fechaCampo.value) return;
+                const [a, m, d] = fechaCampo.value.split('-').map(Number);
+                const fecha = new Date(a, m - 1, d);
+                semanaCampo.value = semanaIso(fecha);
+                diaCampo.value = DIAS[(fecha.getDay() + 6) % 7];
+            }
+
+            fechaCampo.addEventListener('change', completarDesdeFecha);
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
@@ -643,9 +666,9 @@
                     return false;
                 }
 
-                if (semana < 1 || semana > 52) {
+                if (semana < 1 || semana > 53) {
                     e.preventDefault();
-                    alert('La semana debe estar entre 1 y 52');
+                    alert('La semana debe estar entre 1 y 53');
                     return false;
                 }
             });

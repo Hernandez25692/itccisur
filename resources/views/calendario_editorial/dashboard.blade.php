@@ -66,6 +66,24 @@
                         </select>
                     </div>
 
+                    @foreach ([
+                        'area' => ['Área', \App\Models\CalendarioEditorial::AREAS],
+                        'red' => ['Red', \App\Models\CalendarioEditorial::REDES],
+                        'tipo' => ['Contenido', \App\Models\CalendarioEditorial::TIPOS_CONTENIDO],
+                    ] as $campo => [$etiqueta, $opciones])
+                        <div class="flex flex-col">
+                            <label class="text-xs text-blue-200 mb-1 font-semibold">{{ $etiqueta }}</label>
+                            <select name="{{ $campo }}"
+                                class="bg-white/90 border-0 rounded-lg p-2 text-sm font-medium text-gray-800 max-w-[12rem]
+                       focus:ring-2 focus:ring-cyan-400 focus:outline-none shadow-md">
+                                <option value="">Todas</option>
+                                @foreach ($opciones as $opcion)
+                                    <option value="{{ $opcion }}" @selected(($filtros[$campo] ?? '') === $opcion)>{{ $opcion }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endforeach
+
                     <button type="submit"
                         class="px-5 py-2.5 h-10 bg-gradient-to-r from-cyan-500 to-blue-500
                    text-white rounded-lg font-semibold hover:shadow-lg
@@ -159,6 +177,41 @@
                 </div>
             </div>
 
+        </div>
+
+        @php
+            $enlace = fn (array $extra) => route('calendario-editorial.index', array_filter(array_merge(
+                ['mes' => $mes, 'anio' => $anio, 'area' => $filtros['area'] ?? null, 'red' => $filtros['red'] ?? null, 'tipo' => $filtros['tipo'] ?? null],
+                $extra
+            )));
+        @endphp
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <a href="{{ $enlace(['estado' => 'reprogramado']) }}" class="bg-white rounded-2xl border border-yellow-200 p-5 shadow hover:shadow-lg transition">
+                <p class="text-xs font-semibold uppercase tracking-wide text-yellow-700">Reprogramadas</p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">{{ $reprogramadas }}</p>
+                <p class="text-xs text-gray-500 mt-1">No cuentan para el cumplimiento</p>
+            </a>
+            <a href="{{ $enlace(['estado' => 'cancelado']) }}" class="bg-white rounded-2xl border border-red-200 p-5 shadow hover:shadow-lg transition">
+                <p class="text-xs font-semibold uppercase tracking-wide text-red-700">Canceladas</p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">{{ $canceladas }}</p>
+                <p class="text-xs text-gray-500 mt-1">No cuentan para el cumplimiento</p>
+            </a>
+            <a href="{{ $enlace(['estado' => 'pendiente']) }}" class="bg-white rounded-2xl border {{ $vencidas ? 'border-red-400 ring-2 ring-red-200' : 'border-gray-200' }} p-5 shadow hover:shadow-lg transition">
+                <p class="text-xs font-semibold uppercase tracking-wide text-red-700">Vencidas sin publicar</p>
+                <p class="text-3xl font-extrabold {{ $vencidas ? 'text-red-600' : 'text-gray-900' }} mt-1">{{ $vencidas }}</p>
+                <p class="text-xs text-gray-500 mt-1">Pendientes con fecha pasada</p>
+            </a>
+            <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow">
+                <p class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">Áreas con más publicaciones</p>
+                @forelse ($porArea as $area => $total)
+                    <a href="{{ $enlace(['area' => $area]) }}" class="flex justify-between text-sm py-0.5 hover:text-blue-700">
+                        <span class="truncate pr-2">{{ $area }}</span>
+                        <span class="font-bold">{{ $total }}</span>
+                    </a>
+                @empty
+                    <p class="text-sm text-gray-400">Sin área registrada</p>
+                @endforelse
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">

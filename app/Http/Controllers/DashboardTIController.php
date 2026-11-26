@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\BitacoraActividad;
+use App\Models\CalendarioEditorial;
 use App\Models\ControlRecordatorio;
+use App\Models\PlanTrabajo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -160,14 +162,32 @@ class DashboardTIController extends Controller
         | Estas no dependen del filtro de actividades.
         */
 
+        // El rango de días se filtra en PHP para no depender de DATEDIFF (solo MySQL)
         $alertas = ControlRecordatorio::where('notificar', true)
             ->where('atendido', false)
             ->whereDate('fecha_vencimiento', '>=', $hoy)
-            ->whereRaw('DATEDIFF(fecha_vencimiento, ?) BETWEEN 0 AND dias_recordatorio', [$hoy->toDateString()])
             ->orderBy('fecha_vencimiento', 'ASC')
-            ->get();
+            ->get()
+            ->filter(fn ($alerta) => $hoy->diffInDays(Carbon::parse($alerta->fecha_vencimiento)) <= $alerta->dias_recordatorio)
+            ->values();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Integración: Plan de Trabajo y Calendario Editorial
+        |--------------------------------------------------------------------------
+        | No dependen de los filtros de la bitácora.
+        */
+
+        $bitacorasConPlan = (clone $queryBase)->whereNotNull('plan_actividad_id')->count();
+        $plan = $this->resumenPlan();
+        $planesEnRevision = PlanTrabajo::where('estado', 'enviado')->orderBy('anio')->get(['id', 'anio']);
+        $calendario = $this->resumenCalendario($hoy);
 
         return view('dashboard-ti.index', compact(
+            'bitacorasConPlan',
+            'plan',
+            'planesEnRevision',
+            'calendario',
             'actividadesHoy',
             'pendientes',
             'resueltasMes',
@@ -186,5 +206,54 @@ class DashboardTIController extends Controller
             'prioridadesFiltro',
             'tiposFallaFiltro'
         ));
+    }
+
+    /** Avance del plan aprobado vigente y sus actividades atrasadas. */
+    private function resumenPlan(): ?array
+    {
+        $plan = PlanTrabajo::vigente();
+
+        if (!$plan) {
+            return null;
+        }
+
+        $plan->load(['actividades' => fn ($q) => $q->withSum('ejecuciones', 'avance')->withCount('bitacoras')]);
+        $actividades = $plan->actividades;
+        $atrasadas = $actividades->filter->atrasada->sortBy('mes_previsto_numero')->values();
+
+        return [
+            'modelo' => $plan,
+            'avance' => $plan->avance_global,
+            'total' => $actividades->count(),
+            'finalizadas' => $actividades->where('progreso', '>=', 100)->count(),
+            'en_progreso' => $actividades->filter(fn ($a) => $a->progreso > 0 && $a->progreso < 100)->count(),
+            'atrasadas' => $atrasadas->count(),
+            'lista_atrasadas' => $atrasadas->take(6),
+            'del_mes' => $actividades->filter(fn ($a) => $a->mes_previsto_numero === now()->month && $a->progreso < 100)->count(),
+        ];
+    }
+
+    /** Cumplimiento del calendario editorial en el mes actual. */
+    private function resumenCalendario(Carbon $hoy): array
+    {
+        $delMes = CalendarioEditorial::whereYear('fecha_publicacion', $hoy->year)
+            ->whereMonth('fecha_publicacion', $hoy->month)
+            ->get(['id', 'estado', 'fecha_publicacion']);
+
+        $enMeta = $delMes->reject(fn ($r) => in_array($r->estado, CalendarioEditorial::ESTADOS_FUERA_DE_META, true));
+        $publicadas = $enMeta->where('estado', 'publicado')->count();
+
+        return [
+            'total' => $enMeta->count(),
+            'publicadas' => $publicadas,
+            'cumplimiento' => $enMeta->count() ? round($publicadas / $enMeta->count() * 100) : 0,
+            'vencidas' => CalendarioEditorial::vencidas()->count(),
+            'proximas' => CalendarioEditorial::where('estado', 'pendiente')
+                ->whereBetween('fecha_publicacion', [$hoy->toDateString(), $hoy->copy()->addDays(7)->toDateString()])
+                ->orderBy('fecha_publicacion')
+                ->orderBy('hora')
+                ->limit(5)
+                ->get(['id', 'tema', 'fecha_publicacion', 'hora', 'publicar_en']),
+        ];
     }
 }

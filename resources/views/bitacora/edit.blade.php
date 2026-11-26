@@ -325,8 +325,12 @@
                         <div class="mb-4 bg-gray-50 border border-gray-200 rounded-xl p-6">
                             <h4 class="font-semibold text-gray-700 mb-3">Evidencia Actual</h4>
                             <div class="flex items-center gap-4">
-                                <img src="{{ route('bitacora.evidencia', $actividad->id) }}" 
-                                     class="h-32 rounded-lg shadow border border-gray-300 object-cover">
+                                @if (in_array(strtolower(pathinfo($actividad->evidencia, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
+                                    <img src="{{ route('bitacora.evidencia', $actividad->id) }}"
+                                         class="h-32 rounded-lg shadow border border-gray-300 object-cover">
+                                @else
+                                    <span class="text-4xl" aria-hidden="true">📄</span>
+                                @endif
                                 <div>
                                     <a href="{{ route('bitacora.evidencia', $actividad->id) }}" target="_blank"
                                        class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white text-sm rounded-xl hover:shadow-md transition-shadow">
@@ -349,12 +353,17 @@
                                name="evidencia" 
                                accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
                                class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#0C1C3C] file:text-white hover:file:bg-[#1A2A4F]">
-                        <p class="text-xs text-gray-500 mt-2">Formatos: JPG, PNG, GIF • Máx. 5MB</p>
+                        <p class="text-xs text-gray-500 mt-2">Formatos: JPG, PNG, PDF, DOC, DOCX • Máx. 10MB</p>
                     </div>
                     @error('evidencia')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
+
+                @include('bitacora._vinculo_plan', [
+                    'seleccionada' => $actividad->plan_actividad_id,
+                    'ejecucion' => $actividad->ejecucionPlan,
+                ])
 
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-200">
                     <div class="text-sm text-gray-500">

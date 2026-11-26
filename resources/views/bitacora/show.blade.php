@@ -55,18 +55,41 @@
                             </span>
                         </div>
                     </div>
-                    
-                    <a href="{{ route('bitacora.edit', $actividad->id) }}"
-                       class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold rounded-xl hover:shadow-lg transition-all duration-300">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                        Editar Actividad
-                    </a>
+
+                    @role('admin_ti')
+                        <a href="{{ route('bitacora.edit', $actividad->id) }}"
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold rounded-xl hover:shadow-lg transition-all duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Editar Actividad
+                        </a>
+                    @endrole
                 </div>
             </div>
 
             <div class="p-8">
+                <x-flash />
+
+                @if ($actividad->planActividad)
+                    <div class="mb-8 rounded-xl border border-[#C5A049]/40 bg-[#C5A049]/5 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-[#B59038]">Plan de Trabajo TI {{ $actividad->planActividad->plan?->anio }}</p>
+                            <p class="text-lg font-bold text-[#0C1C3C] mt-1">{{ $actividad->planActividad->actividad }}</p>
+                            <p class="text-sm text-gray-600">{{ $actividad->planActividad->seccion }}</p>
+                            @if ($actividad->ejecucionPlan)
+                                <p class="text-sm text-green-700 font-medium mt-2">
+                                    Esta bitácora sumó {{ $actividad->ejecucionPlan->avance }}% de avance a la actividad.
+                                </p>
+                            @endif
+                        </div>
+                        <a href="{{ route('plan-actividad.show', $actividad->plan_actividad_id) }}"
+                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white text-sm font-medium rounded-xl hover:shadow-md">
+                            Ver actividad del plan →
+                        </a>
+                    </div>
+                @endif
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                         <div class="flex items-center gap-3 mb-2">
@@ -211,9 +234,16 @@
                         </div>
                         <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                             <div class="relative group">
-                                <img src="{{ route('bitacora.evidencia', $actividad->id) }}" 
-                                     class="w-full max-h-96 object-contain rounded-lg shadow-lg border border-gray-300 group-hover:scale-[1.02] transition-transform duration-300"
-                                     alt="Evidencia del incidente">
+                                @if (in_array(strtolower(pathinfo($actividad->evidencia, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
+                                    <img src="{{ route('bitacora.evidencia', $actividad->id) }}"
+                                         class="w-full max-h-96 object-contain rounded-lg shadow-lg border border-gray-300 group-hover:scale-[1.02] transition-transform duration-300"
+                                         alt="Evidencia del incidente">
+                                @else
+                                    <div class="py-10 text-center text-gray-600">
+                                        <span class="text-5xl" aria-hidden="true">📄</span>
+                                        <p class="mt-2 text-sm">{{ basename($actividad->evidencia) }}</p>
+                                    </div>
+                                @endif
                                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
                                     <a href="{{ route('bitacora.evidencia', $actividad->id) }}" target="_blank" 
                                        class="bg-white/90 p-3 rounded-full shadow-lg hover:scale-110 transition-transform">
@@ -245,15 +275,17 @@
                         Volver a Bitácora
                     </a>
                     
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('bitacora.edit', $actividad->id) }}"
-                           class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold rounded-xl hover:shadow-lg transition-all duration-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                            Editar Actividad
-                        </a>
-                    </div>
+                    @role('admin_ti')
+                        <div class="flex items-center gap-3">
+                            <a href="{{ route('bitacora.edit', $actividad->id) }}"
+                               class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold rounded-xl hover:shadow-lg transition-all duration-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Editar Actividad
+                            </a>
+                        </div>
+                    @endrole
                 </div>
             </div>
         </div>

@@ -294,53 +294,39 @@
                 <form method="POST" action="{{ route('bitacora.store') }}" enctype="multipart/form-data">
                     @csrf
 
+                    @php
+                        $tiposFalla = ['Hardware', 'Software', 'Red', 'Impresora', 'Energía', 'Correo', 'Usuario / Permisos', 'Servidor', 'Internet', 'Aplicación Interna', 'Limpieza Física', 'Pagina Web', 'Actividad Diaria'];
+                        $equipos = ['PC Escritorio', 'Laptop', 'Switch', 'Router', 'Access Point', 'Servidor', 'Impresora', 'UPS', 'Sistema Interno', 'Infraestructura', 'Otro', 'Actividad Diaria'];
+                        $ubicaciones = ['DE' => 'Dirección Ejecutiva', 'GOR' => 'Gerencia de Operaciones Registrales', 'GAF' => 'Gerencia Administrativa y Financiera', 'GSEA' => 'Gerencia de Servicios Empresariales y Afiliaciones', 'CCISUR' => 'CCISUR', 'CAS' => 'CAS'];
+                    @endphp
+
                     <div class="form-group">
                         <label class="form-label form-label-required">Título</label>
-                        <input type="text" name="titulo" class="form-input" required
+                        <input type="text" name="titulo" class="form-input" required value="{{ old('titulo') }}"
                             placeholder="Breve descripción de la actividad">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Descripción</label>
-                        <textarea name="descripcion" class="form-textarea" placeholder="Detalles de la actividad realizada"></textarea>
+                        <textarea name="descripcion" class="form-textarea" placeholder="Detalles de la actividad realizada">{{ old('descripcion') }}</textarea>
                     </div>
 
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label form-label">Tipo de Falla</label>
                             <select name="tipo_falla" class="form-select">
-                                <option value="Hardware">Hardware</option>
-                                <option value="Software">Software</option>
-                                <option value="Red">Red</option>
-                                <option value="Impresora">Impresora</option>
-                                <option value="Energía">Energía</option>
-                                <option value="Correo">Correo</option>
-                                <option value="Usuario / Permisos">Usuario / Permisos</option>
-                                <option value="Servidor">Servidor</option>
-                                <option value="Internet">Internet</option>
-                                <option value="Aplicación Interna">Aplicación Interna</option>
-                                <option value="Limpieza Física">Limpieza Física</option>
-                                <option value="Pagina Web">Pagina Web</option>
-                                <option value="Actividad Diaria">Actividad Diaria</option>
-
+                                @foreach ($tiposFalla as $tipo)
+                                    <option value="{{ $tipo }}" @selected(old('tipo_falla') === $tipo)>{{ $tipo }}</option>
+                                @endforeach
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label form-label">Equipo Afectado</label>
                             <select name="equipo_afectado" class="form-select">
-                                <option value="PC Escritorio">PC Escritorio</option>
-                                <option value="Laptop">Laptop</option>
-                                <option value="Switch">Switch</option>
-                                <option value="Router">Router</option>
-                                <option value="Access Point">Access Point</option>
-                                <option value="Servidor">Servidor</option>
-                                <option value="Impresora">Impresora</option>
-                                <option value="UPS">UPS</option>
-                                <option value="Sistema Interno">Sistema Interno</option>
-                                <option value="Infraestructura">Infraestructura</option>
-                                <option value="Otro">Otro</option>
-                                <option value="Actividad Diaria">Actividad Diaria</option>
+                                @foreach ($equipos as $equipo)
+                                    <option value="{{ $equipo }}" @selected(old('equipo_afectado') === $equipo)>{{ $equipo }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -348,37 +334,34 @@
                     <div class="form-group">
                         <label class="form-label form-label-required">Ubicación</label>
                         <select name="ubicacion" class="form-select" required>
-                            <option value="DE">Dirección Ejecutiva</option>
-                            <option value="GOR">Gerencia de Operaciones Registrales</option>
-                            <option value="GAF">Gerencia Administrativa y Financiera</option>
-                            <option value="GSEA">Gerencia de Servicios Empresariales y Afiliaciones</option>
-                            <option value="CCISUR">CCISUR</option>
-                            <option value="CAS">CAS</option>
+                            @foreach ($ubicaciones as $valor => $texto)
+                                <option value="{{ $valor }}" @selected(old('ubicacion') === $valor)>{{ $texto }}</option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label form-label-required">Estado</label>
                         <select name="estado" class="form-select" required>
-                            <option value="pendiente">Pendiente</option>
-                            <option value="en_proceso">En Proceso</option>
-                            <option value="resuelto">Resuelto</option>
+                            @foreach (\App\Models\BitacoraActividad::ESTADOS as $valor => $texto)
+                                <option value="{{ $valor }}" @selected(old('estado', 'pendiente') === $valor)>{{ $texto }}</option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label form-label-required">Fecha</label>
-                            <input type="date" name="fecha" class="form-input" required>
+                            <input type="date" name="fecha" class="form-input" required
+                                value="{{ old('fecha', now()->toDateString()) }}">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Prioridad</label>
                             <select name="prioridad" class="form-select">
-                                <option value="baja">Baja</option>
-                                <option value="media" selected>Media</option>
-                                <option value="alta">Alta</option>
-                                <option value="critica">Crítica</option>
+                                @foreach (\App\Models\BitacoraActividad::PRIORIDADES as $valor => $texto)
+                                    <option value="{{ $valor }}" @selected(old('prioridad', 'media') === $valor)>{{ $texto }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -386,11 +369,11 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label form-label">Hora inicio</label>
-                            <input type="time" name="hora_inicio" class="form-input" id="horaInicio">
+                            <input type="time" name="hora_inicio" class="form-input" id="horaInicio" value="{{ old('hora_inicio') }}">
                         </div>
                         <div class="form-group">
                             <label class="form-label form-label">Hora fin</label>
-                            <input type="time" name="hora_fin" class="form-input" id="horaFin">
+                            <input type="time" name="hora_fin" class="form-input" id="horaFin" value="{{ old('hora_fin') }}">
                         </div>
                     </div>
 
@@ -419,7 +402,7 @@
 
                     <div class="form-group">
                         <label class="form-label">Solución aplicada</label>
-                        <textarea name="solucion_aplicada" class="form-textarea" placeholder="Describa la solución implementada"></textarea>
+                        <textarea name="solucion_aplicada" class="form-textarea" placeholder="Describa la solución implementada">{{ old('solucion_aplicada') }}</textarea>
                     </div>
 
                     <div class="form-group">
@@ -495,6 +478,8 @@
                             }
                         });
                     </script>
+
+                    @include('bitacora._vinculo_plan', ['seleccionada' => $planActividadSugerida])
 
                     <div class="form-actions">
                         <a href="{{ url()->previous() }}" class="btn-cancel">

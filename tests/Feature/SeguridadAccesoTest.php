@@ -37,7 +37,7 @@ function bitacoraConEvidencia(string $ruta): BitacoraActividad
     ]);
 }
 
-// El dashboard usa DATEDIFF (solo MySQL), por eso aquí no se prueba que cargue
+// Que cargue con datos se prueba en PlanBitacoraCalendarioTest
 it('pide sesión y rol para el dashboard TI', function () {
     $this->get('/dashboard-ti')->assertRedirect(route('login'));
     $this->actingAs(usuarioConRol('usuario'))->get('/dashboard-ti')->assertForbidden();

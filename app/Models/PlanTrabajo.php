@@ -11,6 +11,8 @@ class PlanTrabajo extends Model
 
     protected $table = 'plan_trabajos';
 
+    public const ESTADOS = ['borrador', 'enviado', 'aprobado', 'rechazado'];
+
     protected $fillable = [
         'anio',
         'estado',
@@ -24,10 +26,10 @@ class PlanTrabajo extends Model
         'fecha_aprobacion' => 'date',
     ];
 
-    // Relación: un plan tiene muchas actividades
+    // Relación: un plan tiene muchas actividades (chaperone: cada actividad ya conoce su plan)
     public function actividades()
     {
-        return $this->hasMany(PlanActividad::class, 'plan_trabajo_id');
+        return $this->hasMany(PlanActividad::class, 'plan_trabajo_id')->chaperone('plan');
     }
 
     // Quién aprobó (usuario de gerencia)
@@ -39,5 +41,31 @@ class PlanTrabajo extends Model
     public function revisiones()
     {
         return $this->hasMany(PlanRevision::class)->orderBy('created_at', 'desc');
+    }
+
+    /** Solo en borrador o rechazado se puede cambiar el plan y sus actividades. */
+    public function esEditable(): bool
+    {
+        return in_array($this->estado, ['borrador', 'rechazado'], true);
+    }
+
+    /**
+     * Promedio del progreso de las actividades (0-100). Requiere las
+     * actividades cargadas, idealmente con withSum('ejecuciones', 'avance').
+     */
+    public function getAvanceGlobalAttribute(): int
+    {
+        $actividades = $this->actividades;
+
+        return $actividades->isEmpty() ? 0 : (int) round($actividades->avg(fn ($a) => $a->progreso));
+    }
+
+    /** Plan que se está ejecutando: el aprobado más reciente hasta el año dado. */
+    public static function vigente(?int $anio = null): ?self
+    {
+        return static::where('estado', 'aprobado')
+            ->where('anio', '<=', $anio ?? now()->year)
+            ->orderByDesc('anio')
+            ->first();
     }
 }

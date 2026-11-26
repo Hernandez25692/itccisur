@@ -685,6 +685,118 @@
 
         </div>
 
+        {{-- Integración: Plan de Trabajo TI y Calendario Editorial (no dependen de los filtros de la bitácora) --}}
+        <h2 class="dashboard-title" style="font-size: 1.35rem; margin-bottom: 1rem;">Plan de Trabajo y Calendario Editorial</h2>
+
+        @if ($planesEnRevision->isNotEmpty())
+            <div class="alert-container" style="border-left-color: var(--gold-primary); background: rgba(197, 160, 73, 0.15); border-color: rgba(197, 160, 73, 0.35);">
+                <div class="alert-header" style="margin-bottom: 0;">
+                    <div class="alert-icon" style="background: var(--gold-primary);">📝</div>
+                    <h2 class="alert-title" style="color: white;">
+                        @foreach ($planesEnRevision as $p)
+                            <a href="{{ route('plan-trabajo.show', $p->id) }}" style="color: white; text-decoration: underline;">Plan {{ $p->anio }}</a>{{ $loop->last ? '' : ',' }}
+                        @endforeach
+                        esperando revisión de Gerencia
+                    </h2>
+                </div>
+            </div>
+        @endif
+
+        <div class="metrics-grid">
+            @if ($plan)
+                <a href="{{ route('plan-trabajo.show', $plan['modelo']) }}" class="metric-card" style="--accent-color: #C5A049; text-decoration: none;">
+                    <h3 class="metric-label">Avance Plan TI {{ $plan['modelo']->anio }}</h3>
+                    <p class="metric-value">{{ $plan['avance'] }}%</p>
+                    <div style="height: 6px; background: #E5E7EB; border-radius: 9999px; overflow: hidden; margin: .5rem 0 .75rem;">
+                        <div style="height: 100%; width: {{ $plan['avance'] }}%; background: var(--gold-primary);"></div>
+                    </div>
+                    <div class="metric-trend" style="background: rgba(197, 160, 73, 0.12); color: #B59038;">
+                        {{ $plan['finalizadas'] }} de {{ $plan['total'] }} actividades finalizadas
+                    </div>
+                </a>
+
+                <a href="{{ route('plan-trabajo.show', ['plan' => $plan['modelo']->id, 'situacion' => 'atrasada']) }}" class="metric-card" style="--accent-color: #EF4444; text-decoration: none;">
+                    <h3 class="metric-label">Actividades atrasadas</h3>
+                    <p class="metric-value" style="{{ $plan['atrasadas'] ? 'color: #DC2626;' : '' }}">{{ $plan['atrasadas'] }}</p>
+                    <div class="metric-trend" style="background: rgba(239, 68, 68, 0.1); color: #DC2626;">
+                        {{ $plan['del_mes'] }} previstas para este mes sin terminar
+                    </div>
+                </a>
+            @else
+                <div class="metric-card" style="--accent-color: #9CA3AF;">
+                    <h3 class="metric-label">Plan de Trabajo TI</h3>
+                    <p class="metric-value" style="font-size: 1.25rem;">Sin plan aprobado</p>
+                    <div class="metric-trend" style="background: rgba(156, 163, 175, 0.15); color: #6B7280;">
+                        <a href="{{ route('plan-trabajo.index') }}">Ir a Planes de Trabajo</a>
+                    </div>
+                </div>
+            @endif
+
+            <a href="{{ route('bitacora.index', ['plan' => 'con', 'desde' => $fechaInicio->toDateString(), 'hasta' => $fechaFin->toDateString()]) }}" class="metric-card" style="--accent-color: #0C1C3C; text-decoration: none;">
+                <h3 class="metric-label">Bitácoras que avanzan el plan</h3>
+                <p class="metric-value">{{ $bitacorasConPlan }}</p>
+                <div class="metric-trend">
+                    de {{ $actividadesHoy }} actividades del período
+                </div>
+            </a>
+
+            <a href="{{ route('calendario-editorial.dashboard', ['mes' => now()->month, 'anio' => now()->year]) }}" class="metric-card" style="--accent-color: #8B5CF6; text-decoration: none;">
+                <h3 class="metric-label">Cumplimiento editorial del mes</h3>
+                <p class="metric-value">{{ $calendario['cumplimiento'] }}%</p>
+                <div class="metric-trend" style="background: rgba(139, 92, 246, 0.1); color: #7C3AED;">
+                    {{ $calendario['publicadas'] }} de {{ $calendario['total'] }} publicadas
+                    @if ($calendario['vencidas'])
+                        · {{ $calendario['vencidas'] }} vencidas
+                    @endif
+                </div>
+            </a>
+        </div>
+
+        @if (($plan && $plan['lista_atrasadas']->isNotEmpty()) || $calendario['proximas']->isNotEmpty())
+            <div class="charts-grid">
+                <div class="activities-container">
+                    <div class="activities-header">
+                        <h3 class="activities-title">Actividades del plan atrasadas</h3>
+                    </div>
+                    <div class="activities-list">
+                        @forelse ($plan['lista_atrasadas'] ?? [] as $act)
+                            <a href="{{ route('plan-actividad.show', $act->id) }}" class="activity-item" style="display: block; text-decoration: none;">
+                                <h4 class="activity-title">{{ $act->actividad }}</h4>
+                                <div class="activity-meta">
+                                    <span>Prevista: {{ $act->mes_previsto }}</span>
+                                    <span>Avance: {{ $act->progreso }}%</span>
+                                    <span>{{ $act->responsable }}</span>
+                                </div>
+                            </a>
+                        @empty
+                            <p class="activity-description">Sin actividades atrasadas. 👍</p>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="activities-container">
+                    <div class="activities-header">
+                        <h3 class="activities-title">Próximas publicaciones (7 días)</h3>
+                    </div>
+                    <div class="activities-list">
+                        @forelse ($calendario['proximas'] as $pub)
+                            <a href="{{ route('calendario-editorial.show', $pub->id) }}" class="activity-item" style="display: block; text-decoration: none;">
+                                <h4 class="activity-title">{{ \Illuminate\Support\Str::limit($pub->tema, 90) }}</h4>
+                                <div class="activity-meta">
+                                    <span>{{ $pub->fecha_publicacion->translatedFormat('D d/m') }}{{ $pub->hora ? ' · ' . substr($pub->hora, 0, 5) : '' }}</span>
+                                    @if ($pub->publicar_en)
+                                        <span>{{ implode(', ', $pub->publicar_en) }}</span>
+                                    @endif
+                                </div>
+                            </a>
+                        @empty
+                            <p class="activity-description">No hay publicaciones pendientes en los próximos 7 días.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="charts-grid">
             <div class="chart-container">
                 <div class="chart-header">

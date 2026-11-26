@@ -1,5 +1,4 @@
 <x-app-layout>
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -337,6 +336,61 @@
                 font-size: 1.2rem !important;
             }
         }
+        .event-pill.estado {
+            background: color-mix(in srgb, var(--color-estado) 18%, transparent);
+            border-color: color-mix(in srgb, var(--color-estado) 55%, transparent);
+            color: var(--blanco);
+        }
+
+        .event-pill.estado::before {
+            background: var(--color-estado);
+        }
+
+        .event-pill .hora {
+            color: var(--gris-texto);
+            font-weight: 500;
+        }
+
+        .ccisur-filtros {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .ccisur-filtros select,
+        .ccisur-filtros input {
+            background: var(--azul-medio);
+            border: 1px solid var(--azul-borde);
+            color: var(--blanco);
+            border-radius: 8px;
+            padding: .5rem .75rem;
+            font-size: .85rem;
+            min-width: 160px;
+        }
+
+        .ccisur-filtros a,
+        .ccisur-filtros button {
+            border-radius: 8px;
+            padding: .5rem 1rem;
+            font-size: .85rem;
+            font-weight: 600;
+            border: 1px solid var(--dorado-borde);
+            color: var(--dorado-claro);
+            background: transparent;
+            text-decoration: none;
+        }
+
+        .ccisur-filtros button {
+            background: var(--dorado);
+            color: var(--azul-profundo);
+        }
+
+        .ccisur-ayuda {
+            color: var(--gris-texto);
+            font-size: .75rem;
+            margin-top: .75rem;
+        }
     </style>
 
     <div class="ccisur-page">
@@ -353,18 +407,55 @@
             </div>
 
             <div class="ccisur-card">
+                <form id="filtrosCalendario" class="ccisur-filtros" method="GET">
+                    <input type="text" name="buscar" value="{{ request('buscar') }}" placeholder="Buscar tema o etiqueta">
+                    <select name="estado">
+                        <option value="">Todos los estados</option>
+                        @foreach (\App\Models\CalendarioEditorial::ESTADOS as $estado)
+                            <option value="{{ $estado }}" @selected(request('estado') === $estado)>{{ ucfirst($estado) }}</option>
+                        @endforeach
+                    </select>
+                    <select name="red">
+                        <option value="">Todas las redes</option>
+                        @foreach (\App\Models\CalendarioEditorial::REDES as $red)
+                            <option value="{{ $red }}" @selected(request('red') === $red)>{{ $red }}</option>
+                        @endforeach
+                    </select>
+                    <select name="area">
+                        <option value="">Todas las áreas</option>
+                        @foreach (\App\Models\CalendarioEditorial::AREAS as $area)
+                            <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
+                        @endforeach
+                    </select>
+                    <select name="tipo">
+                        <option value="">Todo tipo de contenido</option>
+                        @foreach (\App\Models\CalendarioEditorial::TIPOS_CONTENIDO as $tipo)
+                            <option value="{{ $tipo }}" @selected(request('tipo') === $tipo)>{{ $tipo }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit">Filtrar</button>
+                    <a href="{{ route('calendario-editorial.calendar') }}">Limpiar</a>
+                    <a href="{{ route('calendario-editorial.index', request()->only(['estado', 'area', 'red', 'tipo', 'buscar'])) }}">Ver como lista</a>
+                </form>
+
                 <div id="calendar"></div>
 
                 <div class="ccisur-legend">
-                    <div class="legend-item">
-                        <span class="legend-dot gold"></span>
-                        Publicación programada
-                    </div>
+                    @foreach (\App\Models\CalendarioEditorial::COLORES as $estado => $color)
+                        <div class="legend-item">
+                            <span class="legend-dot" style="background: {{ $color }}"></span>
+                            {{ ucfirst($estado) }}
+                        </div>
+                    @endforeach
                     <div class="legend-item">
                         <span class="legend-dot today"></span>
                         Día actual
                     </div>
                 </div>
+
+                @role('admin_ti|calendario')
+                    <p class="ccisur-ayuda">Haz clic en un día para programar una publicación en esa fecha.</p>
+                @endrole
             </div>
         </div>
     </div>
@@ -372,9 +463,14 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
-            const eventos = @json($eventos);
+            const filtros = document.getElementById('filtrosCalendario');
+            const puedeCrear = @json(auth()->user()->hasAnyRole(['admin_ti', 'calendario']));
+            const urlCrear = @json(route('calendario-editorial.create'));
 
-            console.log('Eventos cargados:', eventos);
+            // El título viene de lo que escribe el usuario: se escapa antes de armar el HTML
+            const escapar = (texto) => String(texto ?? '').replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
 
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
@@ -397,23 +493,47 @@
                     day: 'Día'
                 },
 
-                events: eventos,
+                // Solo se pide el rango visible, con los filtros del formulario
+                events: {
+                    url: @json(route('calendario-editorial.calendar.eventos')),
+                    extraParams: () => Object.fromEntries(new FormData(filtros)),
+                    failure: () => alert('No se pudieron cargar las publicaciones.'),
+                },
 
-                eventContent: function(info) {
+                eventContent: function (info) {
+                    const props = info.event.extendedProps;
+                    const hora = props.hora ? `<span class="hora">${escapar(props.hora)}</span> ` : '';
+                    const detalle = [props.estado, props.area, (props.redes || []).join(', ')].filter(Boolean).join(' · ');
+
                     return {
-                        html: `<a href="${info.event.url}" class="event-pill" title="${info.event.title}">${info.event.title}</a>`
+                        html: `<a href="${escapar(info.event.url)}" class="event-pill estado"
+                                  style="--color-estado: ${escapar(info.event.backgroundColor)}"
+                                  title="${escapar(info.event.title)}${detalle ? ' — ' + escapar(detalle) : ''}">${hora}${escapar(info.event.title)}</a>`
                     };
                 },
 
-                eventClick: function(info) {
+                eventClick: function (info) {
                     info.jsEvent.preventDefault();
                     if (info.event.url) {
                         window.location.href = info.event.url;
+                    }
+                },
+
+                dateClick: function (info) {
+                    if (puedeCrear) {
+                        window.location.href = `${urlCrear}?fecha=${info.dateStr.substring(0, 10)}`;
                     }
                 }
             });
 
             calendar.render();
+
+            filtros.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const params = new URLSearchParams(new FormData(filtros));
+                history.replaceState(null, '', `${location.pathname}?${params}`);
+                calendar.refetchEvents();
+            });
         });
     </script>
 </x-app-layout>

@@ -11,68 +11,46 @@ class CalendarioEditorialDashboardController extends Controller
     {
         $mes  = $request->input('mes');
         $anio = $request->input('anio');
+        $filtros = $request->only(['area', 'red', 'tipo']);
 
-        $base = CalendarioEditorial::query();
+        $base = CalendarioEditorial::query()->filtrar($filtros);
 
         if ($mes && $anio) {
             $base->whereMonth('fecha_publicacion', $mes)
                 ->whereYear('fecha_publicacion', $anio);
+        } elseif ($anio) {
+            $base->whereYear('fecha_publicacion', $anio);
         }
 
-        $excluirEstados = ['reprogramado', 'reprogramada', 'cancelado', 'cancelada'];
+        // Una sola consulta: el volumen mensual es chico y se agrupa en memoria
+        $registros = $base->get(['id', 'semana', 'dia', 'estado', 'area', 'contenido', 'publicar_en', 'fecha_publicacion']);
 
-        $baseKpi = (clone $base)->whereNotIn('estado', $excluirEstados);
+        // Igual que antes: lo reprogramado o cancelado no cuenta para el cumplimiento
+        $fueraDeMeta = [...CalendarioEditorial::ESTADOS_FUERA_DE_META, 'reprogramada', 'cancelada'];
+        $enMeta = $registros->reject(fn ($r) => in_array($r->estado, $fueraDeMeta, true));
 
-        $totalMes = (clone $baseKpi)->count();
-
-        $porEstado = (clone $baseKpi)
-            ->select('estado')
-            ->selectRaw('COUNT(*) as total')
-            ->groupBy('estado')
-            ->pluck('total', 'estado');
-
+        $totalMes = $enMeta->count();
+        $porEstado = $enMeta->countBy('estado');
         $publicadas = $porEstado->get('publicado', 0);
+        $cumplimiento = $totalMes > 0 ? round(($publicadas / $totalMes) * 100, 1) : 0;
 
-        $cumplimiento = $totalMes > 0
-            ? round(($publicadas / $totalMes) * 100, 1)
-            : 0;
+        $reprogramadas = $registros->where('estado', 'reprogramado')->count();
+        $canceladas = $registros->where('estado', 'cancelado')->count();
+        $vencidas = $registros->filter(fn ($r) => $r->estado === 'pendiente' && $r->fecha_publicacion->isBefore(today()))->count();
 
+        $porSemana = $registros->groupBy('semana')
+            ->map(fn ($grupo, $semana) => (object) ['semana' => $semana, 'total' => $grupo->count()])
+            ->sortBy('semana')
+            ->values();
 
-        $porSemana = (clone $base)
-            ->select('semana')
-            ->selectRaw('COUNT(*) as total')
-            ->groupBy('semana')
-            ->orderBy('semana')
-            ->get();
+        $porDia = collect(CalendarioEditorial::DIAS)
+            ->map(fn ($dia) => (object) ['dia' => $dia, 'total' => $registros->where('dia', $dia)->count()])
+            ->filter(fn ($d) => $d->total > 0)
+            ->values();
 
-        $porDia = (clone $base)
-            ->select('dia')
-            ->selectRaw('COUNT(*) as total')
-            ->groupBy('dia')
-            ->get();
+        $porRed = $registros->pluck('publicar_en')->filter()->flatten()->countBy()->sortDesc();
 
-        $porRed = (clone $base)->get()
-            ->pluck('publicar_en')
-            ->filter()
-            ->flatten()
-            ->countBy()
-            ->sortDesc();
-
-        $diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-
-        $tablaPorDiaSemana = [];
-        $semanas = (clone $base)->select('semana')->distinct()->orderBy('semana')->pluck('semana');
-
-        foreach ($semanas as $semana) {
-            $fila = ['semana' => 'S ' . $semana];
-            foreach ($diasSemana as $dia) {
-                $fila[$dia] = (clone $base)
-                    ->where('semana', $semana)
-                    ->where('dia', $dia)
-                    ->count();
-            }
-            $tablaPorDiaSemana[] = $fila;
-        }
+        $porArea = $registros->pluck('area')->filter()->countBy()->sortDesc()->take(8);
 
         $tiposContenido = [
             'EN VIVO'  => 'VIV',
@@ -82,15 +60,19 @@ class CalendarioEditorialDashboardController extends Controller
             'VIDEO'    => 'VID',
         ];
 
+        $tablaPorDiaSemana = [];
         $tablaContenidoPorSemana = [];
 
-        foreach ($semanas as $semana) {
+        foreach ($registros->groupBy('semana')->sortKeys() as $semana => $grupo) {
+            $fila = ['semana' => 'S ' . $semana];
+            foreach (CalendarioEditorial::DIAS as $dia) {
+                $fila[$dia] = $grupo->where('dia', $dia)->count();
+            }
+            $tablaPorDiaSemana[] = $fila;
+
             $fila = ['semana' => 'S ' . $semana];
             foreach ($tiposContenido as $tipo => $alias) {
-                $fila[$alias] = (clone $base)
-                    ->where('semana', $semana)
-                    ->whereJsonContains('contenido', $tipo)
-                    ->count();
+                $fila[$alias] = $grupo->filter(fn ($r) => in_array($tipo, $r->contenido ?? [], true))->count();
             }
             $tablaContenidoPorSemana[] = $fila;
         }
@@ -98,12 +80,17 @@ class CalendarioEditorialDashboardController extends Controller
         return view('calendario_editorial.dashboard', compact(
             'mes',
             'anio',
+            'filtros',
             'totalMes',
             'porEstado',
             'porSemana',
             'porDia',
             'porRed',
+            'porArea',
             'cumplimiento',
+            'reprogramadas',
+            'canceladas',
+            'vencidas',
             'tablaPorDiaSemana',
             'tablaContenidoPorSemana'
         ));

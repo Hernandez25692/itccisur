@@ -51,7 +51,8 @@
         Route::get('/gor/resumen', [GorResumenController::class, 'index'])->name('gor.resumen');
     });
 
-    Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
+    // Plan de Trabajo: TI arma el plan y registra avances; gerencia consulta y revisa
+    Route::middleware(['auth', 'role:admin_ti'])->group(function () {
 
         Route::get(
             'plan-trabajo/{plan}/actividad/create',
@@ -69,7 +70,9 @@
             'plan-actividad/{plan_actividad}/ejecucion',
             [\App\Http\Controllers\ActividadEjecucionController::class, 'store']
         )->name('actividad.ejecucion.store');
+    });
 
+    Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
         Route::get(
             'actividad-ejecucion/{ejecucion}/evidencia',
             [\App\Http\Controllers\ActividadEjecucionController::class, 'evidencia']
@@ -141,15 +144,21 @@
             Route::get('/', [CalendarioEditorialController::class, 'index'])
                 ->name('index');
 
+            // Crear: los mismos roles que ven el botón "Nueva Publicación"
             Route::get('/crear', [CalendarioEditorialController::class, 'create'])
+                ->middleware('role:admin_ti|calendario')
                 ->name('create');
 
             Route::post('/', [CalendarioEditorialController::class, 'store'])
+                ->middleware('role:admin_ti|calendario')
                 ->name('store');
 
-            // Va antes de las rutas con {calendarioEditorial}; si no, 'calendar' se toma como id
+            // Van antes de las rutas con {calendarioEditorial}; si no, 'calendar' se toma como id
             Route::get('/calendar', [CalendarioEditorialController::class, 'calendar'])
                 ->name('calendar');
+
+            Route::get('/calendar/eventos', [CalendarioEditorialController::class, 'eventos'])
+                ->name('calendar.eventos');
 
             Route::get('/{calendarioEditorial}/editar', [CalendarioEditorialController::class, 'edit'])
                 ->name('edit');
@@ -176,24 +185,24 @@
     )->name('calendario-editorial.adjuntos.destroy');
 
 
-    // Bitácora de Actividades TI
+    // Bitácora de Actividades TI: registra y edita TI; gerencia consulta
+    Route::middleware(['auth', 'role:admin_ti'])->group(function () {
+        Route::get('/bitacora/create', [App\Http\Controllers\BitacoraActividadController::class, 'create'])
+            ->name('bitacora.create');
+        Route::post('/bitacora', [App\Http\Controllers\BitacoraActividadController::class, 'store'])
+            ->name('bitacora.store');
+        Route::get('/bitacora/{id}/editar', [App\Http\Controllers\BitacoraActividadController::class, 'edit'])
+            ->name('bitacora.edit');
+        Route::put('/bitacora/{id}', [App\Http\Controllers\BitacoraActividadController::class, 'update'])
+            ->name('bitacora.update');
+    });
+
     Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
 
         Route::get('/bitacora', [App\Http\Controllers\BitacoraActividadController::class, 'index'])
             ->name('bitacora.index');
-        Route::get('/bitacora/create', [App\Http\Controllers\BitacoraActividadController::class, 'create'])
-            ->name('bitacora.create');
         Route::get('/bitacora/{id}', [App\Http\Controllers\BitacoraActividadController::class, 'show'])
             ->name('bitacora.show');
-        Route::post('/bitacora', [App\Http\Controllers\BitacoraActividadController::class, 'store'])
-            ->name('bitacora.store');
-
-        Route::get('/bitacora/{id}/editar', [App\Http\Controllers\BitacoraActividadController::class, 'edit'])
-            ->name('bitacora.edit');
-
-        Route::put('/bitacora/{id}', [App\Http\Controllers\BitacoraActividadController::class, 'update'])
-            ->name('bitacora.update');
-
         Route::get('/bitacora/{id}/evidencia', [App\Http\Controllers\BitacoraActividadController::class, 'evidencia'])
             ->name('bitacora.evidencia');
     });
@@ -202,12 +211,12 @@
             ->name('dashboard.ti');
     });
 
-    Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
+    // Crear y editar el plan: solo TI (antes que el resource, para que 'create' no se tome como {plan})
+    Route::middleware(['auth', 'role:admin_ti'])->group(function () {
 
         Route::resource('plan-trabajo', PlanTrabajoController::class)
-            ->parameters(['plan-trabajo' => 'plan']);
-
-        // aprobar/rechazar están más abajo, solo para gerencia
+            ->parameters(['plan-trabajo' => 'plan'])
+            ->only(['create', 'store', 'edit', 'update']);
 
         Route::get(
             'plan-actividad/{actividad}/edit',
@@ -220,6 +229,16 @@
             [PlanActividadController::class, 'update']
         )
             ->name('plan-actividad.update');
+    });
+
+    Route::middleware(['auth', 'role:admin_ti|gerencia'])->group(function () {
+
+        // Sin destroy: no hay borrado de planes
+        Route::resource('plan-trabajo', PlanTrabajoController::class)
+            ->parameters(['plan-trabajo' => 'plan'])
+            ->only(['index', 'show']);
+
+        // aprobar/rechazar están más abajo, solo para gerencia
 
         Route::get(
             'plan-actividad/{actividad}',

@@ -1,6 +1,13 @@
 <x-app-layout>
     <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
+        <a href="{{ route('plan-trabajo.show', $actividad->plan_trabajo_id) }}"
+            class="inline-flex items-center gap-2 mb-4 text-sm font-medium text-[#0C1C3C] hover:text-[#C5A049]">
+            ← Volver al Plan de Trabajo {{ $actividad->plan?->anio }}
+        </a>
+
+        <x-flash />
+
         <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] rounded-2xl p-8 text-white shadow-xl mb-8">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div class="flex-1">
@@ -15,7 +22,11 @@
                         <div>
                             <h1 class="text-3xl font-bold">Actividad {{ $actividad->codigo }}</h1>
                             <p class="text-gray-300 mt-1">Plan de Trabajo TI
-                                {{ $actividad->planTrabajo->anio ?? 'N/A' }}</p>
+                                {{ $actividad->plan->anio ?? 'N/A' }}
+                                @if ($actividad->plan)
+                                    · {{ $actividad->plan->estado === 'enviado' ? 'En revisión' : ucfirst($actividad->plan->estado) }}
+                                @endif
+                            </p>
                         </div>
                     </div>
 
@@ -25,8 +36,14 @@
                             @if ($actividad->progreso == 100) bg-green-100 text-green-800
                             @elseif($actividad->progreso > 0) bg-yellow-100 text-yellow-800
                             @else bg-gray-100 text-gray-800 @endif">
-                            <span class="capitalize">{{ $actividad->estado }}</span>
+                            <span>{{ $actividad->progreso >= 100 ? 'Finalizada' : ($actividad->progreso > 0 ? 'En progreso' : 'Pendiente') }}</span>
                         </div>
+
+                        @if ($actividad->atrasada)
+                            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-red-100 text-red-700">
+                                Atrasada (prevista para {{ $actividad->mes_previsto }})
+                            </div>
+                        @endif
 
                         <div class="flex items-center gap-3">
                             <div class="w-40">
@@ -47,15 +64,27 @@
                     </div>
                 </div>
 
-                <a href="{{ route('plan-actividad.edit', $actividad->id) }}"
-                    class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold rounded-xl hover:shadow-lg transition-all duration-300">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                        </path>
-                    </svg>
-                    Editar Actividad
-                </a>
+                @role('admin_ti')
+                    <div class="flex flex-col gap-3">
+                        @if ($actividad->plan?->estado !== 'enviado')
+                            <a href="{{ route('plan-actividad.edit', $actividad->id) }}"
+                                class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold rounded-xl hover:shadow-lg transition-all duration-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                    </path>
+                                </svg>
+                                Editar Actividad
+                            </a>
+                        @endif
+                        @if ($actividad->plan?->estado === 'aprobado' && $actividad->progreso < 100)
+                            <a href="{{ route('bitacora.create', ['plan_actividad_id' => $actividad->id]) }}"
+                                class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 border border-white/30 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors">
+                                + Registrar en bitácora
+                            </a>
+                        @endif
+                    </div>
+                @endrole
             </div>
         </div>
 
@@ -230,7 +259,7 @@
 
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-900 mb-3">Comentario</label>
-                                        <textarea name="comentario" rows="3"
+                                        <textarea name="comentario" rows="3" required
                                             class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors resize-none"
                                             placeholder="Describe el avance realizado..."></textarea>
                                     </div>
@@ -261,7 +290,7 @@
                                             <input type="file" name="evidencia"
                                                 accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
                                                 class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#0C1C3C] file:text-white hover:file:bg-[#1A2A4F]">
-                                            <p class="text-xs text-gray-500 mt-2">Formatos: JPG, PNG, GIF • Máx. 5MB</p>
+                                            <p class="text-xs text-gray-500 mt-2">Formatos: JPG, PNG, PDF, DOC, DOCX • Máx. 4MB</p>
                                         </div>
                                     </div>
 
@@ -354,6 +383,18 @@
                                             Ver Evidencia
                                         </a>
                                     @endif
+                                    @if ($e->bitacora)
+                                        <a href="{{ route('bitacora.show', $e->bitacora->id) }}"
+                                            class="inline-flex items-center gap-2 px-4 py-2 border border-[#C5A049] text-[#B59038] text-sm font-medium rounded-xl hover:bg-[#C5A049]/10">
+                                            📋 Ver bitácora
+                                        </a>
+                                        @if ($e->bitacora->evidencia && !$e->evidencia)
+                                            <a href="{{ route('bitacora.evidencia', $e->bitacora->id) }}" target="_blank"
+                                                class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white text-sm font-medium rounded-xl hover:shadow-md transition-shadow">
+                                                Ver Evidencia
+                                            </a>
+                                        @endif
+                                    @endif
                                 </div>
                             </div>
 
@@ -364,7 +405,7 @@
                                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
                                         </path>
                                     </svg>
-                                    <span>{{ $e->usuario->name }}</span>
+                                    <span>{{ $e->usuario->name ?? 'Usuario eliminado' }}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -379,6 +420,49 @@
                 </div>
             </div>
         @endif
+
+        {{-- Integración con la Bitácora TI --}}
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mt-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Registros de Bitácora vinculados</h2>
+                    <p class="text-gray-600">Trabajo del día a día que corresponde a esta actividad del plan</p>
+                </div>
+                @if ($actividad->bitacoras->count())
+                    <a href="{{ route('bitacora.index', ['plan_actividad_id' => $actividad->id]) }}"
+                        class="text-sm font-medium text-[#C5A049] hover:text-[#B59038]">Ver en la bitácora →</a>
+                @endif
+            </div>
+
+            @forelse ($actividad->bitacoras as $b)
+                <a href="{{ route('bitacora.show', $b->id) }}"
+                    class="flex flex-col md:flex-row md:items-center justify-between gap-2 border border-gray-200 rounded-xl p-4 mb-3 hover:bg-gray-50 transition-colors">
+                    <div>
+                        <p class="font-semibold text-gray-900">{{ $b->titulo }}</p>
+                        <p class="text-sm text-gray-500">
+                            {{ $b->fecha->format('d/m/Y') }} · {{ $b->user->name ?? 'Usuario eliminado' }}
+                            @if ($b->tipo_falla)
+                                · {{ $b->tipo_falla }}
+                            @endif
+                        </p>
+                    </div>
+                    <span class="self-start md:self-center inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+                        {{ $b->estado === 'resuelto' ? 'bg-green-100 text-green-800' : ($b->estado === 'en_proceso' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800') }}">
+                        {{ \App\Models\BitacoraActividad::ESTADOS[$b->estado] ?? $b->estado }}
+                    </span>
+                </a>
+            @empty
+                <p class="text-gray-500">
+                    Ningún registro de bitácora apunta a esta actividad todavía.
+                    @role('admin_ti')
+                        @if ($actividad->plan?->estado === 'aprobado' && $actividad->progreso < 100)
+                            <a href="{{ route('bitacora.create', ['plan_actividad_id' => $actividad->id]) }}"
+                                class="text-[#C5A049] font-medium">Registrar el primero</a>
+                        @endif
+                    @endrole
+                </p>
+            @endforelse
+        </div>
 
     </div>
 </x-app-layout>

@@ -43,8 +43,8 @@
                             </div>
                         </div>
 
-                        @role('admin_ti|calendario')
-                            <div>
+                        <div class="flex flex-wrap gap-3 items-center">
+                            @role('admin_ti|calendario')
                                 <a href="{{ route('calendario-editorial.create') }}"
                                     class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -54,69 +54,111 @@
                                     </svg>
                                     <span>Nueva Publicación</span>
                                 </a>
-                                <a href="/calendario-editorial/calendar"
-                                    class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-
-                                    <span>Vista Calendario</span>
-
-                                </a>
-                            </div>
-                        @endrole
+                            @endrole
+                            <a href="{{ route('calendario-editorial.calendar', request()->only(['estado', 'area', 'red', 'tipo', 'buscar'])) }}"
+                                class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span>Vista Calendario</span>
+                            </a>
+                            <a href="{{ route('calendario-editorial.dashboard', array_filter(['mes' => request('mes'), 'anio' => request('anio') ?: (request('mes') ? now()->year : null), 'area' => request('area'), 'red' => request('red'), 'tipo' => request('tipo')])) }}"
+                                class="inline-flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 px-5 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 shadow-sm">
+                                📊 <span>Dashboard</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
+
+                <x-flash class="mt-6" />
 
                 <div class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Estado de Publicaciones</h3>
+                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Estado de Publicaciones <span class="font-normal text-gray-500">(con los filtros aplicados · clic para filtrar)</span></h3>
                             <div class="flex flex-wrap gap-3">
-                                @php
-                                    $allRegistros = \App\Models\CalendarioEditorial::all();
-                                @endphp
-                                @foreach ([['color' => 'green', 'label' => 'Publicado', 'count' => $allRegistros->where('estado', 'publicado')->count()], ['color' => 'orange', 'label' => 'Pendiente', 'count' => $allRegistros->where('estado', 'pendiente')->count()], ['color' => 'yellow', 'label' => 'Reprogramado', 'count' => $allRegistros->where('estado', 'reprogramado')->count()], ['color' => 'red', 'label' => 'Cancelado', 'count' => $allRegistros->where('estado', 'cancelado')->count()]] as $status)
-                                    <div class="flex items-center gap-2">
+                                @foreach ([['color' => 'green', 'estado' => 'publicado', 'label' => 'Publicado'], ['color' => 'orange', 'estado' => 'pendiente', 'label' => 'Pendiente'], ['color' => 'yellow', 'estado' => 'reprogramado', 'label' => 'Reprogramado'], ['color' => 'red', 'estado' => 'cancelado', 'label' => 'Cancelado']] as $status)
+                                    <a href="{{ request()->fullUrlWithQuery(['estado' => request('estado') === $status['estado'] ? null : $status['estado'], 'page' => null]) }}"
+                                        class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-50 {{ request('estado') === $status['estado'] ? 'ring-2 ring-blue-400' : '' }}">
                                         <div class="flex items-center gap-1.5">
-                                            <span class="w-3 h-3 rounded-full bg-{{ $status['color'] }}-500"></span>
-                                            <span
-                                                class="text-sm font-medium text-gray-700">{{ $status['label'] }}</span>
+                                            <span class="w-3 h-3 rounded-full" style="background: {{ \App\Models\CalendarioEditorial::COLORES[$status['estado']] }}"></span>
+                                            <span class="text-sm font-medium text-gray-700">{{ $status['label'] }}</span>
                                         </div>
-                                        <span
-                                            class="text-xs font-semibold bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">
-                                            {{ $status['count'] }}
+                                        <span class="text-xs font-semibold bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">
+                                            {{ $porEstado[$status['estado']] ?? 0 }}
                                         </span>
-                                    </div>
+                                    </a>
                                 @endforeach
                             </div>
                         </div>
+                        @if ($vencidas > 0)
+                            <div class="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+                                <strong>{{ $vencidas }}</strong> pendiente{{ $vencidas > 1 ? 's' : '' }} con fecha pasada (sin publicar)
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
 
             <form method="GET" class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                    <input type="text" name="buscar" value="{{ request('buscar') }}" placeholder="Buscar tema, encabezado o etiqueta"
+                        class="lg:col-span-2 border rounded-lg p-2 text-sm">
+
                     <select name="estado" class="border rounded-lg p-2 text-sm">
                         <option value="">Todos los estados</option>
-                        @foreach (['publicado', 'pendiente', 'reprogramado', 'cancelado'] as $e)
+                        @foreach (\App\Models\CalendarioEditorial::ESTADOS as $e)
                             <option value="{{ $e }}" @selected(request('estado') == $e)>
                                 {{ ucfirst($e) }}
                             </option>
                         @endforeach
                     </select>
 
-                    <input type="number" name="semana" value="{{ request('semana') }}" placeholder="Semana"
-                        class="border rounded-lg p-2 text-sm">
-
                     <select name="mes" class="border rounded-lg p-2 text-sm">
                         <option value="">Todos los meses</option>
                         @foreach (range(1, 12) as $m)
                             <option value="{{ $m }}" @selected(request('mes') == $m)>
-                                {{ \Carbon\Carbon::createFromDate(now()->year, $m, 1)->translatedFormat('F') }}
+                                {{ ucfirst(\Carbon\Carbon::createFromDate(now()->year, $m, 1)->translatedFormat('F')) }}
                             </option>
+                        @endforeach
+                    </select>
+
+                    <select name="anio" class="border rounded-lg p-2 text-sm">
+                        <option value="">Todos los años</option>
+                        @foreach ($anios as $a)
+                            <option value="{{ $a }}" @selected(request('anio') == $a)>{{ $a }}</option>
+                        @endforeach
+                    </select>
+
+                    <input type="number" name="semana" min="1" max="53" value="{{ request('semana') }}" placeholder="Semana"
+                        class="border rounded-lg p-2 text-sm">
+
+                    <select name="area" class="lg:col-span-2 border rounded-lg p-2 text-sm">
+                        <option value="">Todas las áreas</option>
+                        @foreach (\App\Models\CalendarioEditorial::AREAS as $area)
+                            <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="red" class="border rounded-lg p-2 text-sm">
+                        <option value="">Todas las redes</option>
+                        @foreach (\App\Models\CalendarioEditorial::REDES as $red)
+                            <option value="{{ $red }}" @selected(request('red') === $red)>{{ $red }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="tipo" class="border rounded-lg p-2 text-sm">
+                        <option value="">Todo tipo de contenido</option>
+                        @foreach (\App\Models\CalendarioEditorial::TIPOS_CONTENIDO as $tipo)
+                            <option value="{{ $tipo }}" @selected(request('tipo') === $tipo)>{{ $tipo }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="creado_por" class="border rounded-lg p-2 text-sm">
+                        <option value="">Cualquier autor</option>
+                        @foreach ($creadores as $id => $nombre)
+                            <option value="{{ $id }}" @selected((string) request('creado_por') === (string) $id)>{{ $nombre }}</option>
                         @endforeach
                     </select>
 
@@ -302,7 +344,7 @@
                                                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                     </svg>
                                                     <span class="text-base font-bold text-gray-900">
-                                                        {{ $item->hora }}
+                                                        {{ $item->hora ? substr($item->hora, 0, 5) : 'Sin hora' }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -399,6 +441,7 @@
                                                     <span>Detalles</span>
                                                 </a>
 
+                                                @if ($item->puedeEditar(auth()->user()))
                                                 <a href="{{ route('calendario-editorial.edit', $item) }}"
                                                     class="group/btn inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-all duration-200 hover:shadow-sm hover:border-blue-300">
                                                     <svg class="w-4 h-4 group-hover/btn:text-blue-800 transition-colors"
@@ -410,6 +453,7 @@
                                                     </svg>
                                                     <span>Editar</span>
                                                 </a>
+                                                @endif
 
                                                 @role('admin_ti')
                                                     @if ($item->estado !== 'publicado')
@@ -634,7 +678,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            {{ $item->hora }}
+                                            {{ $item->hora ? substr($item->hora, 0, 5) : 'Sin hora' }}
                                         </span>
                                     </div>
                                     <div class="text-xs text-gray-500">
@@ -695,15 +739,17 @@
                                     Ver
                                 </a>
 
-                                <a href="{{ route('calendario-editorial.edit', $item) }}"
-                                    class="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                        </path>
-                                    </svg>
-                                    Editar
-                                </a>
+                                @if ($item->puedeEditar(auth()->user()))
+                                    <a href="{{ route('calendario-editorial.edit', $item) }}"
+                                        class="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                            </path>
+                                        </svg>
+                                        Editar
+                                    </a>
+                                @endif
 
                                 @if ($item->enlace)
                                     <div class="col-span-2 mt-2">

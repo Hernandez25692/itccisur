@@ -10,6 +10,7 @@ class ActividadEjecucion extends Model
 
     protected $fillable = [
         'plan_actividad_id',
+        'bitacora_actividad_id',
         'avance',
         'comentario',
         'fecha',
@@ -25,5 +26,11 @@ class ActividadEjecucion extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** Bitácora de la que salió este avance (su evidencia es la de la bitácora). */
+    public function bitacora()
+    {
+        return $this->belongsTo(BitacoraActividad::class, 'bitacora_actividad_id');
     }
 }

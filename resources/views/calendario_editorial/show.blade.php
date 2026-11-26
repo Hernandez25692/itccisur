@@ -32,16 +32,18 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <a href="{{ route('calendario-editorial.edit', $calendarioEditorial) }}"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-blue-300 text-blue-700 font-medium rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 shadow-sm hover:shadow">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                </path>
-                            </svg>
-                            Editar publicación
-                        </a>
+                        @if ($calendarioEditorial->puedeEditar(auth()->user()))
+                            <a href="{{ route('calendario-editorial.edit', $calendarioEditorial) }}"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-blue-300 text-blue-700 font-medium rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 shadow-sm hover:shadow">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                    </path>
+                                </svg>
+                                Editar publicación
+                            </a>
+                        @endif
 
                         @role('admin_ti')
                             @if ($calendarioEditorial->estado !== 'publicado')
@@ -64,6 +66,8 @@
                     </div>
                 </div>
             </div>
+
+            <x-flash />
 
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
@@ -578,6 +582,17 @@
                                             @endif
                                         </div>
                                     </div>
+                                @endif
+
+                                @if ($calendarioEditorial->nota_admin)
+                                    @role('admin_ti|gerencia')
+                                        <div class="mt-8 pt-8 border-t border-gray-200 space-y-3">
+                                            <div class="text-sm font-medium text-gray-500">Nota administrativa (solo TI y gerencia)</div>
+                                            <div class="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                                                <p class="text-gray-700 whitespace-pre-line">{{ $calendarioEditorial->nota_admin }}</p>
+                                            </div>
+                                        </div>
+                                    @endrole
                                 @endif
                             </div>
 

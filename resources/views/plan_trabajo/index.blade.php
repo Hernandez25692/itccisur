@@ -8,28 +8,45 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    
-                    
-                    <a href="{{ route('plan-trabajo.create') }}" 
-                       class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Nuevo Plan
-                    </a>
+                    @role('admin_ti')
+                        <a href="{{ route('plan-trabajo.create') }}"
+                           class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Nuevo Plan
+                        </a>
+                    @endrole
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            
+        <x-flash />
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+
+            <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">En revisión de Gerencia</p>
+                        <p class="text-3xl font-bold text-blue-600 mt-2">
+                            {{ $porEstado['enviado'] ?? 0 }}
+                        </p>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-xl">
+                        <svg class="w-7 h-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
 
             <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600">Planes Aprobados</p>
                         <p class="text-3xl font-bold text-green-600 mt-2">
-                            {{ $planes->where('estado', 'aprobado')->count() }}
+                            {{ $porEstado['aprobado'] ?? 0 }}
                         </p>
                     </div>
                     <div class="p-3 bg-green-50 rounded-xl">
@@ -45,7 +62,7 @@
                     <div>
                         <p class="text-sm text-gray-600">En Borrador</p>
                         <p class="text-3xl font-bold text-yellow-600 mt-2">
-                            {{ $planes->where('estado', 'borrador')->count() }}
+                            {{ $porEstado['borrador'] ?? 0 }}
                         </p>
                     </div>
                     <div class="p-3 bg-yellow-50 rounded-xl">
@@ -61,7 +78,7 @@
                     <div>
                         <p class="text-sm text-gray-600">Planes Rechazados</p>
                         <p class="text-3xl font-bold text-red-600 mt-2">
-                            {{ $planes->where('estado', 'rechazado')->count() }}
+                            {{ $porEstado['rechazado'] ?? 0 }}
                         </p>
                     </div>
                     <div class="p-3 bg-red-50 rounded-xl">
@@ -73,7 +90,30 @@
             </div>
         </div>
 
-        
+        <form method="GET" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6 flex flex-wrap items-end gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Año</label>
+                <select name="anio" class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50">
+                    <option value="">Todos</option>
+                    @foreach ($anios as $a)
+                        <option value="{{ $a }}" @selected(request('anio') == $a)>{{ $a }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Estado</label>
+                <select name="estado" class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50">
+                    <option value="">Todos</option>
+                    @foreach (\App\Models\PlanTrabajo::ESTADOS as $e)
+                        <option value="{{ $e }}" @selected(request('estado') === $e)>{{ $e === 'enviado' ? 'En revisión' : ucfirst($e) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button class="px-5 py-2 bg-[#0C1C3C] text-white rounded-lg text-sm font-medium hover:bg-[#1A2A4F]">Filtrar</button>
+            @if (request()->anyFilled(['anio', 'estado']))
+                <a href="{{ route('plan-trabajo.index') }}" class="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">Limpiar</a>
+            @endif
+        </form>
 
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             @if ($planes->isEmpty())
@@ -83,15 +123,22 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No hay planes registrados</h3>
-                    <p class="text-gray-600 mb-6">Comienza creando el primer plan de trabajo anual.</p>
-                    <a href="{{ route('plan-trabajo.create') }}"
-                        class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Crear primer plan
-                    </a>
+                    @if (request()->anyFilled(['anio', 'estado']))
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Ningún plan coincide con el filtro</h3>
+                        <a href="{{ route('plan-trabajo.index') }}" class="text-[#C5A049] font-medium">Ver todos los planes</a>
+                    @else
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">No hay planes registrados</h3>
+                        <p class="text-gray-600 mb-6">Comienza creando el primer plan de trabajo anual.</p>
+                        @role('admin_ti')
+                            <a href="{{ route('plan-trabajo.create') }}"
+                                class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Crear primer plan
+                            </a>
+                        @endrole
+                    @endif
                 </div>
             @else
                 <div class="overflow-x-auto">
@@ -101,6 +148,7 @@
                                 <th class="p-4 text-left font-semibold text-sm">Año</th>
                                 <th class="p-4 text-left font-semibold text-sm">Estado</th>
                                 <th class="p-4 text-left font-semibold text-sm">Actividades</th>
+                                <th class="p-4 text-left font-semibold text-sm">Avance</th>
                                 <th class="p-4 text-left font-semibold text-sm">Acciones</th>
                             </tr>
                         </thead>
@@ -177,7 +225,27 @@
                                             </div>
                                         </div>
                                     </td>
-                                    
+
+                                    @php
+                                        $avance = $plan->avance_global;
+                                        $atrasadas = $plan->actividades->filter->atrasada->count();
+                                    @endphp
+                                    <td class="p-4">
+                                        <div class="w-40 space-y-1">
+                                            <div class="flex justify-between text-xs">
+                                                <span class="font-semibold text-gray-800">{{ $avance }}%</span>
+                                                @if ($atrasadas)
+                                                    <a href="{{ route('plan-trabajo.show', ['plan' => $plan->id, 'situacion' => 'atrasada']) }}"
+                                                        class="text-red-600 font-semibold hover:underline">{{ $atrasadas }} atrasada{{ $atrasadas > 1 ? 's' : '' }}</a>
+                                                @endif
+                                            </div>
+                                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                <div class="h-full rounded-full {{ $avance >= 100 ? 'bg-green-500' : ($avance > 0 ? 'bg-yellow-500' : 'bg-gray-400') }}"
+                                                    style="width: {{ $avance }}%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+
                                     <td class="p-4">
                                         <div class="flex items-center gap-2">
                                             <a href="{{ route('plan-trabajo.show', $plan->id) }}"
@@ -188,14 +256,18 @@
                                                 </svg>
                                                 Ver
                                             </a>
-                                            
-                                            <a href="{{ route('plan-trabajo.edit', $plan->id) }}"
-                                               class="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] text-sm font-medium rounded-xl hover:shadow-md transition-shadow duration-200">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                </svg>
-                                                Editar
-                                            </a>
+
+                                            @if ($plan->esEditable())
+                                                @role('admin_ti')
+                                                    <a href="{{ route('plan-trabajo.edit', $plan->id) }}"
+                                                       class="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-[#C5A049] to-[#D8B96E] text-[#0C1C3C] text-sm font-medium rounded-xl hover:shadow-md transition-shadow duration-200">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                        </svg>
+                                                        Editar
+                                                    </a>
+                                                @endrole
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

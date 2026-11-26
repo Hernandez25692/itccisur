@@ -1,4 +1,9 @@
 <x-app-layout>
+    @php
+        $hayFiltros = collect($filtros)->reject(fn ($v) => in_array($v, [null, '', 'todos', 'todas'], true))->isNotEmpty();
+        $campo = 'w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors';
+    @endphp
+
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -17,73 +22,41 @@
             @endrole
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-            <div class="bg-gradient-to-br from-[#0C1C3C] to-[#1A2A4F] text-white p-4 rounded-xl shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-300">Total Actividades</p>
-                        <p class="text-2xl font-bold mt-1">{{ $actividades->total() }}</p>
-                    </div>
-                    <div class="p-3 bg-white/10 rounded-lg">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
+        <x-flash class="mt-6" />
 
-            <div class="bg-gradient-to-br from-[#1A2A4F] to-[#2A3A6F] text-white p-4 rounded-xl shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-300">Pendientes</p>
-                        <p class="text-2xl font-bold mt-1">
-                            {{ $actividades->where('estado', 'pendiente')->count() }}
-                        </p>
-                    </div>
-                    <div class="p-3 bg-white/10 rounded-lg">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
+        @if ($actividadPlanFiltrada)
+            <div class="mt-6 rounded-xl border border-[#C5A049]/40 bg-[#C5A049]/5 px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <p class="text-sm text-gray-700">
+                    Mostrando la bitácora de la actividad del plan
+                    <a href="{{ route('plan-actividad.show', $actividadPlanFiltrada) }}" class="font-semibold text-[#B59038] hover:underline">
+                        {{ $actividadPlanFiltrada->actividad }}
+                    </a>
+                    (Plan {{ $actividadPlanFiltrada->plan?->anio }})
+                </p>
+                <a href="{{ request()->fullUrlWithQuery(['plan_actividad_id' => null]) }}" class="text-sm font-medium text-[#C5A049]">Quitar filtro</a>
             </div>
+        @endif
 
-            <div class="bg-gradient-to-br from-[#1A2A4F] to-[#2A3A6F] text-white p-4 rounded-xl shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-300">En Proceso</p>
-                        <p class="text-2xl font-bold mt-1">
-                            {{ $actividades->where('estado', 'en_proceso')->count() }}
-                        </p>
-                    </div>
-                    <div class="p-3 bg-white/10 rounded-lg">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
+            @foreach ([
+                ['Total ' . ($hayFiltros ? 'filtrado' : 'actividades'), $actividades->total(), null],
+                ['Pendientes', $porEstado['pendiente'] ?? 0, 'pendiente'],
+                ['En Proceso', $porEstado['en_proceso'] ?? 0, 'en_proceso'],
+                ['Resueltas', $porEstado['resuelto'] ?? 0, 'resuelto'],
+            ] as [$etiqueta, $valor, $estado])
+                <a href="{{ $estado ? request()->fullUrlWithQuery(['estado' => $estado, 'page' => null]) : request()->fullUrlWithQuery(['estado' => null, 'page' => null]) }}"
+                    class="bg-gradient-to-br {{ $loop->first ? 'from-[#0C1C3C] to-[#1A2A4F]' : 'from-[#1A2A4F] to-[#2A3A6F]' }} text-white p-4 rounded-xl shadow hover:shadow-lg transition {{ ($filtros['estado'] ?? null) === $estado && $estado ? 'ring-2 ring-[#C5A049]' : '' }}">
+                    <p class="text-sm text-gray-300">{{ $etiqueta }}</p>
+                    <p class="text-2xl font-bold mt-1">{{ $valor }}</p>
+                </a>
+            @endforeach
 
-            <div class="bg-gradient-to-br from-[#1A2A4F] to-[#2A3A6F] text-white p-4 rounded-xl shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-300">Total actividades del mes</p>
-                        <p class="text-2xl font-bold mt-1">
-                            {{ $totalMes }}
-                        </p>
-                    </div>
-                    <div class="p-3 bg-white/10 rounded-lg">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
+            <a href="{{ request()->fullUrlWithQuery(['plan' => 'con', 'page' => null]) }}"
+                class="bg-gradient-to-br from-[#B59038] to-[#C5A049] text-[#0C1C3C] p-4 rounded-xl shadow hover:shadow-lg transition">
+                <p class="text-sm font-medium">Vinculadas al Plan</p>
+                <p class="text-2xl font-bold mt-1">{{ $vinculadas }}</p>
+                <p class="text-xs mt-1 opacity-80">Este mes en total: {{ $totalMes }}</p>
+            </a>
         </div>
     </div>
 
@@ -93,85 +66,103 @@
             <span class="text-sm text-gray-500">{{ $actividades->total() }} registros encontrados</span>
         </div>
 
-        <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Prioridad</label>
-                <select name="prioridad"
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors">
-                    <option value="todas" class="py-2">Todas las prioridades</option>
-                    <option value="baja" class="py-2">Baja</option>
-                    <option value="media" class="py-2">Media</option>
-                    <option value="alta" class="py-2">Alta</option>
-                    <option value="critica" class="py-2">Crítica</option>
-                </select>
-            </div>
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            @if (!empty($filtros['plan_actividad_id']))
+                <input type="hidden" name="plan_actividad_id" value="{{ $filtros['plan_actividad_id'] }}">
+            @endif
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                <select name="estado"
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors">
-                    <option value="todos" class="py-2">Todos los estados</option>
-                    <option value="pendiente" class="py-2">Pendiente</option>
-                    <option value="en_proceso" class="py-2">En Proceso</option>
-                    <option value="resuelto" class="py-2">Resuelto</option>
-                </select>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
+                <input type="text" name="buscar" value="{{ $filtros['buscar'] ?? '' }}" class="{{ $campo }}"
+                    placeholder="Título, descripción, equipo, ubicación o solución">
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Desde</label>
-                <input type="date" name="desde"
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors">
+                <input type="date" name="desde" value="{{ $filtros['desde'] ?? '' }}" class="{{ $campo }}">
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
-                <input type="date" name="hasta"
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors">
+                <input type="date" name="hasta" value="{{ $filtros['hasta'] ?? '' }}" class="{{ $campo }}">
             </div>
 
-            <div class="flex items-end">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                <select name="estado" class="{{ $campo }}">
+                    <option value="">Todos los estados</option>
+                    @foreach (\App\Models\BitacoraActividad::ESTADOS as $valor => $texto)
+                        <option value="{{ $valor }}" @selected(($filtros['estado'] ?? '') === $valor)>{{ $texto }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Prioridad</label>
+                <select name="prioridad" class="{{ $campo }}">
+                    <option value="">Todas las prioridades</option>
+                    @foreach (\App\Models\BitacoraActividad::PRIORIDADES as $valor => $texto)
+                        <option value="{{ $valor }}" @selected(($filtros['prioridad'] ?? '') === $valor)>{{ $texto }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de falla</label>
+                <select name="tipo_falla" class="{{ $campo }}">
+                    <option value="">Todos</option>
+                    @foreach ($opciones['tipos_falla'] as $tipo)
+                        <option value="{{ $tipo }}" @selected(($filtros['tipo_falla'] ?? '') === $tipo)>{{ $tipo }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Ubicación</label>
+                <select name="ubicacion" class="{{ $campo }}">
+                    <option value="">Todas</option>
+                    @foreach ($opciones['ubicaciones'] as $ubicacion)
+                        <option value="{{ $ubicacion }}" @selected(($filtros['ubicacion'] ?? '') === $ubicacion)>{{ $ubicacion }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Técnico</label>
+                <select name="tecnico" class="{{ $campo }}">
+                    <option value="">Todos</option>
+                    @foreach ($opciones['tecnicos'] as $id => $nombre)
+                        <option value="{{ $id }}" @selected((string) ($filtros['tecnico'] ?? '') === (string) $id)>{{ $nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Plan de Trabajo</label>
+                <select name="plan" class="{{ $campo }}">
+                    <option value="">Con y sin vínculo</option>
+                    <option value="con" @selected(($filtros['plan'] ?? '') === 'con')>Vinculadas al plan</option>
+                    <option value="sin" @selected(($filtros['plan'] ?? '') === 'sin')>Sin vínculo (soporte del día)</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-2 flex items-end gap-3">
                 <button type="submit"
-                    class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white font-medium px-6 py-3 rounded-xl shadow hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                    class="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white font-medium px-6 py-3 rounded-xl shadow hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                     <span>Filtrar</span>
                 </button>
+                @if ($hayFiltros)
+                    <a href="{{ route('bitacora.index') }}"
+                        class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">
+                        Limpiar
+                    </a>
+                @endif
             </div>
         </form>
-
-        @if (request()->anyFilled(['prioridad', 'estado', 'desde', 'hasta']))
-            <div class="mt-4 flex items-center gap-2 text-sm">
-                <span class="text-gray-600">Filtros aplicados:</span>
-                <div class="flex flex-wrap gap-2">
-                    @if (request('prioridad') && request('prioridad') != 'todas')
-                        <span
-                            class="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs">
-                            Prioridad: {{ ucfirst(request('prioridad')) }}
-                            <a href="{{ request()->fullUrlWithQuery(['prioridad' => null]) }}"
-                                class="text-blue-600 hover:text-blue-800">
-                                ×
-                            </a>
-                        </span>
-                    @endif
-                    @if (request('desde'))
-                        <span
-                            class="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs">
-                            Desde: {{ request('desde') }}
-                            <a href="{{ request()->fullUrlWithQuery(['desde' => null]) }}"
-                                class="text-green-600 hover:text-green-800">
-                                ×
-                            </a>
-                        </span>
-                    @endif
-                </div>
-                <a href="{{ route('bitacora.index') }}"
-                    class="ml-auto text-sm text-[#C5A049] hover:text-[#D8B96E] font-medium">
-                    Limpiar filtros
-                </a>
-            </div>
-        @endif
     </div>
 
     <div class="space-y-4">
@@ -206,9 +197,23 @@
                                     @else bg-green-100 text-green-800 @endif">
                                     {{ ucfirst(str_replace('_', ' ', $a->estado)) }}
                                 </span>
+
+                                @if ($a->planActividad)
+                                    <a href="{{ route('plan-actividad.show', $a->plan_actividad_id) }}"
+                                        title="{{ $a->planActividad->actividad }}"
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[#C5A049]/15 text-[#8a6d22] border border-[#C5A049]/40 hover:bg-[#C5A049]/25">
+                                        🗂️ Plan {{ $a->planActividad->plan?->anio }}
+                                        @if ($a->ejecucionPlan)
+                                            · +{{ $a->ejecucionPlan->avance }}%
+                                        @endif
+                                    </a>
+                                @endif
                             </div>
 
                             <h3 class="text-xl font-bold text-gray-900 mt-3">{{ $a->titulo }}</h3>
+                            @if ($a->planActividad)
+                                <p class="text-sm text-[#8a6d22] mt-1">{{ \Illuminate\Support\Str::limit($a->planActividad->actividad, 110) }}</p>
+                            @endif
                         </div>
 
                         <div class="text-right">
@@ -216,9 +221,12 @@
                                 {{ $a->fecha->format('d/m/Y') }}
                             </div>
                             <div class="text-sm text-gray-500">
-                                {{ $a->hora_inicio }}
+                                {{ $a->hora_inicio?->format('H:i') }}
                                 @if ($a->hora_fin)
-                                    - {{ $a->hora_fin }}
+                                    - {{ $a->hora_fin->format('H:i') }}
+                                @endif
+                                @if ($a->tiempo_empleado_minutos)
+                                    <span class="block text-xs">{{ $a->tiempo_empleado_minutos }} min</span>
                                 @endif
                             </div>
                         </div>
