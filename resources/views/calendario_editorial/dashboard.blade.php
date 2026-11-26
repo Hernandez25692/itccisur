@@ -1,120 +1,84 @@
 <x-app-layout>
-    <div class="max-w-7xl mx-auto py-8 px-4 space-y-10">
+    @php
+        $periodo = match (true) {
+            $mes && $anio => ucfirst(\Carbon\Carbon::create((int) $anio, (int) $mes, 1)->translatedFormat('F Y')),
+            (bool) $anio => "Año {$anio}",
+            default => 'Todos los registros',
+        };
+        $filtrosActivos = collect(['mes' => $mes, 'anio' => $anio] + $filtros)->filter()->count();
+    @endphp
 
-        <div
-            class="flex flex-col lg:flex-row lg:justify-between gap-6 items-center bg-gradient-to-r from-gray-900 to-blue-900 p-6 rounded-2xl shadow-2xl">
-            <div>
-                <h1 class="text-4xl font-extrabold text-white mb-2 tracking-tight">
-                    📊 Dashboard Editorial Pro
-                </h1>
-                <p class="text-blue-300 font-medium text-lg">
-                    Análisis de Publicaciones:
-                    {{ \Carbon\Carbon::createFromDate($anio, $mes, 1)->translatedFormat('F Y') }}
-                </p>
+    <div class="max-w-7xl mx-auto space-y-6">
+
+        <div class="flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-gray-900 to-blue-900 p-5 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div class="min-w-0">
+                <h1 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">📊 Dashboard Editorial</h1>
+                <p class="mt-1 text-blue-200">Análisis de publicaciones · <span class="font-semibold text-white">{{ $periodo }}</span></p>
             </div>
-
-            <div class="flex flex-col sm:flex-row gap-4 items-center">
-
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-blue-500 p-2 rounded-lg flex-shrink-0">
-                            <span class="text-white text-xl">📅</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-blue-200">Periodo seleccionado</p>
-                            <p class="text-lg font-bold text-white">
-                                @if ($mes && $anio)
-                                    {{ \Carbon\Carbon::createFromDate(null, (int) $mes, 1)->translatedFormat('F') }}
-                                    {{ $anio }}
-                                @else
-                                    Todos los registros
-                                @endif
-                            </p>
-
-                        </div>
-                    </div>
-                </div>
-
-                <form method="GET"
-                    class="flex flex-wrap gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/20 items-end">
-
-                    <div class="flex flex-col">
-                        <label class="text-xs text-blue-200 mb-1 font-semibold">Mes</label>
-                        <select name="mes"
-                            class="bg-white/90 border-0 rounded-lg p-2 text-sm font-medium text-gray-800
-                       focus:ring-2 focus:ring-cyan-400 focus:outline-none shadow-md">
-                            <option value="">Todos</option>
-                            @foreach (range(1, 12) as $m)
-                                <option value="{{ $m }}" @selected($mes == $m)>
-                                    {{ \Carbon\Carbon::createFromDate(now()->year, $m, 1)->translatedFormat('F') }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="flex flex-col">
-                        <label class="text-xs text-blue-200 mb-1 font-semibold">Año</label>
-                        <select name="anio"
-                            class="bg-white/90 border-0 rounded-lg p-2 text-sm font-medium text-gray-800
-                       focus:ring-2 focus:ring-cyan-400 focus:outline-none shadow-md">
-                            <option value="">Todos</option>
-                            @foreach (range(now()->year - 2, now()->year + 1) as $y)
-                                <option value="{{ $y }}" @selected($anio == $y)>
-                                    {{ $y }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    @foreach ([
-                        'area' => ['Área', \App\Models\CalendarioEditorial::AREAS],
-                        'red' => ['Red', \App\Models\CalendarioEditorial::REDES],
-                        'tipo' => ['Contenido', \App\Models\CalendarioEditorial::TIPOS_CONTENIDO],
-                    ] as $campo => [$etiqueta, $opciones])
-                        <div class="flex flex-col">
-                            <label class="text-xs text-blue-200 mb-1 font-semibold">{{ $etiqueta }}</label>
-                            <select name="{{ $campo }}"
-                                class="bg-white/90 border-0 rounded-lg p-2 text-sm font-medium text-gray-800 max-w-[12rem]
-                       focus:ring-2 focus:ring-cyan-400 focus:outline-none shadow-md">
-                                <option value="">Todas</option>
-                                @foreach ($opciones as $opcion)
-                                    <option value="{{ $opcion }}" @selected(($filtros[$campo] ?? '') === $opcion)>{{ $opcion }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    @endforeach
-
-                    <button type="submit"
-                        class="px-5 py-2.5 h-10 bg-gradient-to-r from-cyan-500 to-blue-500
-                   text-white rounded-lg font-semibold hover:shadow-lg
-                   transition-all hover:scale-[1.02] active:scale-[0.98]
-                   shadow-blue-500/50">
-                        🔍 Aplicar
-                    </button>
-
-                    <a href="{{ route('calendario-editorial.dashboard') }}"
-                        class="px-5 py-2.5 h-10 bg-white/20 text-white rounded-lg
-                   font-semibold hover:bg-white/30 transition-all">
-                        ♻ Mostrar todo
-                    </a>
-
-                </form>
-            </div>
-
+            <a href="{{ route('calendario-editorial.index', array_filter(['mes' => $mes, 'anio' => $anio] + $filtros)) }}"
+                class="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-white/15 px-4 text-sm font-semibold text-white hover:bg-white/25">
+                Ver publicaciones del periodo →
+            </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <x-filtros :limpiar="route('calendario-editorial.dashboard')" :activos="$filtrosActivos" :columnas="5"
+            :resumen="'Periodo: ' . $periodo">
+            <x-filtro label="Mes">
+                <select name="mes" class="filtro-control">
+                    <option value="">Todos</option>
+                    @foreach (range(1, 12) as $m)
+                        <option value="{{ $m }}" @selected($mes == $m)>
+                            {{ ucfirst(\Carbon\Carbon::create(null, $m, 1)->translatedFormat('F')) }}
+                        </option>
+                    @endforeach
+                </select>
+            </x-filtro>
+            <x-filtro label="Año">
+                <select name="anio" class="filtro-control">
+                    <option value="">Todos</option>
+                    @foreach (range(now()->year - 2, now()->year + 1) as $y)
+                        <option value="{{ $y }}" @selected($anio == $y)>{{ $y }}</option>
+                    @endforeach
+                </select>
+            </x-filtro>
+            <x-filtro label="Área">
+                <select name="area" class="filtro-control">
+                    <option value="">Todas</option>
+                    @foreach (\App\Models\CalendarioEditorial::AREAS as $opcion)
+                        <option value="{{ $opcion }}" @selected(($filtros['area'] ?? '') === $opcion)>{{ $opcion }}</option>
+                    @endforeach
+                </select>
+            </x-filtro>
+            <x-filtro label="Red social">
+                <select name="red" class="filtro-control">
+                    <option value="">Todas</option>
+                    @foreach (\App\Models\CalendarioEditorial::REDES as $opcion)
+                        <option value="{{ $opcion }}" @selected(($filtros['red'] ?? '') === $opcion)>{{ ucfirst(strtolower($opcion)) }}</option>
+                    @endforeach
+                </select>
+            </x-filtro>
+            <x-filtro label="Tipo de contenido">
+                <select name="tipo" class="filtro-control">
+                    <option value="">Todos</option>
+                    @foreach (\App\Models\CalendarioEditorial::TIPOS_CONTENIDO as $opcion)
+                        <option value="{{ $opcion }}" @selected(($filtros['tipo'] ?? '') === $opcion)>{{ ucfirst(strtolower($opcion)) }}</option>
+                    @endforeach
+                </select>
+            </x-filtro>
+        </x-filtros>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
             <div
                 class="bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-b-4 border-blue-400">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-light text-blue-200 uppercase tracking-widest">Total Publicaciones</p>
-                        <p class="text-6xl font-extrabold mt-2">{{ $totalMes }}</p>
+                <div class="flex justify-between items-start gap-3">
+                    <div class="min-w-0">
+                        <p class="text-sm font-light text-blue-200 uppercase tracking-wide truncate">Total</p>
+                        <p class="text-4xl font-extrabold mt-2 whitespace-nowrap">{{ $totalMes }}</p>
                         <p class="text-sm mt-1 text-blue-200">En el periodo</p>
                     </div>
-                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                        <span class="text-3xl">📊</span>
+                    <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm shrink-0">
+                        <span class="text-2xl">📊</span>
                     </div>
                 </div>
                 <div class="mt-4 w-full h-2 bg-blue-500/30 rounded-full">
@@ -124,14 +88,14 @@
 
             <div
                 class="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-b-4 border-emerald-400">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-light text-emerald-200 uppercase tracking-widest">Publicadas</p>
-                        <p class="text-6xl font-extrabold mt-2">{{ $porEstado['publicado'] ?? 0 }}</p>
+                <div class="flex justify-between items-start gap-3">
+                    <div class="min-w-0">
+                        <p class="text-sm font-light text-emerald-200 uppercase tracking-wide truncate">Publicadas</p>
+                        <p class="text-4xl font-extrabold mt-2 whitespace-nowrap">{{ $porEstado['publicado'] ?? 0 }}</p>
                         <p class="text-sm mt-1 text-emerald-200">Éxito total</p>
                     </div>
-                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                        <span class="text-3xl">✅</span>
+                    <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm shrink-0">
+                        <span class="text-2xl">✅</span>
                     </div>
                 </div>
                 <div class="mt-4 w-full h-2 bg-emerald-500/30 rounded-full">
@@ -143,14 +107,14 @@
 
             <div
                 class="bg-gradient-to-br from-amber-600 to-amber-800 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-b-4 border-amber-400">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-light text-amber-200 uppercase tracking-widest">Pendientes</p>
-                        <p class="text-6xl font-extrabold mt-2">{{ $porEstado['pendiente'] ?? 0 }}</p>
+                <div class="flex justify-between items-start gap-3">
+                    <div class="min-w-0">
+                        <p class="text-sm font-light text-amber-200 uppercase tracking-wide truncate">Pendientes</p>
+                        <p class="text-4xl font-extrabold mt-2 whitespace-nowrap">{{ $porEstado['pendiente'] ?? 0 }}</p>
                         <p class="text-sm mt-1 text-amber-200">En proceso</p>
                     </div>
-                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                        <span class="text-3xl">⏳</span>
+                    <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm shrink-0">
+                        <span class="text-2xl">⏳</span>
                     </div>
                 </div>
                 <div class="mt-4 w-full h-2 bg-amber-500/30 rounded-full">
@@ -162,14 +126,14 @@
 
             <div
                 class="bg-gradient-to-br from-violet-600 to-violet-800 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-b-4 border-violet-400">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-light text-violet-200 uppercase tracking-widest">Cumplimiento</p>
-                        <p class="text-6xl font-extrabold mt-2">{{ $cumplimiento }}%</p>
+                <div class="flex justify-between items-start gap-3">
+                    <div class="min-w-0">
+                        <p class="text-sm font-light text-violet-200 uppercase tracking-wide truncate">Cumplimiento</p>
+                        <p class="text-4xl font-extrabold mt-2 whitespace-nowrap">{{ $cumplimiento }}%</p>
                         <p class="text-sm mt-1 text-violet-200">Meta lograda</p>
                     </div>
-                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                        <span class="text-3xl">🎯</span>
+                    <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm shrink-0">
+                        <span class="text-2xl">🎯</span>
                     </div>
                 </div>
                 <div class="mt-4 w-full h-2 bg-violet-500/30 rounded-full">
@@ -185,34 +149,38 @@
                 $extra
             )));
         @endphp
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <a href="{{ $enlace(['estado' => 'reprogramado']) }}" class="bg-white rounded-2xl border border-yellow-200 p-5 shadow hover:shadow-lg transition">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <a href="{{ $enlace(['estado' => 'reprogramado']) }}" class="bg-white rounded-2xl border border-yellow-200 p-5 shadow-sm hover:shadow-md transition">
                 <p class="text-xs font-semibold uppercase tracking-wide text-yellow-700">Reprogramadas</p>
                 <p class="text-3xl font-extrabold text-gray-900 mt-1">{{ $reprogramadas }}</p>
                 <p class="text-xs text-gray-500 mt-1">No cuentan para el cumplimiento</p>
             </a>
-            <a href="{{ $enlace(['estado' => 'cancelado']) }}" class="bg-white rounded-2xl border border-red-200 p-5 shadow hover:shadow-lg transition">
+            <a href="{{ $enlace(['estado' => 'cancelado']) }}" class="bg-white rounded-2xl border border-red-200 p-5 shadow-sm hover:shadow-md transition">
                 <p class="text-xs font-semibold uppercase tracking-wide text-red-700">Canceladas</p>
                 <p class="text-3xl font-extrabold text-gray-900 mt-1">{{ $canceladas }}</p>
                 <p class="text-xs text-gray-500 mt-1">No cuentan para el cumplimiento</p>
             </a>
-            <a href="{{ $enlace(['estado' => 'pendiente']) }}" class="bg-white rounded-2xl border {{ $vencidas ? 'border-red-400 ring-2 ring-red-200' : 'border-gray-200' }} p-5 shadow hover:shadow-lg transition">
+            <a href="{{ $enlace(['estado' => 'pendiente']) }}" class="bg-white rounded-2xl border {{ $vencidas ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200' }} p-5 shadow-sm hover:shadow-md transition">
                 <p class="text-xs font-semibold uppercase tracking-wide text-red-700">Vencidas sin publicar</p>
                 <p class="text-3xl font-extrabold {{ $vencidas ? 'text-red-600' : 'text-gray-900' }} mt-1">{{ $vencidas }}</p>
                 <p class="text-xs text-gray-500 mt-1">Pendientes con fecha pasada</p>
             </a>
-            <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow">
-                <p class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">Áreas con más publicaciones</p>
-                @forelse ($porArea as $area => $total)
-                    <a href="{{ $enlace(['area' => $area]) }}" class="flex justify-between text-sm py-0.5 hover:text-blue-700">
-                        <span class="truncate pr-2">{{ $area }}</span>
-                        <span class="font-bold">{{ $total }}</span>
-                    </a>
-                @empty
-                    <p class="text-sm text-gray-400">Sin área registrada</p>
-                @endforelse
-            </div>
         </div>
+
+        @if ($porArea->isNotEmpty())
+            <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-3">Áreas con más publicaciones</p>
+                <div class="flex flex-wrap gap-2">
+                    @foreach ($porArea as $area => $total)
+                        <a href="{{ $enlace(['area' => $area]) }}"
+                            class="inline-flex max-w-full items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700 hover:border-blue-300 hover:bg-blue-50">
+                            <span class="truncate">{{ $area }}</span>
+                            <span class="shrink-0 rounded-md bg-white px-1.5 text-xs font-bold text-gray-900">{{ $total }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div

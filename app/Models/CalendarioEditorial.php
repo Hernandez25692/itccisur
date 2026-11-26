@@ -86,14 +86,23 @@ class CalendarioEditorial extends Model
 
     protected static function booted(): void
     {
-        // El día siempre sale de la fecha; la semana (ISO, 1-53) solo si no se indicó
+        // El día siempre sale de la fecha; la semana del mes solo si no se indicó
         static::saving(function (self $registro) {
             if ($registro->fecha_publicacion) {
                 $fecha = Carbon::parse($registro->fecha_publicacion);
                 $registro->dia = self::DIAS[$fecha->dayOfWeekIso - 1];
-                $registro->semana = $registro->semana ?: $fecha->isoWeek();
+                $registro->semana = $registro->semana ?: self::semanaDelMes($fecha);
             }
         });
+    }
+
+    /**
+     * Semana del mes como la usa el equipo (1-6): semanas de lunes a domingo,
+     * la que contiene el día 1 es la semana 1. Ej.: 01/12/2027 → 1.
+     */
+    public static function semanaDelMes(Carbon $fecha): int
+    {
+        return (int) ceil(($fecha->day + $fecha->copy()->startOfMonth()->dayOfWeekIso - 1) / 7);
     }
 
     public function creador()

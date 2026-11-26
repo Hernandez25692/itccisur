@@ -23,7 +23,7 @@
 
         <x-flash />
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
 
             <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
                 <div class="flex items-center justify-between">
@@ -90,30 +90,26 @@
             </div>
         </div>
 
-        <form method="GET" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6 flex flex-wrap items-end gap-4">
-            <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Año</label>
-                <select name="anio" class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50">
+        <x-filtros class="mb-6" :limpiar="route('plan-trabajo.index')"
+            :activos="collect(request()->only(['anio', 'estado']))->filter()->count()"
+            :resumen="$planes->count() . ' planes'">
+            <x-filtro label="Año">
+                <select name="anio" class="filtro-control">
                     <option value="">Todos</option>
                     @foreach ($anios as $a)
                         <option value="{{ $a }}" @selected(request('anio') == $a)>{{ $a }}</option>
                     @endforeach
                 </select>
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Estado</label>
-                <select name="estado" class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50">
+            </x-filtro>
+            <x-filtro label="Estado">
+                <select name="estado" class="filtro-control">
                     <option value="">Todos</option>
                     @foreach (\App\Models\PlanTrabajo::ESTADOS as $e)
                         <option value="{{ $e }}" @selected(request('estado') === $e)>{{ $e === 'enviado' ? 'En revisión' : ucfirst($e) }}</option>
                     @endforeach
                 </select>
-            </div>
-            <button class="px-5 py-2 bg-[#0C1C3C] text-white rounded-lg text-sm font-medium hover:bg-[#1A2A4F]">Filtrar</button>
-            @if (request()->anyFilled(['anio', 'estado']))
-                <a href="{{ route('plan-trabajo.index') }}" class="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">Limpiar</a>
-            @endif
-        </form>
+            </x-filtro>
+        </x-filtros>
 
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             @if ($planes->isEmpty())

@@ -317,6 +317,37 @@
         .legend-dot.gold  { background: var(--dorado); }
         .legend-dot.today { background: var(--dorado); border-radius: 50%; }
 
+        /* Vista de lista (teléfonos) con el mismo tema oscuro */
+        .fc .fc-list {
+            border-color: var(--azul-borde) !important;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .fc .fc-list-day-cushion,
+        .fc .fc-list-empty {
+            background: var(--azul-medio) !important;
+            color: var(--dorado-claro) !important;
+        }
+
+        .fc .fc-list-event td {
+            background: var(--azul-panel) !important;
+            border-color: var(--azul-borde) !important;
+            color: var(--blanco);
+        }
+
+        .fc .fc-list-event:hover td {
+            background: var(--azul-hover) !important;
+        }
+
+        .fc .fc-list-event-time {
+            color: var(--gris-texto);
+        }
+
+        .fc .fc-list-event-title .event-pill {
+            white-space: normal;
+        }
+
         @media (max-width: 640px) {
             .ccisur-header {
                 flex-direction: column;
@@ -324,8 +355,17 @@
                 gap: .75rem;
             }
 
+            .ccisur-page {
+                padding: 1.25rem .75rem;
+            }
+
             .ccisur-card {
-                padding: 1.25rem;
+                padding: 1rem;
+            }
+
+            .fc .fc-toolbar {
+                flex-wrap: wrap;
+                gap: .5rem;
             }
 
             .fc .fc-toolbar {
@@ -352,21 +392,36 @@
         }
 
         .ccisur-filtros {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
             gap: .75rem;
             margin-bottom: 1.25rem;
         }
 
         .ccisur-filtros select,
         .ccisur-filtros input {
-            background: var(--azul-medio);
+            width: 100%;
+            min-width: 0;
+            height: 2.5rem;
+            background-color: var(--azul-medio);
             border: 1px solid var(--azul-borde);
             color: var(--blanco);
             border-radius: 8px;
             padding: .5rem .75rem;
             font-size: .85rem;
-            min-width: 160px;
+        }
+
+        .ccisur-filtros select {
+            padding-right: 2.25rem;
+            text-overflow: ellipsis;
+        }
+
+        .ccisur-filtros .acciones {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: .5rem;
         }
 
         .ccisur-filtros a,
@@ -433,9 +488,11 @@
                             <option value="{{ $tipo }}" @selected(request('tipo') === $tipo)>{{ $tipo }}</option>
                         @endforeach
                     </select>
+                    <div class="acciones">
                     <button type="submit">Filtrar</button>
                     <a href="{{ route('calendario-editorial.calendar') }}">Limpiar</a>
                     <a href="{{ route('calendario-editorial.index', request()->only(['estado', 'area', 'red', 'tipo', 'buscar'])) }}">Ver como lista</a>
+                    </div>
                 </form>
 
                 <div id="calendar"></div>
@@ -473,7 +530,8 @@
             }[c]));
 
             const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
+                // En el teléfono la cuadrícula del mes no se lee: se abre en lista
+                initialView: window.matchMedia('(max-width: 640px)').matches ? 'listMonth' : 'dayGridMonth',
                 locale: 'es',
                 height: 'auto',
                 expandRows: true,
@@ -483,14 +541,15 @@
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    right: 'dayGridMonth,timeGridWeek,listMonth'
                 },
 
                 buttonText: {
                     today: 'Hoy',
                     month: 'Mes',
                     week: 'Semana',
-                    day: 'Día'
+                    day: 'Día',
+                    list: 'Lista'
                 },
 
                 // Solo se pide el rango visible, con los filtros del formulario

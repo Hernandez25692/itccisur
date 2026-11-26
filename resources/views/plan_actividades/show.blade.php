@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto sm:py-2">
 
         <a href="{{ route('plan-trabajo.show', $actividad->plan_trabajo_id) }}"
             class="inline-flex items-center gap-2 mb-4 text-sm font-medium text-[#0C1C3C] hover:text-[#C5A049]">
@@ -8,7 +8,7 @@
 
         <x-flash />
 
-        <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] rounded-2xl p-8 text-white shadow-xl mb-8">
+        <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] rounded-2xl p-5 sm:p-8 text-white shadow-xl mb-8">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div class="flex-1">
                     <div class="flex items-center gap-4 mb-4">
@@ -20,7 +20,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h1 class="text-3xl font-bold">Actividad {{ $actividad->codigo }}</h1>
+                            <h1 class="text-2xl sm:text-3xl font-bold break-words">Actividad {{ $actividad->codigo }}</h1>
                             <p class="text-gray-300 mt-1">Plan de Trabajo TI
                                 {{ $actividad->plan->anio ?? 'N/A' }}
                                 @if ($actividad->plan)
@@ -90,7 +90,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 sm:p-8">
                     <div class="space-y-6">
                         <div class="flex items-start gap-4">
                             <div class="p-3 bg-[#0C1C3C]/5 rounded-xl">
@@ -127,7 +127,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 sm:p-8">
                     <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
                         <svg class="w-5 h-5 text-[#C5A049]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -218,7 +218,7 @@
                     </div>
                 @else
                     @role('admin_ti')
-                        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 sm:p-8">
                             <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
                                 <svg class="w-5 h-5 text-[#C5A049]" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -332,7 +332,7 @@
         </div>
 
         @if ($actividad->ejecuciones->count() > 0)
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 sm:p-8">
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center gap-3">
                         <div class="p-3 bg-gradient-to-r from-[#C5A049]/10 to-[#D8B96E]/10 rounded-xl">
@@ -422,7 +422,7 @@
         @endif
 
         {{-- Integración con la Bitácora TI --}}
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mt-8">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 sm:p-8 mt-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900">Registros de Bitácora vinculados</h2>

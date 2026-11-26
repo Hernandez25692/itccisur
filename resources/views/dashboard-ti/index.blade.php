@@ -510,6 +510,55 @@
                 flex-direction: column;
             }
         }
+
+        /* Ajustes para que nada se salga del panel en pantallas chicas */
+        .metrics-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .charts-grid {
+            grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
+        }
+
+        .chart-container,
+        .activities-container,
+        .metric-card {
+            min-width: 0;
+        }
+
+        .chart-header {
+            flex-wrap: wrap;
+            gap: .75rem;
+        }
+
+        .chart-legend {
+            flex-wrap: wrap;
+            gap: .5rem 1rem;
+        }
+
+        .alert-item {
+            flex-wrap: wrap;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .activity-title,
+        .activity-description {
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 640px) {
+            .dashboard-container {
+                padding: .75rem;
+                border-radius: 12px;
+            }
+
+            .chart-container,
+            .activities-container,
+            .metric-card {
+                padding: 1.25rem;
+            }
+        }
     </style>
 
     <div class="dashboard-container">
@@ -641,7 +690,7 @@
                             d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
                             clip-rule="evenodd" />
                     </svg>
-                    Hoy
+                    En el período
                 </div>
             </div>
 

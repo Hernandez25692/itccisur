@@ -130,13 +130,17 @@ it('borra adjuntos propios y protege los ajenos', function () {
         ->and($ajena->adjuntos()->count())->toBe(1);
 });
 
-it('calcula el día desde la fecha y la semana ISO si no se indica', function () {
+it('calcula el día desde la fecha y la semana del mes si no se indica', function () {
     $publicacion = CalendarioEditorial::create([
         'dia' => 'Domingo', 'fecha_publicacion' => '2026-12-28', 'tema' => 'Fin de año',
     ]);
 
-    // 28/12/2026 es lunes de la semana ISO 53
-    expect($publicacion->dia)->toBe('Lunes')->and($publicacion->semana)->toBe(53);
+    // Diciembre 2026 empieza en martes: del 28 al 31 es la semana 5 del mes
+    expect($publicacion->dia)->toBe('Lunes')->and($publicacion->semana)->toBe(5);
+
+    // Como en producción: 01/12/2027 queda en la semana 1, y una semana escrita a mano no se toca
+    expect(CalendarioEditorial::create(['fecha_publicacion' => '2027-12-01', 'tema' => 'Locutor'])->semana)->toBe(1)
+        ->and(CalendarioEditorial::create(['fecha_publicacion' => '2027-12-06', 'tema' => 'X', 'semana' => 1])->semana)->toBe(1);
 });
 
 it('rechaza adjuntos HTML y no deja crear al rol usuario', function () {

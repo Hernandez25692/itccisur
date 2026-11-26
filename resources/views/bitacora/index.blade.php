@@ -1,7 +1,6 @@
 <x-app-layout>
     @php
         $hayFiltros = collect($filtros)->reject(fn ($v) => in_array($v, [null, '', 'todos', 'todas'], true))->isNotEmpty();
-        $campo = 'w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C5A049]/30 focus:border-[#C5A049] transition-colors';
     @endphp
 
     <div class="mb-8">
@@ -37,7 +36,7 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 mt-6">
             @foreach ([
                 ['Total ' . ($hayFiltros ? 'filtrado' : 'actividades'), $actividades->total(), null],
                 ['Pendientes', $porEstado['pendiente'] ?? 0, 'pendiente'],
@@ -60,110 +59,73 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Filtros de Búsqueda</h3>
-            <span class="text-sm text-gray-500">{{ $actividades->total() }} registros encontrados</span>
-        </div>
+    @php
+        $activos = collect($filtros)->except('plan_actividad_id')->reject(fn ($v) => in_array($v, [null, '', 'todos', 'todas'], true))->count();
+    @endphp
+    <x-filtros class="mb-8" :limpiar="route('bitacora.index')" :activos="$activos"
+        :resumen="$actividades->total() . ' registros encontrados'">
+        @if (!empty($filtros['plan_actividad_id']))
+            <input type="hidden" name="plan_actividad_id" value="{{ $filtros['plan_actividad_id'] }}">
+        @endif
 
-        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            @if (!empty($filtros['plan_actividad_id']))
-                <input type="hidden" name="plan_actividad_id" value="{{ $filtros['plan_actividad_id'] }}">
-            @endif
-
-            <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
-                <input type="text" name="buscar" value="{{ $filtros['buscar'] ?? '' }}" class="{{ $campo }}"
-                    placeholder="Título, descripción, equipo, ubicación o solución">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Desde</label>
-                <input type="date" name="desde" value="{{ $filtros['desde'] ?? '' }}" class="{{ $campo }}">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
-                <input type="date" name="hasta" value="{{ $filtros['hasta'] ?? '' }}" class="{{ $campo }}">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                <select name="estado" class="{{ $campo }}">
-                    <option value="">Todos los estados</option>
-                    @foreach (\App\Models\BitacoraActividad::ESTADOS as $valor => $texto)
-                        <option value="{{ $valor }}" @selected(($filtros['estado'] ?? '') === $valor)>{{ $texto }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Prioridad</label>
-                <select name="prioridad" class="{{ $campo }}">
-                    <option value="">Todas las prioridades</option>
-                    @foreach (\App\Models\BitacoraActividad::PRIORIDADES as $valor => $texto)
-                        <option value="{{ $valor }}" @selected(($filtros['prioridad'] ?? '') === $valor)>{{ $texto }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de falla</label>
-                <select name="tipo_falla" class="{{ $campo }}">
-                    <option value="">Todos</option>
-                    @foreach ($opciones['tipos_falla'] as $tipo)
-                        <option value="{{ $tipo }}" @selected(($filtros['tipo_falla'] ?? '') === $tipo)>{{ $tipo }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Ubicación</label>
-                <select name="ubicacion" class="{{ $campo }}">
-                    <option value="">Todas</option>
-                    @foreach ($opciones['ubicaciones'] as $ubicacion)
-                        <option value="{{ $ubicacion }}" @selected(($filtros['ubicacion'] ?? '') === $ubicacion)>{{ $ubicacion }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Técnico</label>
-                <select name="tecnico" class="{{ $campo }}">
-                    <option value="">Todos</option>
-                    @foreach ($opciones['tecnicos'] as $id => $nombre)
-                        <option value="{{ $id }}" @selected((string) ($filtros['tecnico'] ?? '') === (string) $id)>{{ $nombre }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Plan de Trabajo</label>
-                <select name="plan" class="{{ $campo }}">
-                    <option value="">Con y sin vínculo</option>
-                    <option value="con" @selected(($filtros['plan'] ?? '') === 'con')>Vinculadas al plan</option>
-                    <option value="sin" @selected(($filtros['plan'] ?? '') === 'sin')>Sin vínculo (soporte del día)</option>
-                </select>
-            </div>
-
-            <div class="md:col-span-2 flex items-end gap-3">
-                <button type="submit"
-                    class="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] text-white font-medium px-6 py-3 rounded-xl shadow hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    <span>Filtrar</span>
-                </button>
-                @if ($hayFiltros)
-                    <a href="{{ route('bitacora.index') }}"
-                        class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">
-                        Limpiar
-                    </a>
-                @endif
-            </div>
-        </form>
-    </div>
+        <x-filtro label="Buscar" :ancho="2">
+            <input type="text" name="buscar" value="{{ $filtros['buscar'] ?? '' }}" class="filtro-control"
+                placeholder="Título, descripción, equipo, ubicación o solución">
+        </x-filtro>
+        <x-filtro label="Desde">
+            <input type="date" name="desde" value="{{ $filtros['desde'] ?? '' }}" class="filtro-control">
+        </x-filtro>
+        <x-filtro label="Hasta">
+            <input type="date" name="hasta" value="{{ $filtros['hasta'] ?? '' }}" class="filtro-control">
+        </x-filtro>
+        <x-filtro label="Estado">
+            <select name="estado" class="filtro-control">
+                <option value="">Todos</option>
+                @foreach (\App\Models\BitacoraActividad::ESTADOS as $valor => $texto)
+                    <option value="{{ $valor }}" @selected(($filtros['estado'] ?? '') === $valor)>{{ $texto }}</option>
+                @endforeach
+            </select>
+        </x-filtro>
+        <x-filtro label="Prioridad">
+            <select name="prioridad" class="filtro-control">
+                <option value="">Todas</option>
+                @foreach (\App\Models\BitacoraActividad::PRIORIDADES as $valor => $texto)
+                    <option value="{{ $valor }}" @selected(($filtros['prioridad'] ?? '') === $valor)>{{ $texto }}</option>
+                @endforeach
+            </select>
+        </x-filtro>
+        <x-filtro label="Tipo de falla">
+            <select name="tipo_falla" class="filtro-control">
+                <option value="">Todos</option>
+                @foreach ($opciones['tipos_falla'] as $tipo)
+                    <option value="{{ $tipo }}" @selected(($filtros['tipo_falla'] ?? '') === $tipo)>{{ $tipo }}</option>
+                @endforeach
+            </select>
+        </x-filtro>
+        <x-filtro label="Ubicación">
+            <select name="ubicacion" class="filtro-control">
+                <option value="">Todas</option>
+                @foreach ($opciones['ubicaciones'] as $ubicacion)
+                    <option value="{{ $ubicacion }}" @selected(($filtros['ubicacion'] ?? '') === $ubicacion)>{{ $ubicacion }}</option>
+                @endforeach
+            </select>
+        </x-filtro>
+        <x-filtro label="Técnico">
+            <select name="tecnico" class="filtro-control">
+                <option value="">Todos</option>
+                @foreach ($opciones['tecnicos'] as $id => $nombre)
+                    <option value="{{ $id }}" @selected((string) ($filtros['tecnico'] ?? '') === (string) $id)>{{ $nombre }}</option>
+                @endforeach
+            </select>
+        </x-filtro>
+        <x-filtro label="Plan de Trabajo">
+            <select name="plan" class="filtro-control">
+                <option value="">Con y sin vínculo</option>
+                <option value="con" @selected(($filtros['plan'] ?? '') === 'con')>Vinculadas al plan</option>
+                <option value="sin" @selected(($filtros['plan'] ?? '') === 'sin')>Sin vínculo (soporte del día)</option>
+            </select>
+        </x-filtro>
+    </x-filtros>
 
     <div class="space-y-4">
         @forelse ($actividades as $a)
@@ -232,7 +194,7 @@
                         </div>
                     </div>
 
-                    <p class="text-gray-700 mb-6 leading-relaxed">{{ $a->descripcion }}</p>
+                    <p class="text-gray-700 mb-6 leading-relaxed line-clamp-3 break-words">{{ $a->descripcion }}</p>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div class="flex items-start gap-3">

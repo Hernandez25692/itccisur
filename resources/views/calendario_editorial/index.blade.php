@@ -1,872 +1,300 @@
 <x-app-layout>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 sm:py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    @php
+        $filtrosActivos = collect(request()->only(['buscar', 'estado', 'mes', 'anio', 'semana', 'area', 'red', 'tipo', 'creado_por']))
+            ->filter(fn ($v) => filled($v))
+            ->count();
 
-            <div class="mb-10">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                    <div class="space-y-3">
-                        <div class="flex items-center gap-3">
-                            <div class="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
-                                    Calendario Editorial
-                                </h1>
-                                <p class="text-gray-600 mt-1 text-sm sm:text-base">
-                                    Gestión de publicaciones para redes sociales institucionales
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+        $estilos = [
+            'publicado' => ['texto' => 'Publicado', 'badge' => 'bg-green-100 text-green-800 border-green-200', 'fondo' => 'bg-green-50/40'],
+            'pendiente' => ['texto' => 'Pendiente', 'badge' => 'bg-orange-100 text-orange-800 border-orange-200', 'fondo' => 'bg-orange-50/40'],
+            'reprogramado' => ['texto' => 'Reprogramado', 'badge' => 'bg-yellow-100 text-yellow-800 border-yellow-200', 'fondo' => 'bg-yellow-50/40'],
+            'cancelado' => ['texto' => 'Cancelado', 'badge' => 'bg-red-100 text-red-800 border-red-200', 'fondo' => 'bg-red-50/40'],
+        ];
+        $esAdmin = auth()->user()->hasRole('admin_ti');
+    @endphp
 
-                    <div class="flex flex-wrap gap-4">
-                        <div class="flex-1 min-w-[140px] bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-500">Total</p>
-                                    <p class="text-2xl font-bold text-gray-900">{{ $registros->total() }}</p>
-                                </div>
-                                <div class="p-2 bg-blue-50 rounded-lg">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                                        </path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
+    <div class="max-w-7xl mx-auto space-y-6">
 
-                        <div class="flex flex-wrap gap-3 items-center">
-                            @role('admin_ti|calendario')
-                                <a href="{{ route('calendario-editorial.create') }}"
-                                    class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                    <span>Nueva Publicación</span>
-                                </a>
-                            @endrole
-                            <a href="{{ route('calendario-editorial.calendar', request()->only(['estado', 'area', 'red', 'tipo', 'buscar'])) }}"
-                                class="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span>Vista Calendario</span>
-                            </a>
-                            <a href="{{ route('calendario-editorial.dashboard', array_filter(['mes' => request('mes'), 'anio' => request('anio') ?: (request('mes') ? now()->year : null), 'area' => request('area'), 'red' => request('red'), 'tipo' => request('tipo')])) }}"
-                                class="inline-flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 px-5 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 shadow-sm">
-                                📊 <span>Dashboard</span>
-                            </a>
-                        </div>
-                    </div>
+        {{-- Encabezado --}}
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="shrink-0 p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                 </div>
+                <div class="min-w-0">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Calendario Editorial</h1>
+                    <p class="text-sm text-gray-600">Publicaciones para las redes sociales institucionales</p>
+                </div>
+            </div>
 
-                <x-flash class="mt-6" />
+            <div class="flex flex-wrap gap-2">
+                @role('admin_ti|calendario')
+                    <a href="{{ route('calendario-editorial.create') }}"
+                        class="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold shadow-sm hover:bg-blue-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Nueva publicación
+                    </a>
+                @endrole
+                <a href="{{ route('calendario-editorial.calendar', request()->only(['estado', 'area', 'red', 'tipo', 'buscar'])) }}"
+                    class="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-indigo-600 text-white text-sm font-semibold shadow-sm hover:bg-indigo-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Vista calendario
+                </a>
+                <a href="{{ route('calendario-editorial.dashboard', array_filter(['mes' => request('mes'), 'anio' => request('anio') ?: (request('mes') ? now()->year : null), 'area' => request('area'), 'red' => request('red'), 'tipo' => request('tipo')])) }}"
+                    class="inline-flex items-center gap-2 h-10 px-4 rounded-lg border border-gray-300 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-50">
+                    📊 Dashboard
+                </a>
+            </div>
+        </div>
 
-                <div class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Estado de Publicaciones <span class="font-normal text-gray-500">(con los filtros aplicados · clic para filtrar)</span></h3>
-                            <div class="flex flex-wrap gap-3">
-                                @foreach ([['color' => 'green', 'estado' => 'publicado', 'label' => 'Publicado'], ['color' => 'orange', 'estado' => 'pendiente', 'label' => 'Pendiente'], ['color' => 'yellow', 'estado' => 'reprogramado', 'label' => 'Reprogramado'], ['color' => 'red', 'estado' => 'cancelado', 'label' => 'Cancelado']] as $status)
-                                    <a href="{{ request()->fullUrlWithQuery(['estado' => request('estado') === $status['estado'] ? null : $status['estado'], 'page' => null]) }}"
-                                        class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-50 {{ request('estado') === $status['estado'] ? 'ring-2 ring-blue-400' : '' }}">
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="w-3 h-3 rounded-full" style="background: {{ \App\Models\CalendarioEditorial::COLORES[$status['estado']] }}"></span>
-                                            <span class="text-sm font-medium text-gray-700">{{ $status['label'] }}</span>
-                                        </div>
-                                        <span class="text-xs font-semibold bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">
-                                            {{ $porEstado[$status['estado']] ?? 0 }}
-                                        </span>
-                                    </a>
+        <x-flash class="!mb-0" />
+
+        {{-- Resumen por estado (clic para filtrar) --}}
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+            <a href="{{ request()->fullUrlWithQuery(['estado' => null, 'page' => null]) }}"
+                class="rounded-xl border bg-white p-4 shadow-sm hover:shadow transition {{ request('estado') ? 'border-gray-200' : 'border-blue-400 ring-2 ring-blue-100' }}">
+                <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Total</p>
+                <p class="mt-1 text-2xl font-bold text-gray-900">{{ $porEstado->sum() }}</p>
+            </a>
+            @foreach ($estilos as $estado => $e)
+                <a href="{{ request()->fullUrlWithQuery(['estado' => request('estado') === $estado ? null : $estado, 'page' => null]) }}"
+                    class="rounded-xl border bg-white p-4 shadow-sm hover:shadow transition {{ request('estado') === $estado ? 'border-blue-400 ring-2 ring-blue-100' : 'border-gray-200' }}">
+                    <p class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background: {{ \App\Models\CalendarioEditorial::COLORES[$estado] }}"></span>
+                        <span class="truncate">{{ $e['texto'] }}</span>
+                    </p>
+                    <p class="mt-1 text-2xl font-bold text-gray-900">{{ $porEstado[$estado] ?? 0 }}</p>
+                </a>
+            @endforeach
+        </div>
+
+        @if ($vencidas > 0)
+            <div class="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                <span aria-hidden="true">⚠️</span>
+                <span><strong>{{ $vencidas }}</strong> {{ $vencidas > 1 ? 'publicaciones pendientes' : 'publicación pendiente' }}
+                    con fecha pasada, sin publicar.</span>
+            </div>
+        @endif
+
+        {{-- Filtros --}}
+        <x-filtros :limpiar="route('calendario-editorial.index')" :activos="$filtrosActivos"
+            :resumen="$registros->total() . ' publicaciones'">
+            <x-filtro label="Buscar" :ancho="2">
+                <input type="text" name="buscar" value="{{ request('buscar') }}" class="filtro-control"
+                    placeholder="Tema, encabezado o etiqueta">
+            </x-filtro>
+            <x-filtro label="Estado">
+                <select name="estado" class="filtro-control">
+                    <option value="">Todos</option>
+                    @foreach ($estilos as $estado => $e)
+                        <option value="{{ $estado }}" @selected(request('estado') === $estado)>{{ $e['texto'] }}</option>
+                    @endforeach
+                </select>
+            </x-filtro>
+            <x-filtro label="Orden">
+                <select name="orden" class="filtro-control">
+                    <option value="desc">Más recientes primero</option>
+                    <option value="asc" @selected(request('orden') === 'asc')>Más antiguas primero</option>
+                </select>
+            </x-filtro>
+            <x-filtro label="Mes">
+                <select name="mes" class="filtro-control">
+                    <option value="">Todos</option>
+                    @foreach (range(1, 12) as $m)
+                        <option value="{{ $m }}" @selected(request('mes') == $m)>
+                            {{ ucfirst(\Carbon\Carbon::create(null, $m, 1)->translatedFormat('F')) }}
+                        </option>
+                    @endforeach
+                </select>
+            </x-filtro>
+            <x-filtro label="Año">
+                <select name="anio" class="filtro-control">
+                    <option value="">Todos</option>
+                    @foreach ($anios as $a)
+                        <option value="{{ $a }}" @selected(request('anio') == $a)>{{ $a }}</option>
+                    @endforeach
+                </select>
+            </x-filtro>
+            <x-filtro label="Semana del mes">
+                <input type="number" name="semana" min="1" max="6" value="{{ request('semana') }}" class="filtro-control"
+                    placeholder="1 a 6">
+            </x-filtro>
+            <x-filtro label="Autor">
+                <select name="creado_por" class="filtro-control">
+                    <option value="">Cualquiera</option>
+                    @foreach ($creadores as $id => $nombre)
+                        <option value="{{ $id }}" @selected((string) request('creado_por') === (string) $id)>{{ $nombre }}</option>
+                    @endforeach
+                </select>
+            </x-filtro>
+            <x-filtro label="Área" :ancho="2">
+                <select name="area" class="filtro-control">
+                    <option value="">Todas</option>
+                    @foreach (\App\Models\CalendarioEditorial::AREAS as $area)
+                        <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
+                    @endforeach
+                </select>
+            </x-filtro>
+            <x-filtro label="Red social">
+                <select name="red" class="filtro-control">
+                    <option value="">Todas</option>
+                    @foreach (\App\Models\CalendarioEditorial::REDES as $red)
+                        <option value="{{ $red }}" @selected(request('red') === $red)>{{ ucfirst(strtolower($red)) }}</option>
+                    @endforeach
+                </select>
+            </x-filtro>
+            <x-filtro label="Tipo de contenido">
+                <select name="tipo" class="filtro-control">
+                    <option value="">Todos</option>
+                    @foreach (\App\Models\CalendarioEditorial::TIPOS_CONTENIDO as $tipo)
+                        <option value="{{ $tipo }}" @selected(request('tipo') === $tipo)>{{ ucfirst(strtolower($tipo)) }}</option>
+                    @endforeach
+                </select>
+            </x-filtro>
+        </x-filtros>
+
+        {{-- Listado: una sola estructura; en pantallas grandes se alinea como tabla --}}
+        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <div class="hidden xl:grid xl:grid-cols-[10rem_minmax(0,1fr)_8.5rem_13rem] gap-4 border-b border-gray-200 bg-gray-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <span>Fecha</span>
+                <span>Publicación</span>
+                <span>Estado</span>
+                <span class="text-right">Acciones</span>
+            </div>
+
+            <ul class="divide-y divide-gray-100">
+                @forelse ($registros as $item)
+                    @php $e = $estilos[$item->estado] ?? ['texto' => ucfirst($item->estado), 'badge' => 'bg-gray-100 text-gray-700 border-gray-200', 'fondo' => '']; @endphp
+                    <li class="grid gap-3 px-4 py-4 sm:px-5 xl:grid-cols-[10rem_minmax(0,1fr)_8.5rem_13rem] xl:items-start xl:gap-4 hover:bg-gray-50/70 transition-colors"
+                        style="box-shadow: inset 4px 0 0 {{ $item->color }};">
+
+                        {{-- Fecha --}}
+                        <div class="flex items-center justify-between gap-3 xl:block">
+                            <div>
+                                <p class="font-semibold text-gray-900">{{ $item->fecha_publicacion->format('d/m/Y') }}</p>
+                                <p class="text-sm text-gray-500">
+                                    {{ $item->dia }}{{ $item->hora ? ' · ' . substr($item->hora, 0, 5) : '' }}
+                                </p>
+                                <span class="mt-1 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-600">
+                                    Semana {{ $item->semana }}
+                                </span>
+                            </div>
+                            <span class="xl:hidden inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $e['badge'] }}">
+                                {{ $e['texto'] }}
+                            </span>
+                        </div>
+
+                        {{-- Publicación --}}
+                        <div class="min-w-0">
+                            <a href="{{ route('calendario-editorial.show', $item) }}"
+                                class="block font-semibold text-gray-900 hover:text-blue-700 line-clamp-2 break-words">
+                                {{ $item->tema }}
+                            </a>
+                            @if ($item->encabezado)
+                                <p class="mt-0.5 text-sm text-gray-500 line-clamp-1 break-words">{{ $item->encabezado }}</p>
+                            @endif
+
+                            <div class="mt-2 flex flex-wrap gap-1.5">
+                                @if ($item->area)
+                                    <span class="chip border-gray-200 bg-white text-gray-700" title="Área">{{ $item->area }}</span>
+                                @endif
+                                @foreach ($item->publicar_en ?? [] as $red)
+                                    <span class="chip border-blue-100 bg-blue-50 text-blue-700">{{ ucfirst(strtolower($red)) }}</span>
+                                @endforeach
+                                @foreach ($item->contenido ?? [] as $tipo)
+                                    <span class="chip border-purple-100 bg-purple-50 text-purple-700">{{ ucfirst(strtolower($tipo)) }}</span>
                                 @endforeach
                             </div>
-                        </div>
-                        @if ($vencidas > 0)
-                            <div class="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
-                                <strong>{{ $vencidas }}</strong> pendiente{{ $vencidas > 1 ? 's' : '' }} con fecha pasada (sin publicar)
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
 
-            <form method="GET" class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                    <input type="text" name="buscar" value="{{ request('buscar') }}" placeholder="Buscar tema, encabezado o etiqueta"
-                        class="lg:col-span-2 border rounded-lg p-2 text-sm">
-
-                    <select name="estado" class="border rounded-lg p-2 text-sm">
-                        <option value="">Todos los estados</option>
-                        @foreach (\App\Models\CalendarioEditorial::ESTADOS as $e)
-                            <option value="{{ $e }}" @selected(request('estado') == $e)>
-                                {{ ucfirst($e) }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    <select name="mes" class="border rounded-lg p-2 text-sm">
-                        <option value="">Todos los meses</option>
-                        @foreach (range(1, 12) as $m)
-                            <option value="{{ $m }}" @selected(request('mes') == $m)>
-                                {{ ucfirst(\Carbon\Carbon::createFromDate(now()->year, $m, 1)->translatedFormat('F')) }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    <select name="anio" class="border rounded-lg p-2 text-sm">
-                        <option value="">Todos los años</option>
-                        @foreach ($anios as $a)
-                            <option value="{{ $a }}" @selected(request('anio') == $a)>{{ $a }}</option>
-                        @endforeach
-                    </select>
-
-                    <input type="number" name="semana" min="1" max="53" value="{{ request('semana') }}" placeholder="Semana"
-                        class="border rounded-lg p-2 text-sm">
-
-                    <select name="area" class="lg:col-span-2 border rounded-lg p-2 text-sm">
-                        <option value="">Todas las áreas</option>
-                        @foreach (\App\Models\CalendarioEditorial::AREAS as $area)
-                            <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
-                        @endforeach
-                    </select>
-
-                    <select name="red" class="border rounded-lg p-2 text-sm">
-                        <option value="">Todas las redes</option>
-                        @foreach (\App\Models\CalendarioEditorial::REDES as $red)
-                            <option value="{{ $red }}" @selected(request('red') === $red)>{{ $red }}</option>
-                        @endforeach
-                    </select>
-
-                    <select name="tipo" class="border rounded-lg p-2 text-sm">
-                        <option value="">Todo tipo de contenido</option>
-                        @foreach (\App\Models\CalendarioEditorial::TIPOS_CONTENIDO as $tipo)
-                            <option value="{{ $tipo }}" @selected(request('tipo') === $tipo)>{{ $tipo }}</option>
-                        @endforeach
-                    </select>
-
-                    <select name="creado_por" class="border rounded-lg p-2 text-sm">
-                        <option value="">Cualquier autor</option>
-                        @foreach ($creadores as $id => $nombre)
-                            <option value="{{ $id }}" @selected((string) request('creado_por') === (string) $id)>{{ $nombre }}</option>
-                        @endforeach
-                    </select>
-
-                    <div class="flex gap-2">
-                        <button class="flex-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700">
-                            🔍 Filtrar
-                        </button>
-
-                        <a href="{{ route('calendario-editorial.index') }}"
-                            class="flex-1 text-center bg-gray-200 text-gray-700 rounded-lg px-4 py-2 text-sm hover:bg-gray-300">
-                            Limpiar
-                        </a>
-                    </div>
-                </div>
-            </form>
-
-            <div class="hidden lg:block mt-8">
-                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                                <tr>
-                                    <th scope="col"
-                                        class="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                        <div class="flex items-center justify-between gap-2 cursor-pointer group"
-                                            onclick="toggleSort('semana')">
-                                            <span>Semana</span>
-                                            <div
-                                                class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M7 14l5-5 5 5z"></path>
-                                                </svg>
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M7 10l5 5 5-5z"></path>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <th scope="col"
-                                        class="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                        <div class="flex items-center justify-between gap-2 cursor-pointer group"
-                                            onclick="toggleSort('fecha')">
-                                            <span>Fecha y Hora</span>
-                                            <div
-                                                class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M7 14l5-5 5 5z"></path>
-                                                </svg>
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M7 10l5 5 5-5z"></path>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <th scope="col"
-                                        class="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                        <div class="flex items-center justify-between gap-2 cursor-pointer group"
-                                            onclick="toggleSort('contenido')">
-                                            <span>Contenido</span>
-                                            <div
-                                                class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M7 14l5-5 5 5z"></path>
-                                                </svg>
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M7 10l5 5 5-5z"></path>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <th scope="col"
-                                        class="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                        <div class="flex items-center justify-between gap-2 cursor-pointer group"
-                                            onclick="toggleSort('estado')">
-                                            <span>Estado</span>
-                                            <div
-                                                class="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M7 14l5-5 5 5z"></path>
-                                                </svg>
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M7 10l5 5 5-5z"></path>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <th scope="col"
-                                        class="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                        Acciones
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y-2 divide-gray-300" id="tableBody">
-                                @forelse ($registros as $item)
-                                    @php
-                                        $estadoConfig = match ($item->estado) {
-                                            'publicado' => [
-                                                'bg' => 'bg-gradient-to-r from-green-50 to-emerald-50',
-                                                'text' => 'text-green-800',
-                                                'badge' =>
-                                                    'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200',
-                                                'dot' => 'bg-green-500',
-                                                'border' => 'border-green-300',
-                                                'borderColor' => '#10B981',
-                                            ],
-                                            'pendiente' => [
-                                                'bg' => 'bg-gradient-to-r from-orange-50 to-amber-50',
-                                                'text' => 'text-orange-800',
-                                                'badge' =>
-                                                    'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border border-orange-200',
-                                                'dot' => 'bg-orange-500',
-                                                'border' => 'border-orange-300',
-                                                'borderColor' => '#F97316',
-                                            ],
-                                            'reprogramado' => [
-                                                'bg' => 'bg-gradient-to-r from-yellow-50 to-amber-50',
-                                                'text' => 'text-yellow-800',
-                                                'badge' =>
-                                                    'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200',
-                                                'dot' => 'bg-yellow-500',
-                                                'border' => 'border-yellow-300',
-                                                'borderColor' => '#EAB308',
-                                            ],
-                                            'cancelado' => [
-                                                'bg' => 'bg-gradient-to-r from-red-50 to-rose-50',
-                                                'text' => 'text-red-800',
-                                                'badge' =>
-                                                    'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200',
-                                                'dot' => 'bg-red-500',
-                                                'border' => 'border-red-300',
-                                                'borderColor' => '#EF4444',
-                                            ],
-                                            default => [
-                                                'bg' => 'bg-gradient-to-r from-gray-50 to-gray-100',
-                                                'text' => 'text-gray-800',
-                                                'badge' =>
-                                                    'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-200',
-                                                'dot' => 'bg-gray-500',
-                                                'border' => 'border-gray-300',
-                                                'borderColor' => '#6B7280',
-                                            ],
-                                        };
-                                    @endphp
-
-                                    <tr class="hover:bg-gray-50/50 transition-all duration-200 group {{ $estadoConfig['bg'] }}"
-                                        style="border-left: 6px solid {{ $estadoConfig['borderColor'] }}; border-right: 3px solid {{ $estadoConfig['borderColor'] }};"
-                                        data-semana="{{ $item->semana }}"
-                                        data-fecha="{{ $item->fecha_publicacion->format('Y-m-d') }}"
-                                        data-contenido="{{ strtolower($item->tema) }}"
-                                        data-estado="{{ strtolower($item->estado) }}">
-
-                                        <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <span
-                                                    class="text-2xl font-bold text-gray-900">{{ $item->semana }}</span>
-                                                <span class="text-xs text-gray-500 mt-1">SEMANA</span>
-                                            </div>
-                                        </td>
-
-                                        <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
-                                            <div class="space-y-2">
-                                                <div class="flex items-center gap-2">
-                                                    <svg class="w-4 h-4 text-gray-400" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                        </path>
-                                                    </svg>
-                                                    <span class="text-sm font-semibold text-gray-900">
-                                                        {{ $item->fecha_publicacion->format('d/m/Y') }}
-                                                    </span>
-                                                </div>
-                                                <div
-                                                    class="text-xs text-gray-500 bg-white/50 rounded-lg px-2 py-1 inline-block">
-                                                    {{ $item->dia }}
-                                                </div>
-                                                <div class="flex items-center gap-2 mt-3">
-                                                    <svg class="w-4 h-4 text-gray-400" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                    <span class="text-base font-bold text-gray-900">
-                                                        {{ $item->hora ? substr($item->hora, 0, 5) : 'Sin hora' }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
-                                            <div class="space-y-4">
-                                                <div>
-                                                    <h3
-                                                        class="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">
-                                                        {{ $item->tema }}
-                                                    </h3>
-                                                    <p class="text-sm text-gray-600 leading-relaxed line-clamp-2">
-                                                        {{ $item->encabezado }}
-                                                    </p>
-                                                </div>
-
-                                                <div class="space-y-3">
-                                                    @if ($item->area)
-                                                        <div class="flex items-center gap-2">
-                                                            <span
-                                                                class="text-xs font-medium text-gray-500">Área:</span>
-                                                            <span
-                                                                class="px-3 py-1 bg-white/70 text-gray-700 rounded-full text-xs font-medium border border-gray-200">
-                                                                {{ $item->area }}
-                                                            </span>
-                                                        </div>
-                                                    @endif
-
-                                                    @if (!empty($item->publicar_en))
-                                                        <div class="flex items-center gap-2">
-                                                            <span
-                                                                class="text-xs font-medium text-gray-500">Redes:</span>
-                                                            <div class="flex flex-wrap gap-1">
-                                                                @foreach ($item->publicar_en as $red)
-                                                                    <span
-                                                                        class="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg text-xs font-medium border border-blue-100 flex items-center gap-1">
-                                                                        <svg class="w-3 h-3" fill="currentColor"
-                                                                            viewBox="0 0 24 24">
-                                                                            <path
-                                                                                d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
-                                                                        </svg>
-                                                                        {{ $red }}
-                                                                    </span>
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    @endif
-
-                                                    @if ($item->enlace)
-                                                        <div class="flex items-center gap-2">
-                                                            <a href="{{ $item->enlace }}" target="_blank"
-                                                                class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors group/link">
-                                                                <span>Ver publicación</span>
-                                                                <svg class="w-4 h-4 transform group-hover/link:translate-x-1 transition-transform"
-                                                                    fill="none" stroke="currentColor"
-                                                                    viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                                                                </svg>
-                                                            </a>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <td class="px-8 py-6 align-top border-r {{ $estadoConfig['border'] }}">
-                                            <div class="flex flex-col items-center gap-3">
-                                                <span
-                                                    class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold {{ $estadoConfig['badge'] }} capitalize shadow-sm">
-                                                    <span
-                                                        class="w-2 h-2 rounded-full {{ $estadoConfig['dot'] }} mr-2 animate-pulse"></span>
-                                                    {{ $item->estado }}
-                                                </span>
-                                            </div>
-                                        </td>
-
-                                        <td class="px-8 py-6 align-top">
-                                            <div class="flex flex-col gap-3 min-w-[140px]">
-                                                <a href="{{ route('calendario-editorial.show', $item) }}"
-                                                    class="group/btn inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:shadow-sm hover:border-gray-400">
-                                                    <svg class="w-4 h-4 text-gray-600 group-hover/btn:text-blue-600 transition-colors"
-                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
-                                                        </path>
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                                        </path>
-                                                    </svg>
-                                                    <span>Detalles</span>
-                                                </a>
-
-                                                @if ($item->puedeEditar(auth()->user()))
-                                                <a href="{{ route('calendario-editorial.edit', $item) }}"
-                                                    class="group/btn inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-all duration-200 hover:shadow-sm hover:border-blue-300">
-                                                    <svg class="w-4 h-4 group-hover/btn:text-blue-800 transition-colors"
-                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                                        </path>
-                                                    </svg>
-                                                    <span>Editar</span>
-                                                </a>
-                                                @endif
-
-                                                @role('admin_ti')
-                                                    @if ($item->estado !== 'publicado')
-                                                        <form id="publicar-form-{{ $item->id }}"
-                                                            action="{{ route('calendario-editorial.publicar', $item) }}"
-                                                            method="POST" class="inline">
-                                                            @csrf
-                                                            <button type="button"
-                                                                onclick="confirmarPublicacion({{ $item->id }})"
-                                                                class="group/btn w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 border border-green-600 rounded-lg transition-all duration-200 hover:shadow-sm">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                                    viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
-                                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                                    </path>
-                                                                </svg>
-                                                                <span>Publicar</span>
-                                                            </button>
-                                                        </form>
-                                                    @endif
-                                                @endrole
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="px-8 py-16 text-center">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <div
-                                                    class="w-24 h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6">
-                                                    <svg class="w-12 h-12 text-gray-400" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="1.5"
-                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                        </path>
-                                                    </svg>
-                                                </div>
-                                                <h3 class="text-xl font-bold text-gray-700 mb-2">No hay publicaciones
-                                                    programadas</h3>
-                                                <p class="text-gray-500 mb-6 max-w-md">
-                                                    Comienza a planificar tu contenido para redes sociales creando una
-                                                    nueva publicación
-                                                </p>
-                                                @role('admin_ti|calendario')
-                                                    <a href="{{ route('calendario-editorial.create') }}"
-                                                        class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                                        </svg>
-                                                        Crear primera publicación
-                                                    </a>
-                                                @endrole
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-
-                        <script>
-                            let sortState = {
-                                semana: null,
-                                fecha: null,
-                                contenido: null,
-                                estado: null
-                            };
-
-                            function toggleSort(column) {
-                                Object.keys(sortState).forEach(key => {
-                                    if (key !== column) sortState[key] = null;
-                                });
-
-                                if (sortState[column] === null) {
-                                    sortState[column] = 'asc';
-                                } else if (sortState[column] === 'asc') {
-                                    sortState[column] = 'desc';
-                                } else {
-                                    sortState[column] = null;
-                                }
-
-                                sortTable(column, sortState[column]);
-                            }
-
-                            function sortTable(column, direction) {
-                                const tbody = document.getElementById('tableBody');
-                                const rows = Array.from(tbody.querySelectorAll('tr'));
-
-                                if (!direction) {
-                                    location.reload();
-                                    return;
-                                }
-
-                                rows.sort((a, b) => {
-                                    let aVal, bVal;
-
-                                    switch (column) {
-                                        case 'semana':
-                                            aVal = parseInt(a.dataset.semana);
-                                            bVal = parseInt(b.dataset.semana);
-                                            break;
-                                        case 'fecha':
-                                            aVal = new Date(a.dataset.fecha);
-                                            bVal = new Date(b.dataset.fecha);
-                                            break;
-                                        case 'contenido':
-                                            aVal = a.dataset.contenido;
-                                            bVal = b.dataset.contenido;
-                                            break;
-                                        case 'estado':
-                                            aVal = a.dataset.estado;
-                                            bVal = b.dataset.estado;
-                                            break;
-                                    }
-
-                                    if (direction === 'asc') {
-                                        return aVal > bVal ? 1 : -1;
-                                    } else {
-                                        return aVal < bVal ? 1 : -1;
-                                    }
-                                });
-
-                                rows.forEach(row => tbody.appendChild(row));
-                            }
-                        </script>
-                    </div>
-
-                    <div class="bg-white px-8 py-6 border-t border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <div class="text-sm text-gray-600">
-                                Mostrando <span class="font-medium">{{ $registros->firstItem() ?? 0 }}</span> a <span
-                                    class="font-medium">{{ $registros->lastItem() ?? 0 }}</span> de <span
-                                    class="font-medium">{{ $registros->total() }}</span> registros
-                            </div>
-                            <div class="flex gap-2">
-                                {{ $registros->links('pagination::tailwind') }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:hidden space-y-4 mt-8">
-                @forelse ($registros as $item)
-                    @php
-                        $estadoConfig = match ($item->estado) {
-                            'publicado' => [
-                                'bg' => 'bg-gradient-to-r from-green-50 to-emerald-50',
-                                'border' => 'border-l-green-500',
-                                'badge' =>
-                                    'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200',
-                                'dot' => 'bg-green-500',
-                                'header' => 'from-green-500 to-emerald-600',
-                            ],
-                            'pendiente' => [
-                                'bg' => 'bg-gradient-to-r from-orange-50 to-amber-50',
-                                'border' => 'border-l-orange-500',
-                                'badge' =>
-                                    'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border border-orange-200',
-                                'dot' => 'bg-orange-500',
-                                'header' => 'from-orange-500 to-amber-600',
-                            ],
-                            'reprogramado' => [
-                                'bg' => 'bg-gradient-to-r from-yellow-50 to-amber-50',
-                                'border' => 'border-l-yellow-500',
-                                'badge' =>
-                                    'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200',
-                                'dot' => 'bg-yellow-500',
-                                'header' => 'from-yellow-500 to-amber-600',
-                            ],
-                            'cancelado' => [
-                                'bg' => 'bg-gradient-to-r from-red-50 to-rose-50',
-                                'border' => 'border-l-red-500',
-                                'badge' =>
-                                    'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200',
-                                'dot' => 'bg-red-500',
-                                'header' => 'from-red-500 to-rose-600',
-                            ],
-                            default => [
-                                'bg' => 'bg-gradient-to-r from-gray-50 to-gray-100',
-                                'border' => 'border-l-gray-500',
-                                'badge' =>
-                                    'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-200',
-                                'dot' => 'bg-gray-500',
-                                'header' => 'from-gray-500 to-gray-600',
-                            ],
-                        };
-                    @endphp
-
-                    <div
-                        class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden {{ $estadoConfig['border'] }} border-l-4">
-                        <div class="p-5 {{ $estadoConfig['bg'] }}">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="space-y-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-lg font-bold text-gray-900">
-                                            Semana {{ $item->semana }}
-                                        </span>
-                                        <span
-                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {{ $estadoConfig['badge'] }} capitalize">
-                                            <span
-                                                class="w-2 h-2 rounded-full {{ $estadoConfig['dot'] }} mr-1.5 animate-pulse"></span>
-                                            {{ $item->estado }}
-                                        </span>
-                                    </div>
-                                    <div class="flex items-center gap-3 text-sm text-gray-600">
-                                        <span class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                </path>
-                                            </svg>
-                                            {{ $item->fecha_publicacion->format('d/m/Y') }}
-                                        </span>
-                                        <span class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            {{ $item->hora ? substr($item->hora, 0, 5) : 'Sin hora' }}
-                                        </span>
-                                    </div>
-                                    <div class="text-xs text-gray-500">
-                                        {{ $item->dia }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <h3 class="text-xl font-bold text-gray-900 mb-2">
-                                    {{ $item->tema }}
-                                </h3>
-                                <p class="text-sm text-gray-600 leading-relaxed">
-                                    {{ Str::limit($item->encabezado, 120) }}
-                                </p>
-                            </div>
-
-                            <div class="space-y-3">
-                                @if ($item->area)
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-medium text-gray-500">Área:</span>
-                                        <span
-                                            class="px-3 py-1 bg-white/70 text-gray-700 rounded-full text-xs font-medium border border-gray-200">
-                                            {{ $item->area }}
-                                        </span>
-                                    </div>
-                                @endif
-
-                                @if (!empty($item->publicar_en))
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <span class="text-xs font-medium text-gray-500">Redes:</span>
-                                        @foreach ($item->publicar_en as $red)
-                                            <span
-                                                class="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg text-xs font-medium border border-blue-100 flex items-center gap-1">
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path
-                                                        d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
-                                                </svg>
-                                                {{ $red }}
-                                            </span>
-                                        @endforeach
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-4 border-t border-gray-100">
-                            <div class="grid grid-cols-2 gap-2">
-                                <a href="{{ route('calendario-editorial.show', $item) }}"
-                                    class="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                        </path>
-                                    </svg>
-                                    Ver
+                            @if ($item->enlace)
+                                <a href="{{ $item->enlace }}" target="_blank" rel="noopener"
+                                    class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800">
+                                    Ver publicación ↗
                                 </a>
-
-                                @if ($item->puedeEditar(auth()->user()))
-                                    <a href="{{ route('calendario-editorial.edit', $item) }}"
-                                        class="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                            </path>
-                                        </svg>
-                                        Editar
-                                    </a>
-                                @endif
-
-                                @if ($item->enlace)
-                                    <div class="col-span-2 mt-2">
-                                        <a href="{{ $item->enlace }}" target="_blank"
-                                            class="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-blue-600 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
-                                                </path>
-                                            </svg>
-                                            Ver publicación
-                                        </a>
-                                    </div>
-                                @endif
-
-                                @role('admin_ti')
-                                    @if ($item->estado !== 'publicado')
-                                        <div class="col-span-2 mt-2">
-                                            <form id="publicar-form-mobile-{{ $item->id }}"
-                                                action="{{ route('calendario-editorial.publicar', $item) }}"
-                                                method="POST">
-                                                @csrf
-                                                <button type="button"
-                                                    onclick="confirmarPublicacion({{ $item->id }})"
-                                                    class="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all shadow-sm hover:shadow">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                    Publicar esta actividad
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @endif
-                                @endrole
-                            </div>
+                            @endif
                         </div>
-                    </div>
+
+                        {{-- Estado (escritorio) --}}
+                        <div class="hidden xl:block">
+                            <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $e['badge'] }}">
+                                {{ $e['texto'] }}
+                            </span>
+                        </div>
+
+                        {{-- Acciones --}}
+                        <div class="flex flex-wrap gap-2 xl:justify-end">
+                            <a href="{{ route('calendario-editorial.show', $item) }}"
+                                class="inline-flex h-9 items-center rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Ver
+                            </a>
+                            @if ($item->puedeEditar(auth()->user()))
+                                <a href="{{ route('calendario-editorial.edit', $item) }}"
+                                    class="inline-flex h-9 items-center rounded-lg border border-blue-200 bg-blue-50 px-3 text-sm font-medium text-blue-700 hover:bg-blue-100">
+                                    Editar
+                                </a>
+                            @endif
+                            @if ($esAdmin && $item->estado !== 'publicado')
+                                <form id="publicar-form-{{ $item->id }}" method="POST"
+                                    action="{{ route('calendario-editorial.publicar', $item) }}">
+                                    @csrf
+                                    <button type="button" onclick="confirmarPublicacion({{ $item->id }})"
+                                        class="inline-flex h-9 items-center rounded-lg bg-green-600 px-3 text-sm font-medium text-white hover:bg-green-700">
+                                        Publicar
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </li>
                 @empty
-                    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center">
-                        <div class="flex flex-col items-center justify-center">
-                            <div
-                                class="w-20 h-20 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-4">
-                                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-700 mb-2">Sin publicaciones programadas</h3>
-                            <p class="text-gray-500 mb-6">Crea tu primera publicación para comenzar</p>
+                    <li class="px-6 py-14 text-center">
+                        <p class="text-lg font-semibold text-gray-700">
+                            {{ $filtrosActivos ? 'Ninguna publicación coincide con los filtros' : 'No hay publicaciones programadas' }}
+                        </p>
+                        @if ($filtrosActivos)
+                            <a href="{{ route('calendario-editorial.index') }}" class="mt-2 inline-block text-sm font-medium text-blue-600">Quitar filtros</a>
+                        @else
                             @role('admin_ti|calendario')
-                                <a href="{{ route('calendario-editorial.create') }}"
-                                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                    Nueva publicación
-                                </a>
+                                <a href="{{ route('calendario-editorial.create') }}" class="mt-2 inline-block text-sm font-medium text-blue-600">Crear la primera publicación</a>
                             @endrole
-                        </div>
-                    </div>
+                        @endif
+                    </li>
                 @endforelse
+            </ul>
 
-                @if ($registros->hasPages())
-                    <div class="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
-                        <div class="flex flex-col items-center gap-4">
-                            <div class="text-sm text-gray-600 text-center">
-                                Mostrando <span class="font-medium">{{ $registros->firstItem() ?? 0 }}</span> a <span
-                                    class="font-medium">{{ $registros->lastItem() ?? 0 }}</span> de <span
-                                    class="font-medium">{{ $registros->total() }}</span> registros
-                            </div>
-                            <div class="w-full">
-                                {{ $registros->links('pagination::tailwind') }}
-                            </div>
-                        </div>
-                    </div>
-                @endif
-            </div>
-
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-            <script>
-                function confirmarPublicacion(id) {
-                    Swal.fire({
-                        title: '¿Publicar esta actividad?',
-                        text: 'Esta acción marcará la publicación como "publicado" y será visible.',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Sí, publicar',
-                        cancelButtonText: 'Cancelar',
-                        confirmButtonColor: '#16a34a',
-                        cancelButtonColor: '#6b7280',
-                        reverseButtons: true,
-                        customClass: {
-                            popup: 'rounded-2xl',
-                            confirmButton: 'px-5 py-2.5 rounded-lg font-medium',
-                            cancelButton: 'px-5 py-2.5 rounded-lg font-medium'
-                        },
-                        buttonsStyling: false,
-                        background: 'rgb(249 250 251)',
-                        backdrop: 'rgba(0, 0, 0, 0.4)'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            const form = document.getElementById('publicar-form-' + id) ||
-                                document.getElementById('publicar-form-mobile-' + id);
-                            if (form) {
-                                form.submit();
-                            }
-                        }
-                    });
-                }
-            </script>
+            @if ($registros->hasPages())
+                <div class="border-t border-gray-200 px-4 py-4 sm:px-5">
+                    {{ $registros->onEachSide(1)->links() }}
+                </div>
+            @endif
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmarPublicacion(id) {
+            Swal.fire({
+                title: '¿Marcar como publicada?',
+                text: 'Se registrará la fecha y quién la publicó.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, publicar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280',
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('publicar-form-' + id)?.submit();
+                }
+            });
+        }
+    </script>
 </x-app-layout>

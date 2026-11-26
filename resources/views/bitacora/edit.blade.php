@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto sm:py-2">
         <div class="mb-8">
             <a href="{{ route('bitacora.show', $actividad->id) }}" 
                class="inline-flex items-center gap-2 text-[#0C1C3C] hover:text-[#1A2A4F] font-medium mb-6 group">
@@ -39,7 +39,7 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('bitacora.update', $actividad->id) }}" enctype="multipart/form-data" class="p-8">
+            <form method="POST" action="{{ route('bitacora.update', $actividad->id) }}" enctype="multipart/form-data" class="p-5 sm:p-8">
                 @csrf
                 @method('PUT')
 

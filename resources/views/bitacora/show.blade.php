@@ -1,8 +1,8 @@
 <x-app-layout>
-    <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto sm:py-2">
         
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] px-8 py-6 text-white">
+            <div class="bg-gradient-to-r from-[#0C1C3C] to-[#1A2A4F] px-5 sm:px-8 py-6 text-white">
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div class="flex-1">
                         <div class="flex items-center gap-4 mb-4">
@@ -12,7 +12,7 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <h1 class="text-3xl font-bold">{{ $actividad->titulo }}</h1>
+                                <h1 class="text-2xl sm:text-3xl font-bold break-words">{{ $actividad->titulo }}</h1>
                                 <p class="text-gray-300 mt-1">
                                     Registrado por <strong>{{ $actividad->user->name }}</strong> 
                                     el {{ $actividad->created_at->format('d/m/Y H:i') }}
@@ -68,7 +68,7 @@
                 </div>
             </div>
 
-            <div class="p-8">
+            <div class="p-5 sm:p-8">
                 <x-flash />
 
                 @if ($actividad->planActividad)

@@ -33,11 +33,14 @@ class CalendarioEditorialController extends Controller
             ->mes($request->mes)
             ->anio($request->anio);
 
+        // Orden en el servidor (antes se reordenaba solo la página visible)
+        $orden = $request->orden === 'asc' ? 'asc' : 'desc';
+
         $registros = $base()
             ->estado($request->estado)
             ->with('creador', 'publicadoPor')
-            ->orderBy('fecha_publicacion', 'desc')
-            ->orderBy('hora', 'desc')
+            ->orderBy('fecha_publicacion', $orden)
+            ->orderBy('hora', $orden)
             ->paginate(10)
             ->withQueryString();
 

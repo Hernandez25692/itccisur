@@ -1,6 +1,6 @@
 <x-app-layout>
-    <div class="min-h-screen bg-gray-50 py-8">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="sm:py-2">
+        <div class="max-w-5xl mx-auto">
 
             <div class="mb-8">
                 <div class="flex items-center gap-3 mb-2">
@@ -63,7 +63,7 @@
                                         class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                                         placeholder="Ej: 15">
                                 </div>
-                                <p class="text-xs text-gray-500">Semana ISO del año (1-53). Se completa sola al elegir la fecha.</p>
+                                <p class="text-xs text-gray-500">Semana del mes. Se sugiere sola al elegir la fecha.</p>
                             </div>
 
                             <div class="space-y-2">
@@ -620,26 +620,35 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Semana ISO (1-53) y día de la semana a partir de la fecha elegida
+            // Día y semana del mes (lunes a domingo; la que tiene el día 1 es la semana 1) desde la fecha.
+            // La semana solo se sugiere: si alguien la escribió distinta, no se pisa.
             const fechaCampo = document.querySelector('input[name="fecha_publicacion"]');
             const semanaCampo = document.querySelector('input[name="semana"]');
             const diaCampo = document.querySelector('select[name="dia"]');
             const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-            function semanaIso(fecha) {
-                const d = new Date(Date.UTC(fecha.getFullYear(), fecha.getMonth(), fecha.getDate()));
-                const dia = d.getUTCDay() || 7;
-                d.setUTCDate(d.getUTCDate() + 4 - dia);
-                const inicioAnio = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-                return Math.ceil(((d - inicioAnio) / 86400000 + 1) / 7);
+            function leerFecha(valor) {
+                if (!valor) return null;
+                const [a, m, d] = valor.split('-').map(Number);
+                return new Date(a, m - 1, d);
             }
 
+            function semanaDelMes(fecha) {
+                const primerDia = (new Date(fecha.getFullYear(), fecha.getMonth(), 1).getDay() + 6) % 7;
+                return Math.ceil((fecha.getDate() + primerDia) / 7);
+            }
+
+            let fechaAnterior = leerFecha(fechaCampo.value);
+
             function completarDesdeFecha() {
-                if (!fechaCampo.value) return;
-                const [a, m, d] = fechaCampo.value.split('-').map(Number);
-                const fecha = new Date(a, m - 1, d);
-                semanaCampo.value = semanaIso(fecha);
+                const fecha = leerFecha(fechaCampo.value);
+                if (!fecha) return;
+                const sugeridaAntes = fechaAnterior ? String(semanaDelMes(fechaAnterior)) : '';
+                if (!semanaCampo.value || semanaCampo.value === sugeridaAntes) {
+                    semanaCampo.value = semanaDelMes(fecha);
+                }
                 diaCampo.value = DIAS[(fecha.getDay() + 6) % 7];
+                fechaAnterior = fecha;
             }
 
             fechaCampo.addEventListener('change', completarDesdeFecha);
