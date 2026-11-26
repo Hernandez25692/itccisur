@@ -161,113 +161,128 @@
             </x-filtro>
         </x-filtros>
 
-        {{-- Listado: una sola estructura; en pantallas grandes se alinea como tabla --}}
+        {{-- Tabla compacta: una línea por publicación. El detalle completo está en "Ver". --}}
+        @php
+            $redesCorto = [
+                'FACEBOOK' => ['FB', '#1877F2'], 'INSTAGRAM' => ['IG', '#E1306C'], 'X' => ['X', '#111827'],
+                'LINKEDIN' => ['IN', '#0A66C2'], 'YOUTUBE' => ['YT', '#FF0000'], 'WHATSAPP' => ['WA', '#25D366'],
+                'TIKTOK' => ['TT', '#000000'], 'OTRA' => ['+', '#6B7280'],
+            ];
+        @endphp
         <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div class="hidden xl:grid xl:grid-cols-[10rem_minmax(0,1fr)_8.5rem_13rem] gap-4 border-b border-gray-200 bg-gray-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                <span>Fecha</span>
-                <span>Publicación</span>
-                <span>Estado</span>
-                <span class="text-right">Acciones</span>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <tr>
+                            <th class="hidden whitespace-nowrap py-3 pl-5 pr-3 sm:table-cell">Fecha</th>
+                            <th class="w-full py-3 pl-4 pr-3 sm:pl-3">Tema</th>
+                            <th class="hidden whitespace-nowrap px-3 py-3 xl:table-cell">Redes</th>
+                            <th class="hidden whitespace-nowrap px-3 py-3 sm:table-cell">Estado</th>
+                            <th class="whitespace-nowrap py-3 pl-3 pr-5 text-right"><span class="sr-only">Acciones</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($registros as $item)
+                            @php $e = $estilos[$item->estado] ?? ['texto' => ucfirst($item->estado), 'badge' => 'bg-gray-100 text-gray-700 border-gray-200']; @endphp
+                            <tr class="hover:bg-gray-50">
+                                {{-- Fecha: el color de la izquierda indica el estado --}}
+                                <td class="hidden whitespace-nowrap py-3 pl-5 pr-3 align-middle sm:table-cell" style="box-shadow: inset 4px 0 0 {{ $item->color }};">
+                                    <div class="font-semibold text-gray-900">{{ $item->fecha_publicacion->format('d/m/Y') }}</div>
+                                    <div class="text-xs text-gray-500">
+                                        {{ mb_substr($item->dia, 0, 3) }}{{ $item->hora ? ' ' . substr($item->hora, 0, 5) : '' }} · S{{ $item->semana }}
+                                    </div>
+                                </td>
+
+                                <td class="max-w-0 py-3 pl-4 pr-3 align-middle sm:pl-3">
+                                    <a href="{{ route('calendario-editorial.show', $item) }}" title="{{ $item->tema }}"
+                                        class="break-words font-medium text-gray-900 line-clamp-2 hover:text-blue-700 xl:line-clamp-1">
+                                        {{ $item->tema }}
+                                    </a>
+                                    {{-- En teléfonos la fecha y el estado van aquí, porque esas columnas se ocultan --}}
+                                    <div class="mt-0.5 text-xs text-gray-500 sm:hidden">
+                                        {{ $item->fecha_publicacion->format('d/m/Y') }} · {{ mb_substr($item->dia, 0, 3) }}{{ $item->hora ? ' ' . substr($item->hora, 0, 5) : '' }}
+                                        · <span class="font-semibold" style="color: {{ $item->color }}">{{ $e['texto'] }}</span>
+                                    </div>
+                                    @if ($item->area)
+                                        <div class="mt-0.5 truncate text-xs text-gray-500">{{ $item->area }}</div>
+                                    @endif
+                                </td>
+
+                                <td class="hidden whitespace-nowrap px-3 py-3 align-middle xl:table-cell">
+                                    <div class="flex gap-1">
+                                        @php $redes = collect($item->publicar_en ?? []); @endphp
+                                        @forelse ($redes->take(4) as $red)
+                                            @php [$sigla, $color] = $redesCorto[$red] ?? [mb_substr($red, 0, 2), '#6B7280']; @endphp
+                                            <span class="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded px-1 text-[10px] font-bold text-white"
+                                                style="background: {{ $color }}" title="{{ ucfirst(strtolower($red)) }}">{{ $sigla }}</span>
+                                        @empty
+                                            <span class="text-gray-400">—</span>
+                                        @endforelse
+                                        @if ($redes->count() > 4)
+                                            <span class="inline-flex h-6 items-center justify-center rounded bg-gray-100 px-1.5 text-[10px] font-bold text-gray-600"
+                                                title="{{ $redes->slice(4)->map(fn ($r) => ucfirst(strtolower($r)))->implode(', ') }}">+{{ $redes->count() - 4 }}</span>
+                                        @endif
+                                    </div>
+                                </td>
+
+                                <td class="hidden whitespace-nowrap px-3 py-3 align-middle sm:table-cell">
+                                    <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold {{ $e['badge'] }}">
+                                        {{ $e['texto'] }}
+                                    </span>
+                                </td>
+
+                                <td class="whitespace-nowrap py-3 pl-3 pr-5 align-middle">
+                                    <div class="flex justify-end gap-1">
+                                        <a href="{{ route('calendario-editorial.show', $item) }}" title="Ver detalle" aria-label="Ver detalle"
+                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                        @if ($item->puedeEditar(auth()->user()))
+                                            <a href="{{ route('calendario-editorial.edit', $item) }}" title="Editar" aria-label="Editar"
+                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </a>
+                                        @endif
+                                        @if ($esAdmin && $item->estado !== 'publicado')
+                                            <form id="publicar-form-{{ $item->id }}" method="POST" action="{{ route('calendario-editorial.publicar', $item) }}">
+                                                @csrf
+                                                <button type="button" onclick="confirmarPublicacion({{ $item->id }})" title="Marcar como publicada" aria-label="Marcar como publicada"
+                                                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-green-600 text-white hover:bg-green-700">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-14 text-center">
+                                    <p class="text-base font-semibold text-gray-700">
+                                        {{ $filtrosActivos ? 'Ninguna publicación coincide con los filtros' : 'No hay publicaciones programadas' }}
+                                    </p>
+                                    @if ($filtrosActivos)
+                                        <a href="{{ route('calendario-editorial.index') }}" class="mt-2 inline-block text-sm font-medium text-blue-600">Quitar filtros</a>
+                                    @else
+                                        @role('admin_ti|calendario')
+                                            <a href="{{ route('calendario-editorial.create') }}" class="mt-2 inline-block text-sm font-medium text-blue-600">Crear la primera publicación</a>
+                                        @endrole
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-
-            <ul class="divide-y divide-gray-100">
-                @forelse ($registros as $item)
-                    @php $e = $estilos[$item->estado] ?? ['texto' => ucfirst($item->estado), 'badge' => 'bg-gray-100 text-gray-700 border-gray-200', 'fondo' => '']; @endphp
-                    <li class="grid gap-3 px-4 py-4 sm:px-5 xl:grid-cols-[10rem_minmax(0,1fr)_8.5rem_13rem] xl:items-start xl:gap-4 hover:bg-gray-50/70 transition-colors"
-                        style="box-shadow: inset 4px 0 0 {{ $item->color }};">
-
-                        {{-- Fecha --}}
-                        <div class="flex items-center justify-between gap-3 xl:block">
-                            <div>
-                                <p class="font-semibold text-gray-900">{{ $item->fecha_publicacion->format('d/m/Y') }}</p>
-                                <p class="text-sm text-gray-500">
-                                    {{ $item->dia }}{{ $item->hora ? ' · ' . substr($item->hora, 0, 5) : '' }}
-                                </p>
-                                <span class="mt-1 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-600">
-                                    Semana {{ $item->semana }}
-                                </span>
-                            </div>
-                            <span class="xl:hidden inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $e['badge'] }}">
-                                {{ $e['texto'] }}
-                            </span>
-                        </div>
-
-                        {{-- Publicación --}}
-                        <div class="min-w-0">
-                            <a href="{{ route('calendario-editorial.show', $item) }}"
-                                class="block font-semibold text-gray-900 hover:text-blue-700 line-clamp-2 break-words">
-                                {{ $item->tema }}
-                            </a>
-                            @if ($item->encabezado)
-                                <p class="mt-0.5 text-sm text-gray-500 line-clamp-1 break-words">{{ $item->encabezado }}</p>
-                            @endif
-
-                            <div class="mt-2 flex flex-wrap gap-1.5">
-                                @if ($item->area)
-                                    <span class="chip border-gray-200 bg-white text-gray-700" title="Área">{{ $item->area }}</span>
-                                @endif
-                                @foreach ($item->publicar_en ?? [] as $red)
-                                    <span class="chip border-blue-100 bg-blue-50 text-blue-700">{{ ucfirst(strtolower($red)) }}</span>
-                                @endforeach
-                                @foreach ($item->contenido ?? [] as $tipo)
-                                    <span class="chip border-purple-100 bg-purple-50 text-purple-700">{{ ucfirst(strtolower($tipo)) }}</span>
-                                @endforeach
-                            </div>
-
-                            @if ($item->enlace)
-                                <a href="{{ $item->enlace }}" target="_blank" rel="noopener"
-                                    class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800">
-                                    Ver publicación ↗
-                                </a>
-                            @endif
-                        </div>
-
-                        {{-- Estado (escritorio) --}}
-                        <div class="hidden xl:block">
-                            <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $e['badge'] }}">
-                                {{ $e['texto'] }}
-                            </span>
-                        </div>
-
-                        {{-- Acciones --}}
-                        <div class="flex flex-wrap gap-2 xl:justify-end">
-                            <a href="{{ route('calendario-editorial.show', $item) }}"
-                                class="inline-flex h-9 items-center rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                Ver
-                            </a>
-                            @if ($item->puedeEditar(auth()->user()))
-                                <a href="{{ route('calendario-editorial.edit', $item) }}"
-                                    class="inline-flex h-9 items-center rounded-lg border border-blue-200 bg-blue-50 px-3 text-sm font-medium text-blue-700 hover:bg-blue-100">
-                                    Editar
-                                </a>
-                            @endif
-                            @if ($esAdmin && $item->estado !== 'publicado')
-                                <form id="publicar-form-{{ $item->id }}" method="POST"
-                                    action="{{ route('calendario-editorial.publicar', $item) }}">
-                                    @csrf
-                                    <button type="button" onclick="confirmarPublicacion({{ $item->id }})"
-                                        class="inline-flex h-9 items-center rounded-lg bg-green-600 px-3 text-sm font-medium text-white hover:bg-green-700">
-                                        Publicar
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
-                    </li>
-                @empty
-                    <li class="px-6 py-14 text-center">
-                        <p class="text-lg font-semibold text-gray-700">
-                            {{ $filtrosActivos ? 'Ninguna publicación coincide con los filtros' : 'No hay publicaciones programadas' }}
-                        </p>
-                        @if ($filtrosActivos)
-                            <a href="{{ route('calendario-editorial.index') }}" class="mt-2 inline-block text-sm font-medium text-blue-600">Quitar filtros</a>
-                        @else
-                            @role('admin_ti|calendario')
-                                <a href="{{ route('calendario-editorial.create') }}" class="mt-2 inline-block text-sm font-medium text-blue-600">Crear la primera publicación</a>
-                            @endrole
-                        @endif
-                    </li>
-                @endforelse
-            </ul>
 
             @if ($registros->hasPages())
                 <div class="border-t border-gray-200 px-4 py-4 sm:px-5">

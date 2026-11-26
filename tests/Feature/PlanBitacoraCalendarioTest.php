@@ -153,6 +153,30 @@ it('rechaza adjuntos HTML y no deja crear al rol usuario', function () {
     $this->actingAs(pbcUsuario('usuario'))->get(route('calendario-editorial.create'))->assertForbidden();
 });
 
+it('sirve la imagen adjunta para la vista previa, nueva o de antes del cambio a disco privado', function () {
+    $admin = pbcUsuario('admin_ti');
+
+    $this->actingAs($admin)->post(route('calendario-editorial.store'), pbcFormPublicacion([
+        'adjuntos' => [UploadedFile::fake()->image('arte.png', 40, 40)],
+    ]))->assertSessionHasNoErrors();
+
+    $adjunto = CalendarioEditorial::firstOrFail()->adjuntos()->firstOrFail();
+    expect($adjunto->mime_type)->toBe('image/png');
+
+    $this->actingAs($admin)->get(route('calendario-editorial.adjuntos.show', $adjunto))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'image/png');
+
+    // Archivo viejo que sigue en el disco público
+    Storage::disk('public')->put('calendario_editorial/viejo.png', UploadedFile::fake()->image('v.png')->getContent());
+    $viejo = $adjunto->calendario->adjuntos()->create(['ruta' => 'calendario_editorial/viejo.png', 'nombre_original' => 'v.png', 'mime_type' => 'image/png']);
+    $this->actingAs($admin)->get(route('calendario-editorial.adjuntos.show', $viejo))->assertOk();
+
+    // Si el archivo no está, 404 (la vista muestra un aviso en lugar de la imagen rota)
+    $perdido = $adjunto->calendario->adjuntos()->create(['ruta' => 'calendario_editorial/no-existe.png', 'nombre_original' => 'x.png', 'mime_type' => 'image/png']);
+    $this->actingAs($admin)->get(route('calendario-editorial.adjuntos.show', $perdido))->assertNotFound();
+});
+
 it('entrega al calendario solo el rango visible y con filtros', function () {
     $admin = pbcUsuario('admin_ti');
     pbcPublicacion($admin, ['tema' => 'Diciembre FB', 'fecha_publicacion' => '2026-12-05', 'hora' => '09:30', 'publicar_en' => ['FACEBOOK']]);

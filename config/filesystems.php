@@ -33,6 +33,10 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
+            // Sin esto las carpetas nacen con 0700: si las crea un comando corrido con
+            // otro usuario (p. ej. archivos:privatizar), el servidor web no las puede leer.
+            // Siguen fuera de public/, así que no quedan expuestas por URL.
+            'directory_visibility' => 'public',
             'serve' => true,
             'throw' => false,
             'report' => false,

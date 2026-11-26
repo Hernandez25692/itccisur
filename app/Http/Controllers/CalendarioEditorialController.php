@@ -41,7 +41,7 @@ class CalendarioEditorialController extends Controller
             ->with('creador', 'publicadoPor')
             ->orderBy('fecha_publicacion', $orden)
             ->orderBy('hora', $orden)
-            ->paginate(10)
+            ->paginate(15)
             ->withQueryString();
 
         // Contadores por estado con los mismos filtros (menos el de estado)
@@ -146,6 +146,11 @@ class CalendarioEditorialController extends Controller
     public function verAdjunto(CalendarioEditorialAdjunto $adjunto)
     {
         return $this->mostrarArchivo($adjunto->ruta);
+    }
+
+    public function verAdjuntoPrincipal(CalendarioEditorial $calendarioEditorial)
+    {
+        return $this->mostrarArchivo($calendarioEditorial->adjunto_path);
     }
 
     public function destroyAdjunto(CalendarioEditorialAdjunto $adjunto)

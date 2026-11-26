@@ -1,4 +1,4 @@
-    <?php
+<?php
 
     use App\Http\Controllers\ProfileController;
     use Illuminate\Support\Facades\Route;
@@ -172,6 +172,10 @@
 
             Route::get('/{calendarioEditorial}', [CalendarioEditorialController::class, 'show'])
                 ->name('show');
+
+            // Registros viejos que solo guardaron el archivo en la columna adjunto_path
+            Route::get('/{calendarioEditorial}/adjunto', [CalendarioEditorialController::class, 'verAdjuntoPrincipal'])
+                ->name('adjunto-principal');
         });
 
     Route::get(

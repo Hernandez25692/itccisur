@@ -448,105 +448,149 @@
                                         @endif
                                     </div>
 
-                                    @if ($calendarioEditorial->adjunto_path || $calendarioEditorial->adjuntos->count())
+                                    @php
+                                        $adjuntos = $calendarioEditorial->adjuntos;
+                                        $imagenes = $adjuntos->filter(fn ($a) => str_starts_with((string) $a->mime_type, 'image/'));
+                                        $otros = $adjuntos->diff($imagenes);
+                                        // Registros muy viejos: solo tienen la columna adjunto_path, sin fila en adjuntos
+                                        $soloPrincipal = $adjuntos->isEmpty() && $calendarioEditorial->adjunto_path;
+                                    @endphp
+
+                                    @if ($adjuntos->isNotEmpty() || $soloPrincipal)
                                         <div class="mt-8">
-                                            <div class="flex items-center gap-3 mb-6">
-                                                <div class="p-2 bg-blue-50 rounded-lg">
-                                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
+                                            <h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
+                                                <span class="p-2 bg-blue-50 rounded-lg">
+                                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                             d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                                     </svg>
-                                                </div>
-                                                <h2 class="text-lg font-semibold text-gray-900">
-                                                    Archivos adjuntos
-                                                </h2>
-                                            </div>
+                                                </span>
+                                                Archivos adjuntos
+                                                <span class="text-sm font-normal text-gray-500">({{ $adjuntos->count() ?: 1 }})</span>
+                                            </h2>
 
-                                            <div class="space-y-3">
-                                                @foreach ($calendarioEditorial->adjuntos as $adjunto)
-                                                    <div class="group">
-                                                        <button onclick="mostrarPreview('{{ route('calendario-editorial.adjuntos.show', $adjunto) }}', '{{ $adjunto->mime_type }}')"
-                                                            class="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg
-                                                            border border-gray-200 hover:bg-gray-100 hover:border-gray-300
-                                                            transition-all duration-200">
-
-                                                            @php
-                                                                $icono = str_contains($adjunto->mime_type, 'image')
-                                                                    ? '🖼️'
-                                                                    : (str_contains($adjunto->mime_type, 'video')
-                                                                        ? '🎬'
-                                                                        : (str_contains($adjunto->mime_type, 'pdf')
-                                                                            ? '📄'
-                                                                            : '📎'));
-                                                            @endphp
-
-                                                            <span class="text-xl">{{ $icono }}</span>
-
-                                                            <div class="flex-1 text-left">
-                                                                <div class="font-medium truncate">
-                                                                    {{ $adjunto->nombre_original }}
-                                                                </div>
-                                                                <div class="text-xs text-gray-500">
-                                                                    {{ strtoupper(pathinfo($adjunto->nombre_original, PATHINFO_EXTENSION)) }}
-                                                                    · {{ number_format($adjunto->tamano / 1024, 1) }} KB
-                                                                </div>
-                                                            </div>
-
-                                                            <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600"
-                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
-                                                            </svg>
+                                            {{-- Imágenes: se ven directo como miniaturas --}}
+                                            @if ($imagenes->isNotEmpty())
+                                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+                                                    @foreach ($imagenes as $adjunto)
+                                                        @php $url = route('calendario-editorial.adjuntos.show', $adjunto); @endphp
+                                                        <button type="button" onclick="mostrarPreview(@js($url), @js($adjunto->mime_type), @js($adjunto->nombre_original))"
+                                                            class="group relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100 hover:ring-2 hover:ring-blue-400"
+                                                            title="{{ $adjunto->nombre_original }}">
+                                                            <img src="{{ $url }}" alt="{{ $adjunto->nombre_original }}" loading="lazy"
+                                                                class="h-full w-full object-cover"
+                                                                onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'flex h-full w-full items-center justify-center p-2 text-center text-xs text-red-600', textContent: '⚠️ No se pudo cargar la imagen' }))">
+                                                            <span class="absolute inset-x-0 bottom-0 truncate bg-black/50 px-2 py-1 text-left text-[11px] text-white">
+                                                                {{ $adjunto->nombre_original }}
+                                                            </span>
                                                         </button>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+
+                                            {{-- Otros archivos (PDF, video, Office...) --}}
+                                            <div class="space-y-2">
+                                                @foreach ($otros as $adjunto)
+                                                    @php
+                                                        $url = route('calendario-editorial.adjuntos.show', $adjunto);
+                                                        $mime = (string) $adjunto->mime_type;
+                                                        $icono = str_contains($mime, 'video') ? '🎬' : (str_contains($mime, 'pdf') ? '📄' : '📎');
+                                                    @endphp
+                                                    <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                                                        <span class="text-xl">{{ $icono }}</span>
+                                                        <button type="button" onclick="mostrarPreview(@js($url), @js($mime), @js($adjunto->nombre_original))"
+                                                            class="min-w-0 flex-1 text-left hover:text-blue-700">
+                                                            <span class="block truncate font-medium">{{ $adjunto->nombre_original }}</span>
+                                                            <span class="block text-xs text-gray-500">
+                                                                {{ strtoupper(pathinfo($adjunto->nombre_original, PATHINFO_EXTENSION)) }}
+                                                                · {{ number_format(($adjunto->tamano ?? 0) / 1024, 1) }} KB
+                                                            </span>
+                                                        </button>
+                                                        <a href="{{ $url }}" target="_blank" rel="noopener"
+                                                            class="shrink-0 text-sm font-medium text-blue-600 hover:underline">Abrir</a>
                                                     </div>
                                                 @endforeach
+
+                                                @if ($soloPrincipal)
+                                                    <a href="{{ route('calendario-editorial.adjunto-principal', $calendarioEditorial) }}" target="_blank" rel="noopener"
+                                                        class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 hover:bg-gray-100">
+                                                        <span class="text-xl">📎</span>
+                                                        <span class="min-w-0 flex-1 truncate font-medium">{{ $calendarioEditorial->adjunto_nombre ?: 'Archivo adjunto' }}</span>
+                                                        <span class="text-sm font-medium text-blue-600">Abrir</span>
+                                                    </a>
+                                                @endif
                                             </div>
                                         </div>
                                     @endif
 
-                                    <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                                    <div id="previewModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                                         <div class="bg-white rounded-xl shadow-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
-                                            <div class="sticky top-0 flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-                                                <h3 class="text-lg font-semibold text-gray-900">Vista previa</h3>
-                                                <button onclick="cerrarPreview()" class="text-gray-500 hover:text-gray-700">
-                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <div class="p-6">
-                                                <div id="previewContent" class="flex items-center justify-center">
+                                            <div class="sticky top-0 flex items-center justify-between gap-3 p-4 border-b border-gray-200 bg-white">
+                                                <h3 id="previewTitulo" class="min-w-0 truncate text-lg font-semibold text-gray-900">Vista previa</h3>
+                                                <div class="flex shrink-0 items-center gap-3">
+                                                    <a id="previewAbrir" href="#" target="_blank" rel="noopener" class="text-sm font-medium text-blue-600 hover:underline">Abrir en otra pestaña</a>
+                                                    <button type="button" onclick="cerrarPreview()" class="text-gray-500 hover:text-gray-700" aria-label="Cerrar">
+                                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
                                                 </div>
+                                            </div>
+                                            <div class="p-4 sm:p-6">
+                                                <div id="previewContent" class="flex items-center justify-center"></div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <script>
-                                        function mostrarPreview(url, mimeType) {
-                                            const modal = document.getElementById('previewModal');
+                                        function avisoArchivo() {
+                                            return '<div class="text-center text-sm text-red-700 py-10">⚠️ No se pudo cargar el archivo.<br>' +
+                                                '<span class="text-gray-500">Puede que no esté en el servidor o que la carpeta no tenga permiso de lectura.</span></div>';
+                                        }
+
+                                        function mostrarPreview(url, mimeType, nombre) {
                                             const content = document.getElementById('previewContent');
-                                            
-                                            if (mimeType.includes('image')) {
-                                                content.innerHTML = `<img src="${url}" alt="Preview" class="w-full h-auto rounded-lg">`;
+                                            mimeType = mimeType || '';
+                                            document.getElementById('previewTitulo').textContent = nombre || 'Vista previa';
+                                            document.getElementById('previewAbrir').href = url;
+                                            content.innerHTML = '';
+
+                                            if (mimeType.startsWith('image/')) {
+                                                const img = document.createElement('img');
+                                                img.src = url;
+                                                img.alt = nombre || 'Imagen adjunta';
+                                                img.className = 'max-h-[75vh] w-auto max-w-full rounded-lg';
+                                                img.onerror = () => { content.innerHTML = avisoArchivo(); };
+                                                content.appendChild(img);
                                             } else if (mimeType.includes('video')) {
-                                                content.innerHTML = `<video controls class="w-full h-auto rounded-lg"><source src="${url}" type="${mimeType}">Tu navegador no soporta videos.</video>`;
+                                                const video = document.createElement('video');
+                                                video.controls = true;
+                                                video.className = 'w-full h-auto rounded-lg';
+                                                video.src = url;
+                                                video.onerror = () => { content.innerHTML = avisoArchivo(); };
+                                                content.appendChild(video);
                                             } else if (mimeType.includes('pdf')) {
-                                                content.innerHTML = `<iframe src="${url}" class="w-full h-[600px] rounded-lg"></iframe>`;
+                                                const iframe = document.createElement('iframe');
+                                                iframe.src = url;
+                                                iframe.className = 'w-full h-[70vh] rounded-lg';
+                                                content.appendChild(iframe);
                                             } else {
-                                                content.innerHTML = `<div class="text-center text-gray-500"><p>No se puede mostrar vista previa de este archivo.</p><a href="${url}" target="_blank" class="text-blue-600 hover:underline mt-4 inline-block">Descargar archivo</a></div>`;
+                                                content.innerHTML = '<div class="text-center text-gray-500 py-6"><p>No hay vista previa para este tipo de archivo.</p></div>';
                                             }
-                                            
-                                            modal.classList.remove('hidden');
+
+                                            document.getElementById('previewModal').classList.remove('hidden');
                                         }
 
                                         function cerrarPreview() {
                                             document.getElementById('previewModal').classList.add('hidden');
+                                            document.getElementById('previewContent').innerHTML = '';
                                         }
 
                                         document.getElementById('previewModal').addEventListener('click', (e) => {
                                             if (e.target.id === 'previewModal') cerrarPreview();
+                                        });
+                                        document.addEventListener('keydown', (e) => {
+                                            if (e.key === 'Escape') cerrarPreview();
                                         });
                                     </script>
 

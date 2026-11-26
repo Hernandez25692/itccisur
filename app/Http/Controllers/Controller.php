@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class Controller extends BaseController
@@ -26,6 +27,16 @@ class Controller extends BaseController
                 return Storage::disk($disco)->response($ruta);
             }
         }
+
+        // Deja rastro en storage/logs: casi siempre es un archivo que no se copió
+        // al servidor o una carpeta sin permiso de lectura para el usuario web
+        $rutas = [Storage::disk('local')->path($ruta), Storage::disk('public')->path($ruta)];
+        Log::warning('Archivo adjunto no disponible', [
+            'ruta' => $ruta,
+            'buscado_en' => $rutas,
+            'carpetas_legibles' => array_map(fn ($r) => is_dir(dirname($r)) ? is_readable(dirname($r)) : 'no existe', $rutas),
+            'usuario_php' => function_exists('posix_geteuid') ? (posix_getpwuid(posix_geteuid())['name'] ?? null) : get_current_user(),
+        ]);
 
         abort(404);
     }
