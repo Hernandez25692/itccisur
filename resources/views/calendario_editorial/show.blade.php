@@ -449,11 +449,16 @@
                                     </div>
 
                                     @php
-                                        $adjuntos = $calendarioEditorial->adjuntos;
-                                        $imagenes = $adjuntos->filter(fn ($a) => str_starts_with((string) $a->mime_type, 'image/'));
-                                        $otros = $adjuntos->diff($imagenes);
+                                        // Orden en que se agregaron (el id crece con cada archivo subido)
+                                        $adjuntos = $calendarioEditorial->adjuntos->sortBy('id')->values();
+                                        $imagenes = $adjuntos->filter(fn ($a) => str_starts_with((string) $a->mime_type, 'image/'))->values();
+                                        $otros = $adjuntos->reject(fn ($a) => str_starts_with((string) $a->mime_type, 'image/'))->values();
                                         // Registros muy viejos: solo tienen la columna adjunto_path, sin fila en adjuntos
                                         $soloPrincipal = $adjuntos->isEmpty() && $calendarioEditorial->adjunto_path;
+                                        $galeria = $imagenes->map(fn ($a) => [
+                                            'url' => route('calendario-editorial.adjuntos.show', $a),
+                                            'nombre' => $a->nombre_original,
+                                        ])->values();
                                     @endphp
 
                                     @if ($adjuntos->isNotEmpty() || $soloPrincipal)
@@ -469,17 +474,21 @@
                                                 <span class="text-sm font-normal text-gray-500">({{ $adjuntos->count() ?: 1 }})</span>
                                             </h2>
 
-                                            {{-- Imágenes: se ven directo como miniaturas --}}
+                                            {{-- Imágenes: miniaturas numeradas en el orden en que se agregaron --}}
                                             @if ($imagenes->isNotEmpty())
                                                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
                                                     @foreach ($imagenes as $adjunto)
-                                                        @php $url = route('calendario-editorial.adjuntos.show', $adjunto); @endphp
-                                                        <button type="button" onclick="mostrarPreview(@js($url), @js($adjunto->mime_type), @js($adjunto->nombre_original))"
+                                                        <button type="button" onclick="abrirGaleria({{ $loop->index }})"
                                                             class="group relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100 hover:ring-2 hover:ring-blue-400"
                                                             title="{{ $adjunto->nombre_original }}">
-                                                            <img src="{{ $url }}" alt="{{ $adjunto->nombre_original }}" loading="lazy"
+                                                            <img src="{{ $galeria[$loop->index]['url'] }}" alt="{{ $adjunto->nombre_original }}" loading="lazy"
                                                                 class="h-full w-full object-cover"
                                                                 onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'flex h-full w-full items-center justify-center p-2 text-center text-xs text-red-600', textContent: '⚠️ No se pudo cargar la imagen' }))">
+                                                            @if ($imagenes->count() > 1)
+                                                                <span class="absolute left-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[11px] font-semibold text-white">
+                                                                    {{ $loop->iteration }}
+                                                                </span>
+                                                            @endif
                                                             <span class="absolute inset-x-0 bottom-0 truncate bg-black/50 px-2 py-1 text-left text-[11px] text-white">
                                                                 {{ $adjunto->nombre_original }}
                                                             </span>
@@ -523,74 +532,214 @@
                                         </div>
                                     @endif
 
-                                    <div id="previewModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                                        <div class="bg-white rounded-xl shadow-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
-                                            <div class="sticky top-0 flex items-center justify-between gap-3 p-4 border-b border-gray-200 bg-white">
-                                                <h3 id="previewTitulo" class="min-w-0 truncate text-lg font-semibold text-gray-900">Vista previa</h3>
+                                    {{-- Visor: galería de imágenes (‹ ›, teclado, deslizar) o un archivo suelto (PDF, video) --}}
+                                    <div id="previewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 sm:p-4"
+                                        role="dialog" aria-modal="true" aria-labelledby="previewTitulo">
+                                        <div class="flex max-h-[95vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
+                                            <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-3">
+                                                <div class="min-w-0">
+                                                    <h3 id="previewTitulo" class="truncate text-base font-semibold text-gray-900 sm:text-lg">Vista previa</h3>
+                                                    <p id="previewContador" class="hidden text-xs font-medium text-gray-500"></p>
+                                                </div>
                                                 <div class="flex shrink-0 items-center gap-3">
-                                                    <a id="previewAbrir" href="#" target="_blank" rel="noopener" class="text-sm font-medium text-blue-600 hover:underline">Abrir en otra pestaña</a>
-                                                    <button type="button" onclick="cerrarPreview()" class="text-gray-500 hover:text-gray-700" aria-label="Cerrar">
+                                                    <a id="previewAbrir" href="#" target="_blank" rel="noopener"
+                                                        class="hidden text-sm font-medium text-blue-600 hover:underline sm:inline">Abrir en otra pestaña</a>
+                                                    <button type="button" id="previewCerrar" onclick="cerrarPreview()" class="rounded text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Cerrar">
                                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                         </svg>
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div class="p-4 sm:p-6">
-                                                <div id="previewContent" class="flex items-center justify-center"></div>
+
+                                            <div id="previewEscenario" class="relative flex min-h-[40vh] flex-1 items-center justify-center overflow-auto bg-gray-50 p-3 sm:p-6">
+                                                <div id="previewContent" class="flex w-full items-center justify-center"></div>
+
+                                                <button type="button" id="previewAnterior" onclick="moverGaleria(-1)" aria-label="Imagen anterior" title="Anterior (←)"
+                                                    class="hidden absolute left-2 top-1/2 h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-lg ring-1 ring-gray-200 hover:bg-white disabled:cursor-not-allowed disabled:opacity-30 sm:left-4">
+                                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                                                    </svg>
+                                                </button>
+                                                <button type="button" id="previewSiguiente" onclick="moverGaleria(1)" aria-label="Imagen siguiente" title="Siguiente (→)"
+                                                    class="hidden absolute right-2 top-1/2 h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-lg ring-1 ring-gray-200 hover:bg-white disabled:cursor-not-allowed disabled:opacity-30 sm:right-4">
+                                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </button>
                                             </div>
+
+                                            {{-- Tira de miniaturas para saltar a cualquier imagen --}}
+                                            <div id="previewTira" class="hidden gap-2 overflow-x-auto border-t border-gray-200 bg-white p-3"></div>
                                         </div>
                                     </div>
 
                                     <script>
+                                        const GALERIA = @json($galeria);
+                                        let indiceGaleria = -1; // -1: se está viendo un archivo suelto (PDF, video)
+
+                                        const visor = {
+                                            modal: document.getElementById('previewModal'),
+                                            contenido: document.getElementById('previewContent'),
+                                            titulo: document.getElementById('previewTitulo'),
+                                            contador: document.getElementById('previewContador'),
+                                            abrir: document.getElementById('previewAbrir'),
+                                            anterior: document.getElementById('previewAnterior'),
+                                            siguiente: document.getElementById('previewSiguiente'),
+                                            tira: document.getElementById('previewTira'),
+                                            escenario: document.getElementById('previewEscenario'),
+                                        };
+
                                         function avisoArchivo() {
                                             return '<div class="text-center text-sm text-red-700 py-10">⚠️ No se pudo cargar el archivo.<br>' +
                                                 '<span class="text-gray-500">Puede que no esté en el servidor o que la carpeta no tenga permiso de lectura.</span></div>';
                                         }
 
-                                        function mostrarPreview(url, mimeType, nombre) {
-                                            const content = document.getElementById('previewContent');
-                                            mimeType = mimeType || '';
-                                            document.getElementById('previewTitulo').textContent = nombre || 'Vista previa';
-                                            document.getElementById('previewAbrir').href = url;
-                                            content.innerHTML = '';
+                                        function abrirModal(url, nombre) {
+                                            visor.titulo.textContent = nombre || 'Vista previa';
+                                            visor.abrir.href = url;
+                                            visor.modal.classList.remove('hidden');
+                                            document.body.style.overflow = 'hidden';
+                                            document.getElementById('previewCerrar').focus({ preventScroll: true });
+                                        }
 
-                                            if (mimeType.startsWith('image/')) {
+                                        function navegacionVisible(visible) {
+                                            const varias = visible && GALERIA.length > 1;
+                                            visor.anterior.classList.toggle('hidden', !varias);
+                                            visor.anterior.classList.toggle('flex', varias);
+                                            visor.siguiente.classList.toggle('hidden', !varias);
+                                            visor.siguiente.classList.toggle('flex', varias);
+                                            visor.tira.classList.toggle('hidden', !varias);
+                                            visor.tira.classList.toggle('flex', varias);
+                                            visor.contador.classList.toggle('hidden', !varias);
+                                            visor.contenido.classList.toggle('px-12', varias);
+                                            visor.contenido.classList.toggle('sm:px-16', varias);
+                                        }
+
+                                        function armarTira() {
+                                            if (visor.tira.childElementCount) return;
+                                            GALERIA.forEach((item, i) => {
+                                                const boton = document.createElement('button');
+                                                boton.type = 'button';
+                                                boton.title = `${i + 1}. ${item.nombre}`;
+                                                boton.className = 'relative h-14 w-14 shrink-0 overflow-hidden rounded-md bg-gray-100 opacity-60 transition hover:opacity-100';
+                                                boton.onclick = () => irAImagen(i);
                                                 const img = document.createElement('img');
-                                                img.src = url;
-                                                img.alt = nombre || 'Imagen adjunta';
-                                                img.className = 'max-h-[75vh] w-auto max-w-full rounded-lg';
-                                                img.onerror = () => { content.innerHTML = avisoArchivo(); };
-                                                content.appendChild(img);
-                                            } else if (mimeType.includes('video')) {
+                                                img.src = item.url;
+                                                img.alt = '';
+                                                img.loading = 'lazy';
+                                                img.className = 'h-full w-full object-cover';
+                                                img.onerror = () => img.replaceWith(Object.assign(document.createElement('span'), { className: 'flex h-full w-full items-center justify-center text-lg', textContent: '⚠️' }));
+                                                boton.appendChild(img);
+                                                visor.tira.appendChild(boton);
+                                            });
+                                        }
+
+                                        function mostrarImagenActual() {
+                                            const item = GALERIA[indiceGaleria];
+                                            visor.titulo.textContent = item.nombre;
+                                            visor.abrir.href = item.url;
+                                            visor.contador.textContent = `Imagen ${indiceGaleria + 1} de ${GALERIA.length}`;
+                                            visor.anterior.disabled = indiceGaleria === 0;
+                                            visor.siguiente.disabled = indiceGaleria === GALERIA.length - 1;
+
+                                            const cargando = document.createElement('p');
+                                            cargando.className = 'absolute text-sm text-gray-400';
+                                            cargando.textContent = 'Cargando…';
+
+                                            const img = document.createElement('img');
+                                            img.alt = item.nombre;
+                                            img.className = 'max-h-[62vh] w-auto max-w-full rounded-lg opacity-0 transition-opacity duration-200';
+                                            img.onload = () => { img.classList.remove('opacity-0'); cargando.remove(); };
+                                            img.onerror = () => { visor.contenido.innerHTML = avisoArchivo(); };
+
+                                            visor.contenido.replaceChildren(cargando, img);
+                                            img.src = item.url;
+
+                                            [...visor.tira.children].forEach((boton, i) => {
+                                                const activa = i === indiceGaleria;
+                                                boton.classList.toggle('opacity-60', !activa);
+                                                boton.classList.toggle('ring-2', activa);
+                                                boton.classList.toggle('ring-blue-500', activa);
+                                                if (activa) boton.scrollIntoView({ block: 'nearest', inline: 'center' });
+                                            });
+
+                                            // Precarga la anterior y la siguiente para que el cambio sea inmediato
+                                            [indiceGaleria - 1, indiceGaleria + 1]
+                                                .filter((i) => i >= 0 && i < GALERIA.length)
+                                                .forEach((i) => { new Image().src = GALERIA[i].url; });
+                                        }
+
+                                        function abrirGaleria(indice) {
+                                            indiceGaleria = indice;
+                                            armarTira();
+                                            navegacionVisible(true);
+                                            abrirModal(GALERIA[indice].url, GALERIA[indice].nombre);
+                                            mostrarImagenActual();
+                                        }
+
+                                        function irAImagen(indice) {
+                                            if (indiceGaleria < 0 || indice < 0 || indice >= GALERIA.length || indice === indiceGaleria) return;
+                                            indiceGaleria = indice;
+                                            mostrarImagenActual();
+                                        }
+
+                                        function moverGaleria(paso) {
+                                            irAImagen(indiceGaleria + paso);
+                                        }
+
+                                        // Archivo suelto (PDF, video u otro): sin navegación
+                                        function mostrarPreview(url, mimeType, nombre) {
+                                            mimeType = mimeType || '';
+                                            indiceGaleria = -1;
+                                            navegacionVisible(false);
+                                            visor.contenido.innerHTML = '';
+
+                                            if (mimeType.includes('video')) {
                                                 const video = document.createElement('video');
                                                 video.controls = true;
-                                                video.className = 'w-full h-auto rounded-lg';
+                                                video.className = 'max-h-[70vh] w-full rounded-lg';
                                                 video.src = url;
-                                                video.onerror = () => { content.innerHTML = avisoArchivo(); };
-                                                content.appendChild(video);
+                                                video.onerror = () => { visor.contenido.innerHTML = avisoArchivo(); };
+                                                visor.contenido.appendChild(video);
                                             } else if (mimeType.includes('pdf')) {
                                                 const iframe = document.createElement('iframe');
                                                 iframe.src = url;
-                                                iframe.className = 'w-full h-[70vh] rounded-lg';
-                                                content.appendChild(iframe);
+                                                iframe.className = 'h-[70vh] w-full rounded-lg';
+                                                visor.contenido.appendChild(iframe);
                                             } else {
-                                                content.innerHTML = '<div class="text-center text-gray-500 py-6"><p>No hay vista previa para este tipo de archivo.</p></div>';
+                                                visor.contenido.innerHTML = '<div class="text-center text-gray-500 py-6"><p>No hay vista previa para este tipo de archivo.</p></div>';
                                             }
 
-                                            document.getElementById('previewModal').classList.remove('hidden');
+                                            abrirModal(url, nombre);
                                         }
 
                                         function cerrarPreview() {
-                                            document.getElementById('previewModal').classList.add('hidden');
-                                            document.getElementById('previewContent').innerHTML = '';
+                                            visor.modal.classList.add('hidden');
+                                            visor.contenido.innerHTML = '';
+                                            document.body.style.overflow = '';
+                                            indiceGaleria = -1;
                                         }
 
-                                        document.getElementById('previewModal').addEventListener('click', (e) => {
-                                            if (e.target.id === 'previewModal') cerrarPreview();
+                                        visor.modal.addEventListener('click', (e) => {
+                                            if (e.target === visor.modal) cerrarPreview();
                                         });
+
                                         document.addEventListener('keydown', (e) => {
+                                            if (visor.modal.classList.contains('hidden')) return;
                                             if (e.key === 'Escape') cerrarPreview();
+                                            if (e.key === 'ArrowRight') { e.preventDefault(); moverGaleria(1); }
+                                            if (e.key === 'ArrowLeft') { e.preventDefault(); moverGaleria(-1); }
+                                        });
+
+                                        // Deslizar con el dedo en el teléfono
+                                        let toqueInicioX = null;
+                                        visor.escenario.addEventListener('touchstart', (e) => { toqueInicioX = e.changedTouches[0].clientX; }, { passive: true });
+                                        visor.escenario.addEventListener('touchend', (e) => {
+                                            if (toqueInicioX === null) return;
+                                            const distancia = e.changedTouches[0].clientX - toqueInicioX;
+                                            toqueInicioX = null;
+                                            if (Math.abs(distancia) > 50) moverGaleria(distancia < 0 ? 1 : -1);
                                         });
                                     </script>
 

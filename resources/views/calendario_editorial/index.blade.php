@@ -1,315 +1,338 @@
 <x-app-layout>
-    @php
-        $filtrosActivos = collect(request()->only(['buscar', 'estado', 'mes', 'anio', 'semana', 'area', 'red', 'tipo', 'creado_por']))
-            ->filter(fn ($v) => filled($v))
-            ->count();
+    @include('calendario_editorial.index-styles')
 
-        $estilos = [
-            'publicado' => ['texto' => 'Publicado', 'badge' => 'bg-green-100 text-green-800 border-green-200', 'fondo' => 'bg-green-50/40'],
-            'pendiente' => ['texto' => 'Pendiente', 'badge' => 'bg-orange-100 text-orange-800 border-orange-200', 'fondo' => 'bg-orange-50/40'],
-            'reprogramado' => ['texto' => 'Reprogramado', 'badge' => 'bg-yellow-100 text-yellow-800 border-yellow-200', 'fondo' => 'bg-yellow-50/40'],
-            'cancelado' => ['texto' => 'Cancelado', 'badge' => 'bg-red-100 text-red-800 border-red-200', 'fondo' => 'bg-red-50/40'],
+    @php
+        $estados = [
+            'publicado' => 'Publicado',
+            'pendiente' => 'Pendiente',
+            'reprogramado' => 'Reprogramado',
+            'cancelado' => 'Cancelado',
         ];
-        $esAdmin = auth()->user()->hasRole('admin_ti');
+        $filtrosAvanzados = collect(request()->only(['mes', 'anio', 'semana', 'area', 'red', 'tipo', 'creado_por']))
+            ->filter(fn ($valor) => filled($valor))
+            ->count() + (int) (request('orden') === 'asc');
+        $filtrosActivos = $filtrosAvanzados || filled(request('buscar')) || filled(request('estado'));
+        $totalPorEstado = $porEstado->sum();
+        $usuario = auth()->user();
+        $esAdmin = $usuario->hasRole('admin_ti');
+        $puedeCrear = $usuario->hasAnyRole(['admin_ti', 'calendario']);
+        $redesCortas = [
+            'FACEBOOK' => ['FB', '#1c57a4', 'Facebook'],
+            'INSTAGRAM' => ['IG', '#9d2c61', 'Instagram'],
+            'X' => ['X', '#303640', 'X'],
+            'LINKEDIN' => ['IN', '#135d88', 'LinkedIn'],
+            'YOUTUBE' => ['YT', '#a82429', 'YouTube'],
+            'WHATSAPP' => ['WA', '#226643', 'WhatsApp'],
+            'TIKTOK' => ['TT', '#303640', 'TikTok'],
+            'OTRA' => ['+', '#5e6374', 'Otra'],
+        ];
+        $urlCalendario = route('calendario-editorial.calendar', request()->only(['estado', 'area', 'red', 'tipo', 'buscar']));
+        $urlIndicadores = route('calendario-editorial.dashboard', array_filter([
+            'mes' => request('mes'),
+            'anio' => request('anio') ?: (request('mes') ? now()->year : null),
+            'area' => request('area'),
+            'red' => request('red'),
+            'tipo' => request('tipo'),
+        ]));
+        $mesAnterior = null;
     @endphp
 
-    <div class="max-w-7xl mx-auto space-y-6">
-
-        {{-- Encabezado --}}
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div class="flex items-center gap-3 min-w-0">
-                <div class="shrink-0 p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow">
-                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+    <div class="editorial-desk">
+        <header class="editorial-masthead">
+            <div class="editorial-cover-grid" aria-hidden="true"></div>
+            <div class="editorial-masthead-main">
+                <div>
+                    <p class="editorial-imprint">CCISUR <span aria-hidden="true">/</span> Comunicaciones</p>
+                    <h1>Calendario <em>editorial</em></h1>
+                    <p class="editorial-deck">Plan de publicaciones para las redes institucionales.</p>
                 </div>
-                <div class="min-w-0">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Calendario Editorial</h1>
-                    <p class="text-sm text-gray-600">Publicaciones para las redes sociales institucionales</p>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap gap-2">
-                @role('admin_ti|calendario')
-                    <a href="{{ route('calendario-editorial.create') }}"
-                        class="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold shadow-sm hover:bg-blue-700">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
+                @if ($puedeCrear)
+                    <a href="{{ route('calendario-editorial.create') }}" class="editorial-create">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
                         Nueva publicación
                     </a>
-                @endrole
-                <a href="{{ route('calendario-editorial.calendar', request()->only(['estado', 'area', 'red', 'tipo', 'buscar'])) }}"
-                    class="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-indigo-600 text-white text-sm font-semibold shadow-sm hover:bg-indigo-700">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Vista calendario
-                </a>
-                <a href="{{ route('calendario-editorial.dashboard', array_filter(['mes' => request('mes'), 'anio' => request('anio') ?: (request('mes') ? now()->year : null), 'area' => request('area'), 'red' => request('red'), 'tipo' => request('tipo')])) }}"
-                    class="inline-flex items-center gap-2 h-10 px-4 rounded-lg border border-gray-300 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-50">
-                    📊 Dashboard
-                </a>
+                @endif
             </div>
-        </div>
 
-        <x-flash class="!mb-0" />
-
-        {{-- Resumen por estado (clic para filtrar) --}}
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
-            <a href="{{ request()->fullUrlWithQuery(['estado' => null, 'page' => null]) }}"
-                class="rounded-xl border bg-white p-4 shadow-sm hover:shadow transition {{ request('estado') ? 'border-gray-200' : 'border-blue-400 ring-2 ring-blue-100' }}">
-                <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Total</p>
-                <p class="mt-1 text-2xl font-bold text-gray-900">{{ $porEstado->sum() }}</p>
-            </a>
-            @foreach ($estilos as $estado => $e)
-                <a href="{{ request()->fullUrlWithQuery(['estado' => request('estado') === $estado ? null : $estado, 'page' => null]) }}"
-                    class="rounded-xl border bg-white p-4 shadow-sm hover:shadow transition {{ request('estado') === $estado ? 'border-blue-400 ring-2 ring-blue-100' : 'border-gray-200' }}">
-                    <p class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background: {{ \App\Models\CalendarioEditorial::COLORES[$estado] }}"></span>
-                        <span class="truncate">{{ $e['texto'] }}</span>
-                    </p>
-                    <p class="mt-1 text-2xl font-bold text-gray-900">{{ $porEstado[$estado] ?? 0 }}</p>
+            <nav class="editorial-views" aria-label="Vistas de calendario editorial">
+                <a href="{{ request()->fullUrl() }}" aria-current="page">
+                    <i class="fa-solid fa-list-ul" aria-hidden="true"></i> Agenda
                 </a>
-            @endforeach
-        </div>
+                <a href="{{ $urlCalendario }}">
+                    <i class="fa-regular fa-calendar-days" aria-hidden="true"></i> Calendario
+                </a>
+                <a href="{{ $urlIndicadores }}">
+                    <i class="fa-solid fa-chart-simple" aria-hidden="true"></i> Indicadores
+                </a>
+            </nav>
+        </header>
 
-        @if ($vencidas > 0)
-            <div class="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-                <span aria-hidden="true">⚠️</span>
-                <span><strong>{{ $vencidas }}</strong> {{ $vencidas > 1 ? 'publicaciones pendientes' : 'publicación pendiente' }}
-                    con fecha pasada, sin publicar.</span>
+        <x-flash class="editorial-flash !mb-0" />
+
+        <section class="editorial-register" aria-labelledby="editorial-register-title">
+            <nav class="editorial-status-rail" aria-label="Filtrar por estado">
+                <a href="{{ request()->fullUrlWithQuery(['estado' => null, 'page' => null]) }}"
+                    class="editorial-status-tab editorial-status-total" @if (!filled(request('estado'))) aria-current="true" @endif>
+                    <span class="editorial-status-label">Todas</span>
+                    <strong>{{ $totalPorEstado }}</strong>
+                </a>
+                @foreach ($estados as $estado => $nombre)
+                    <a href="{{ request()->fullUrlWithQuery(['estado' => request('estado') === $estado ? null : $estado, 'page' => null]) }}"
+                        class="editorial-status-tab" data-state="{{ $estado }}" style="--state: {{ \App\Models\CalendarioEditorial::COLORES[$estado] }}"
+                        @if (request('estado') === $estado) aria-current="true" @endif>
+                        <span class="editorial-status-label"><span class="editorial-dot" aria-hidden="true"></span>{{ $nombre }}</span>
+                        <strong>{{ $porEstado[$estado] ?? 0 }}</strong>
+                    </a>
+                @endforeach
+            </nav>
+
+            @if ($vencidas > 0)
+                <p class="editorial-overdue">
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span><strong>{{ $vencidas }} {{ $vencidas === 1 ? 'publicación pendiente' : 'publicaciones pendientes' }}</strong> con fecha vencida.</span>
+                </p>
+            @endif
+
+            <div class="editorial-register-heading">
+                <h2 id="editorial-register-title">Plan de publicaciones</h2>
+                <span>{{ $registros->total() }} {{ $registros->total() === 1 ? 'publicación' : 'publicaciones' }}</span>
             </div>
-        @endif
 
-        {{-- Filtros --}}
-        <x-filtros :limpiar="route('calendario-editorial.index')" :activos="$filtrosActivos"
-            :resumen="$registros->total() . ' publicaciones'">
-            <x-filtro label="Buscar" :ancho="2">
-                <input type="text" name="buscar" value="{{ request('buscar') }}" class="filtro-control"
-                    placeholder="Tema, encabezado o etiqueta">
-            </x-filtro>
-            <x-filtro label="Estado">
-                <select name="estado" class="filtro-control">
-                    <option value="">Todos</option>
-                    @foreach ($estilos as $estado => $e)
-                        <option value="{{ $estado }}" @selected(request('estado') === $estado)>{{ $e['texto'] }}</option>
-                    @endforeach
-                </select>
-            </x-filtro>
-            <x-filtro label="Orden">
-                <select name="orden" class="filtro-control">
-                    <option value="desc">Más recientes primero</option>
-                    <option value="asc" @selected(request('orden') === 'asc')>Más antiguas primero</option>
-                </select>
-            </x-filtro>
-            <x-filtro label="Mes">
-                <select name="mes" class="filtro-control">
-                    <option value="">Todos</option>
-                    @foreach (range(1, 12) as $m)
-                        <option value="{{ $m }}" @selected(request('mes') == $m)>
-                            {{ ucfirst(\Carbon\Carbon::create(null, $m, 1)->translatedFormat('F')) }}
-                        </option>
-                    @endforeach
-                </select>
-            </x-filtro>
-            <x-filtro label="Año">
-                <select name="anio" class="filtro-control">
-                    <option value="">Todos</option>
-                    @foreach ($anios as $a)
-                        <option value="{{ $a }}" @selected(request('anio') == $a)>{{ $a }}</option>
-                    @endforeach
-                </select>
-            </x-filtro>
-            <x-filtro label="Semana del mes">
-                <input type="number" name="semana" min="1" max="6" value="{{ request('semana') }}" class="filtro-control"
-                    placeholder="1 a 6">
-            </x-filtro>
-            <x-filtro label="Autor">
-                <select name="creado_por" class="filtro-control">
-                    <option value="">Cualquiera</option>
-                    @foreach ($creadores as $id => $nombre)
-                        <option value="{{ $id }}" @selected((string) request('creado_por') === (string) $id)>{{ $nombre }}</option>
-                    @endforeach
-                </select>
-            </x-filtro>
-            <x-filtro label="Área" :ancho="2">
-                <select name="area" class="filtro-control">
-                    <option value="">Todas</option>
-                    @foreach (\App\Models\CalendarioEditorial::AREAS as $area)
-                        <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
-                    @endforeach
-                </select>
-            </x-filtro>
-            <x-filtro label="Red social">
-                <select name="red" class="filtro-control">
-                    <option value="">Todas</option>
-                    @foreach (\App\Models\CalendarioEditorial::REDES as $red)
-                        <option value="{{ $red }}" @selected(request('red') === $red)>{{ ucfirst(strtolower($red)) }}</option>
-                    @endforeach
-                </select>
-            </x-filtro>
-            <x-filtro label="Tipo de contenido">
-                <select name="tipo" class="filtro-control">
-                    <option value="">Todos</option>
-                    @foreach (\App\Models\CalendarioEditorial::TIPOS_CONTENIDO as $tipo)
-                        <option value="{{ $tipo }}" @selected(request('tipo') === $tipo)>{{ ucfirst(strtolower($tipo)) }}</option>
-                    @endforeach
-                </select>
-            </x-filtro>
-        </x-filtros>
+            <form method="GET" action="{{ route('calendario-editorial.index') }}" class="editorial-filters" role="search" aria-label="Buscar publicaciones">
+                <input type="hidden" name="estado" value="{{ request('estado') }}">
+                <div class="editorial-search">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <label for="editorial-search" class="sr-only">Tema, encabezado o etiqueta</label>
+                    <input id="editorial-search" type="text" name="buscar" value="{{ request('buscar') }}" placeholder="Tema, encabezado o etiqueta">
+                    <button type="submit">Buscar</button>
+                </div>
 
-        {{-- Tabla compacta: una línea por publicación. El detalle completo está en "Ver". --}}
-        @php
-            $redesCorto = [
-                'FACEBOOK' => ['FB', '#1877F2'], 'INSTAGRAM' => ['IG', '#E1306C'], 'X' => ['X', '#111827'],
-                'LINKEDIN' => ['IN', '#0A66C2'], 'YOUTUBE' => ['YT', '#FF0000'], 'WHATSAPP' => ['WA', '#25D366'],
-                'TIKTOK' => ['TT', '#000000'], 'OTRA' => ['+', '#6B7280'],
-            ];
-        @endphp
-        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        <tr>
-                            <th class="hidden whitespace-nowrap py-3 pl-5 pr-3 sm:table-cell">Fecha</th>
-                            <th class="w-full py-3 pl-4 pr-3 sm:pl-3">Tema</th>
-                            <th class="hidden whitespace-nowrap px-3 py-3 xl:table-cell">Redes</th>
-                            <th class="hidden whitespace-nowrap px-3 py-3 sm:table-cell">Estado</th>
-                            <th class="whitespace-nowrap py-3 pl-3 pr-5 text-right"><span class="sr-only">Acciones</span></th>
+                <details class="editorial-filter-panel" @if ($filtrosAvanzados) open @endif>
+                    <summary>
+                        <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                        <span>Filtros</span>
+                        @if ($filtrosAvanzados)
+                            <span class="editorial-filter-count" aria-label="{{ $filtrosAvanzados }} filtros aplicados">{{ $filtrosAvanzados }}</span>
+                        @endif
+                        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </summary>
+                    <div class="editorial-filter-fields">
+                        <div class="editorial-filter-grid">
+                            <x-filtro label="Mes">
+                                <select name="mes" class="filtro-control">
+                                    <option value="">Todos</option>
+                                    @foreach (range(1, 12) as $mes)
+                                        <option value="{{ $mes }}" @selected(request('mes') == $mes)>
+                                            {{ ucfirst(\Carbon\Carbon::create(null, $mes, 1)->translatedFormat('F')) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </x-filtro>
+                            <x-filtro label="Año">
+                                <select name="anio" class="filtro-control">
+                                    <option value="">Todos</option>
+                                    @foreach ($anios as $anio)
+                                        <option value="{{ $anio }}" @selected(request('anio') == $anio)>{{ $anio }}</option>
+                                    @endforeach
+                                </select>
+                            </x-filtro>
+                            <x-filtro label="Semana del mes">
+                                <input type="number" name="semana" min="1" max="6" value="{{ request('semana') }}" class="filtro-control" placeholder="1 a 6">
+                            </x-filtro>
+                            <x-filtro label="Orden">
+                                <select name="orden" class="filtro-control">
+                                    <option value="desc">Más recientes primero</option>
+                                    <option value="asc" @selected(request('orden') === 'asc')>Más antiguas primero</option>
+                                </select>
+                            </x-filtro>
+                            <x-filtro label="Área">
+                                <select name="area" class="filtro-control">
+                                    <option value="">Todas</option>
+                                    @foreach (\App\Models\CalendarioEditorial::AREAS as $area)
+                                        <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
+                                    @endforeach
+                                </select>
+                            </x-filtro>
+                            <x-filtro label="Red social">
+                                <select name="red" class="filtro-control">
+                                    <option value="">Todas</option>
+                                    @foreach (\App\Models\CalendarioEditorial::REDES as $red)
+                                        <option value="{{ $red }}" @selected(request('red') === $red)>{{ $redesCortas[$red][2] }}</option>
+                                    @endforeach
+                                </select>
+                            </x-filtro>
+                            <x-filtro label="Tipo de contenido">
+                                <select name="tipo" class="filtro-control">
+                                    <option value="">Todos</option>
+                                    @foreach (\App\Models\CalendarioEditorial::TIPOS_CONTENIDO as $tipo)
+                                        <option value="{{ $tipo }}" @selected(request('tipo') === $tipo)>{{ ucfirst(strtolower($tipo)) }}</option>
+                                    @endforeach
+                                </select>
+                            </x-filtro>
+                            <x-filtro label="Autor">
+                                <select name="creado_por" class="filtro-control">
+                                    <option value="">Cualquiera</option>
+                                    @foreach ($creadores as $id => $nombre)
+                                        <option value="{{ $id }}" @selected((string) request('creado_por') === (string) $id)>{{ $nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </x-filtro>
+                        </div>
+                        <div class="editorial-filter-actions">
+                            <button type="submit" class="editorial-apply">Aplicar filtros</button>
+                        </div>
+                    </div>
+                </details>
+
+                @if ($filtrosActivos)
+                    <a href="{{ route('calendario-editorial.index') }}" class="editorial-clear">Limpiar filtros</a>
+                @endif
+            </form>
+
+            @if ($registros->isNotEmpty())
+                <table class="editorial-table" role="table" aria-labelledby="editorial-register-title">
+                    <thead role="rowgroup">
+                        <tr role="row">
+                            <th role="columnheader" scope="col">Fecha</th>
+                            <th role="columnheader" scope="col">Tema</th>
+                            <th role="columnheader" scope="col">Redes</th>
+                            <th role="columnheader" scope="col">Estado</th>
+                            <th role="columnheader" scope="col"><span class="sr-only">Acciones</span></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse ($registros as $item)
-                            @php $e = $estilos[$item->estado] ?? ['texto' => ucfirst($item->estado), 'badge' => 'bg-gray-100 text-gray-700 border-gray-200']; @endphp
-                            <tr class="hover:bg-gray-50">
-                                {{-- Fecha: el color de la izquierda indica el estado --}}
-                                <td class="hidden whitespace-nowrap py-3 pl-5 pr-3 align-middle sm:table-cell" style="box-shadow: inset 4px 0 0 {{ $item->color }};">
-                                    <div class="font-semibold text-gray-900">{{ $item->fecha_publicacion->format('d/m/Y') }}</div>
-                                    <div class="text-xs text-gray-500">
-                                        {{ mb_substr($item->dia, 0, 3) }}{{ $item->hora ? ' ' . substr($item->hora, 0, 5) : '' }} · S{{ $item->semana }}
-                                    </div>
-                                </td>
+                    <tbody role="rowgroup">
+                        @foreach ($registros as $item)
+                            @php
+                                $fecha = $item->fecha_publicacion;
+                                $mesActual = $fecha->format('Y-m');
+                                $redes = collect($item->publicar_en ?? []);
+                                $tipos = collect($item->contenido ?? [])->map(fn ($tipo) => ucfirst(mb_strtolower($tipo)));
+                                $detalle = route('calendario-editorial.show', $item);
+                            @endphp
 
-                                <td class="max-w-0 py-3 pl-4 pr-3 align-middle sm:pl-3">
-                                    <a href="{{ route('calendario-editorial.show', $item) }}" title="{{ $item->tema }}"
-                                        class="break-words font-medium text-gray-900 line-clamp-2 hover:text-blue-700 xl:line-clamp-1">
-                                        {{ $item->tema }}
-                                    </a>
-                                    {{-- En teléfonos la fecha y el estado van aquí, porque esas columnas se ocultan --}}
-                                    <div class="mt-0.5 text-xs text-gray-500 sm:hidden">
-                                        {{ $item->fecha_publicacion->format('d/m/Y') }} · {{ mb_substr($item->dia, 0, 3) }}{{ $item->hora ? ' ' . substr($item->hora, 0, 5) : '' }}
-                                        · <span class="font-semibold" style="color: {{ $item->color }}">{{ $e['texto'] }}</span>
-                                    </div>
-                                    @if ($item->area)
-                                        <div class="mt-0.5 truncate text-xs text-gray-500">{{ $item->area }}</div>
-                                    @endif
-                                </td>
+                            @if ($mesActual !== $mesAnterior)
+                                <tr class="editorial-month" role="row">
+                                    <th colspan="5" role="cell">
+                                        <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                                        {{ $fecha->translatedFormat('F') }} <span>{{ $fecha->year }}</span>
+                                    </th>
+                                </tr>
+                                @php $mesAnterior = $mesActual; @endphp
+                            @endif
 
-                                <td class="hidden whitespace-nowrap px-3 py-3 align-middle xl:table-cell">
-                                    <div class="flex gap-1">
-                                        @php $redes = collect($item->publicar_en ?? []); @endphp
-                                        @forelse ($redes->take(4) as $red)
-                                            @php [$sigla, $color] = $redesCorto[$red] ?? [mb_substr($red, 0, 2), '#6B7280']; @endphp
-                                            <span class="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded px-1 text-[10px] font-bold text-white"
-                                                style="background: {{ $color }}" title="{{ ucfirst(strtolower($red)) }}">{{ $sigla }}</span>
-                                        @empty
-                                            <span class="text-gray-400">—</span>
-                                        @endforelse
-                                        @if ($redes->count() > 4)
-                                            <span class="inline-flex h-6 items-center justify-center rounded bg-gray-100 px-1.5 text-[10px] font-bold text-gray-600"
-                                                title="{{ $redes->slice(4)->map(fn ($r) => ucfirst(strtolower($r)))->implode(', ') }}">+{{ $redes->count() - 4 }}</span>
-                                        @endif
-                                    </div>
-                                </td>
-
-                                <td class="hidden whitespace-nowrap px-3 py-3 align-middle sm:table-cell">
-                                    <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold {{ $e['badge'] }}">
-                                        {{ $e['texto'] }}
+                            <tr class="editorial-entry" role="row" data-state="{{ $item->estado }}" style="--state: {{ $item->color }}">
+                                <td class="editorial-date" role="cell">
+                                    <time datetime="{{ $fecha->toDateString() }}" title="{{ $fecha->format('d/m/Y') }}">
+                                        <strong>{{ $fecha->format('d') }}</strong>
+                                        <span>{{ $fecha->translatedFormat('D') }}</span>
+                                    </time>
+                                    <span class="editorial-date-note">
+                                        {{ $item->hora ? substr($item->hora, 0, 5) . ' · ' : '' }}<abbr title="Semana {{ $item->semana }}">S{{ $item->semana }}</abbr>
                                     </span>
                                 </td>
-
-                                <td class="whitespace-nowrap py-3 pl-3 pr-5 align-middle">
-                                    <div class="flex justify-end gap-1">
-                                        <a href="{{ route('calendario-editorial.show', $item) }}" title="Ver detalle" aria-label="Ver detalle"
-                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
-                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
+                                <td class="editorial-topic" role="cell">
+                                    <a href="{{ $detalle }}">{{ $item->tema }}</a>
+                                    @if ($item->area || $tipos->isNotEmpty())
+                                        <div class="editorial-topic-meta">
+                                            @if ($item->area)
+                                                <span>{{ $item->area }}</span>
+                                            @endif
+                                            @if ($tipos->isNotEmpty())
+                                                <span class="editorial-formats">{{ $tipos->implode(' · ') }}</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="editorial-channels" role="cell">
+                                    <div class="editorial-channel-list">
+                                        @forelse ($redes->take(4) as $red)
+                                            @php [$sigla, $color, $nombreRed] = $redesCortas[$red] ?? [mb_substr($red, 0, 2), '#5e6374', $red]; @endphp
+                                            <abbr class="editorial-channel" style="--channel: {{ $color }}" title="{{ $nombreRed }}">{{ $sigla }}</abbr>
+                                        @empty
+                                            <span class="editorial-no-channels" aria-label="Sin redes asignadas">—</span>
+                                        @endforelse
+                                        @if ($redes->count() > 4)
+                                            <abbr class="editorial-channel" title="{{ $redes->slice(4)->map(fn ($red) => $redesCortas[$red][2] ?? $red)->implode(', ') }}">+{{ $redes->count() - 4 }}</abbr>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="editorial-entry-state" role="cell">
+                                    <span class="editorial-state-label">
+                                        <span class="editorial-dot" aria-hidden="true"></span>
+                                        {{ $estados[$item->estado] ?? ucfirst($item->estado) }}
+                                    </span>
+                                </td>
+                                <td class="editorial-entry-actions" role="cell">
+                                    <div>
+                                        <a href="{{ $detalle }}" class="editorial-icon-action" title="Ver detalle" aria-label="Ver detalle">
+                                            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
                                         </a>
-                                        @if ($item->puedeEditar(auth()->user()))
-                                            <a href="{{ route('calendario-editorial.edit', $item) }}" title="Editar" aria-label="Editar"
-                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
+                                        @if ($item->puedeEditar($usuario))
+                                            <a href="{{ route('calendario-editorial.edit', $item) }}" class="editorial-icon-action" title="Editar" aria-label="Editar">
+                                                <i class="fa-solid fa-pencil" aria-hidden="true"></i>
                                             </a>
                                         @endif
-                                        @if ($esAdmin && $item->estado !== 'publicado')
-                                            <form id="publicar-form-{{ $item->id }}" method="POST" action="{{ route('calendario-editorial.publicar', $item) }}">
+                                        @if ($esAdmin && !$item->esPublicado())
+                                            <form method="POST" action="{{ route('calendario-editorial.publicar', $item) }}" onsubmit="confirmarPublicacion(event)">
                                                 @csrf
-                                                <button type="button" onclick="confirmarPublicacion({{ $item->id }})" title="Marcar como publicada" aria-label="Marcar como publicada"
-                                                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-green-600 text-white hover:bg-green-700">
-                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                                                    </svg>
+                                                <button type="submit" class="editorial-icon-action editorial-publish" title="Marcar como publicada" aria-label="Marcar como publicada">
+                                                    <i class="fa-solid fa-check" aria-hidden="true"></i>
                                                 </button>
                                             </form>
                                         @endif
                                     </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="px-6 py-14 text-center">
-                                    <p class="text-base font-semibold text-gray-700">
-                                        {{ $filtrosActivos ? 'Ninguna publicación coincide con los filtros' : 'No hay publicaciones programadas' }}
-                                    </p>
-                                    @if ($filtrosActivos)
-                                        <a href="{{ route('calendario-editorial.index') }}" class="mt-2 inline-block text-sm font-medium text-blue-600">Quitar filtros</a>
-                                    @else
-                                        @role('admin_ti|calendario')
-                                            <a href="{{ route('calendario-editorial.create') }}" class="mt-2 inline-block text-sm font-medium text-blue-600">Crear la primera publicación</a>
-                                        @endrole
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
-            </div>
+            @else
+                <div class="editorial-empty">
+                    <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                    <p>{{ $filtrosActivos ? 'Ninguna publicación coincide con los filtros' : 'No hay publicaciones programadas' }}</p>
+                    @if ($filtrosActivos)
+                        <a href="{{ route('calendario-editorial.index') }}">Quitar filtros</a>
+                    @elseif ($puedeCrear)
+                        <a href="{{ route('calendario-editorial.create') }}">Crear la primera publicación</a>
+                    @endif
+                </div>
+            @endif
 
             @if ($registros->hasPages())
-                <div class="border-t border-gray-200 px-4 py-4 sm:px-5">
+                <div class="editorial-pagination">
                     {{ $registros->onEachSide(1)->links() }}
                 </div>
             @endif
-        </div>
+        </section>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function confirmarPublicacion(id) {
-            Swal.fire({
-                title: '¿Marcar como publicada?',
-                text: 'Se registrará la fecha y quién la publicó.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, publicar',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#16a34a',
-                cancelButtonColor: '#6b7280',
-                reverseButtons: true,
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('publicar-form-' + id)?.submit();
+    @if ($esAdmin)
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            function confirmarPublicacion(event) {
+                const form = event.currentTarget;
+                const titulo = '¿Marcar como publicada?';
+                const mensaje = 'Se registrará la fecha y quién la publicó.';
+
+                if (typeof Swal === 'undefined') {
+                    if (!window.confirm(titulo + '\n' + mensaje)) event.preventDefault();
+                    return;
                 }
-            });
-        }
-    </script>
+
+                event.preventDefault();
+                Swal.fire({
+                    title: titulo,
+                    text: mensaje,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, publicar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#173551',
+                    reverseButtons: true,
+                }).then(({ isConfirmed }) => {
+                    if (isConfirmed) form.submit();
+                });
+            }
+        </script>
+    @endif
 </x-app-layout>

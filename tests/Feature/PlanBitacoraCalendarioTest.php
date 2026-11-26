@@ -177,6 +177,23 @@ it('sirve la imagen adjunta para la vista previa, nueva o de antes del cambio a 
     $this->actingAs($admin)->get(route('calendario-editorial.adjuntos.show', $perdido))->assertNotFound();
 });
 
+it('arma la galería del detalle en el orden en que se agregaron las imágenes', function () {
+    $admin = pbcUsuario('admin_ti');
+    $publicacion = pbcPublicacion($admin);
+
+    // Nombres en orden alfabético inverso: el orden debe ser el de carga, no el del nombre
+    foreach (['z-portada.png', 'y-detalle.png', 'w-cierre.png'] as $nombre) {
+        $publicacion->adjuntos()->create(['ruta' => "calendario_editorial/{$nombre}", 'nombre_original' => $nombre, 'mime_type' => 'image/png']);
+    }
+    $publicacion->adjuntos()->create(['ruta' => 'calendario_editorial/brief.pdf', 'nombre_original' => 'brief.pdf', 'mime_type' => 'application/pdf']);
+
+    $this->actingAs($admin)->get(route('calendario-editorial.show', $publicacion))
+        ->assertOk()
+        ->assertSeeInOrder(['abrirGaleria(0)', 'z-portada.png', 'abrirGaleria(1)', 'y-detalle.png', 'abrirGaleria(2)', 'w-cierre.png'], false)
+        ->assertDontSee('abrirGaleria(3)', false)
+        ->assertSee('mostrarPreview(', false); // el PDF se abre suelto, fuera de la galería
+});
+
 it('entrega al calendario solo el rango visible y con filtros', function () {
     $admin = pbcUsuario('admin_ti');
     pbcPublicacion($admin, ['tema' => 'Diciembre FB', 'fecha_publicacion' => '2026-12-05', 'hora' => '09:30', 'publicar_en' => ['FACEBOOK']]);
